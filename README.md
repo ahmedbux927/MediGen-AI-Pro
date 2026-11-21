@@ -30,34 +30,51 @@
   <img src="Server/static/img/hero.png" alt="MediGen AI Pro" width="820">
 </p>
 
+<p align="center">
+  <b>
+    <a href="#highlights">Highlights</a> ·
+    <a href="#download">Download</a> ·
+    <a href="#screenshots">Screenshots</a> ·
+    <a href="#features">Features</a> ·
+    <a href="#architecture">Architecture</a> ·
+    <a href="#tech-stack">Tech Stack</a> ·
+    <a href="#quick-start-windows">Quick Start</a> ·
+    <a href="#testing">Testing</a> ·
+    <a href="#author--contact">Contact</a>
+  </b>
+</p>
+
 ---
-
-## Contents
-
-- [Highlights](#highlights)
-- [Download](#download)
-- [Screenshots](#screenshots)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech stack](#tech-stack)
-- [Quick start (Windows)](#quick-start-windows)
-- [Windows application (Setup file)](#windows-application-setup-file)
-- [Android app](#android-app)
-- [Project layout](#project-layout)
-- [Testing](#testing)
-- [Security notes](#security-notes)
-- [Author & Contact](#author--contact)
-- [License](#license)
 
 ## Highlights
 
-| | |
-|---|---|
-| **Built for one real shop** | Designed around a single pharmacy workbench PC — no cloud dependency, works fully offline on the local network |
-| **Expiry-safe selling** | Batch-wise stock with FEFO (first-expiry, first-out) selling and automatic expiry blocking |
-| **AI that acts safely** | The Gemini assistant reads live shop data and performs actions only through a propose → confirm flow |
-| **Proven in production testing** | 2,509 automated tests, a 38-route role-based QA matrix, and screenshot audits in light and dark mode |
-| **One-click everything** | One launcher, one-click backup with a restore test, one-click Windows installer build |
+<table>
+  <tr>
+    <td width="50%">
+      <b>Built for one real shop</b><br>
+      Designed around a single pharmacy workbench PC — no cloud dependency, works fully offline on the local network.
+    </td>
+    <td width="50%">
+      <b>Expiry-safe selling</b><br>
+      Batch-wise stock with FEFO (first-expiry, first-out) selling and automatic blocking of expired batches.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>AI that acts safely</b><br>
+      The Gemini assistant reads live shop data and performs actions only through a propose → confirm flow.
+    </td>
+    <td>
+      <b>Proven in production testing</b><br>
+      2,509 automated tests, a 38-route role-based QA matrix, and screenshot audits in light and dark mode.
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <b>One-click everything</b> — one launcher, one-click backup with a restore test that proves the backup works, and a one-click Windows installer build.
+    </td>
+  </tr>
+</table>
 
 ## Download
 
@@ -70,16 +87,30 @@ Release notes and history: [Releases](https://github.com/ahmedbux927/MediGen-AI-
 
 ## Screenshots
 
-<p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="49%">
-  <img src="docs/screenshots/pos.png" alt="New Sale / POS" width="49%">
-</p>
-<p align="center">
-  <img src="docs/screenshots/login.png" alt="Login" width="49%">
-  <img src="docs/screenshots/chatbot.png" alt="AI Assistant" width="49%">
-</p>
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/dashboard.png" alt="Dashboard"><br>
+      <i>Dashboard — sales, stock and profit at a glance</i>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/pos.png" alt="New Sale / POS"><br>
+      <i>Point of Sale — fast billing with pack/unit selling</i>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="docs/screenshots/login.png" alt="Login"><br>
+      <i>Login — role-based access (Admin / Pharmacist / Cashier)</i>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/chatbot.png" alt="AI Assistant"><br>
+      <i>AI Assistant — answers from live shop data</i>
+    </td>
+  </tr>
+</table>
 
-<p align="center"><i>From the live v101.03 app, running on sample data.</i></p>
+<p align="center"><i>Screenshots from the live v101.03 app, running on sample data.</i></p>
 
 ## Features
 
@@ -172,7 +203,7 @@ docs/              QA matrix, changelog of the v4 programme, shop test checklist
 ## Testing
 
 The automated suite (mock + unit, no database needed) currently reports
-**2509 passed, 0 failed**:
+**2509 passed, 0 failed** — and runs on every push via GitHub Actions:
 
 ```bat
 cd Server
@@ -206,3 +237,5 @@ python tests\run_all.py
 
 Proprietary software — © Ahmed Bux. All rights reserved.
 See [LICENSE](LICENSE) for the full text.
+
+<p align="center"><a href="#medigen-ai-pro">↑ Back to top</a></p>
