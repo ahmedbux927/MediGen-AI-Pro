@@ -1,0 +1,104 @@
+/* ===== MediGen brand polish (v50) =====
+   Serif page titles (same family as the login page), refined cards and a gentle entrance motion.
+   Loaded after pages.css and before theme.css, so dark mode still wins where it sets colours.
+   Motion is switched off for users who prefer reduced motion. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
+:root {
+    --brand-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --brand-gold: oklch(0.76 0.11 78);
+    --brand-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Page title in the top bar and welcome banner */
+.page-heading h3,
+.welcome-banner h2, .welcome-banner h3, .welcome-banner h4 {
+    font-family: var(--brand-serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Numbers in stat cards: even digit width so values do not jump */
+.stat-card, .stat-card h3, .stat-card h4, .stat-card .value, .stat-card .stat-value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Cards: slightly softer edges and a calm hover lift */
+.stat-card, .chart-card, .data-card, .welcome-banner {
+    border-radius: 16px;
+}
+.stat-card, .chart-card {
+    transition: transform 0.25s var(--brand-ease), box-shadow 0.25s ease;
+}
+.stat-card:hover, .chart-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Quick actions: gold hairline on hover, not a loud colour change */
+.quick-action {
+    transition: transform 0.2s var(--brand-ease), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.quick-action:hover {
+    transform: translateY(-2px);
+    border-color: var(--brand-gold);
+}
+
+/* Entrance motion: content rises in with a short stagger */
+@keyframes brand-rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.welcome-banner,
+.stat-card,
+.chart-card,
+.data-card {
+    animation: brand-rise 0.6s var(--brand-ease) both;
+}
+.stat-card:nth-of-type(1) { animation-delay: 0.04s; }
+.stat-card:nth-of-type(2) { animation-delay: 0.08s; }
+.stat-card:nth-of-type(3) { animation-delay: 0.12s; }
+.stat-card:nth-of-type(4) { animation-delay: 0.16s; }
+.chart-card:nth-of-type(1) { animation-delay: 0.2s; }
+.chart-card:nth-of-type(2) { animation-delay: 0.26s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome-banner, .stat-card, .chart-card, .data-card,
+    .stat-card:hover, .chart-card:hover, .quick-action:hover {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
+/* ---------- Sidebar polish (v53): entrance, hover slide, shimmer on the active item ---------- */
+.sidebar-nav a {
+    position: relative; overflow: hidden;
+    transition: background 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease, color 0.2s ease;
+    animation: mg-nav-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sidebar-nav a:nth-child(1) { animation-delay: 0.03s; }
+.sidebar-nav a:nth-child(2) { animation-delay: 0.07s; }
+.sidebar-nav a:nth-child(3) { animation-delay: 0.11s; }
+.sidebar-nav a:nth-child(4) { animation-delay: 0.15s; }
+.sidebar-nav a:nth-child(5) { animation-delay: 0.19s; }
+.sidebar-nav a:nth-child(6) { animation-delay: 0.23s; }
+.sidebar-nav a:nth-child(7) { animation-delay: 0.27s; }
+.sidebar-nav a:nth-child(8) { animation-delay: 0.31s; }
+.sidebar-nav a:nth-child(9) { animation-delay: 0.35s; }
+.sidebar-nav a:nth-child(10) { animation-delay: 0.39s; }
+.sidebar-nav a:nth-child(n+11) { animation-delay: 0.43s; }
+.sidebar-nav a:hover { transform: translateX(3px); }
+.sidebar-nav a.active { box-shadow: 0 10px 24px -12px rgba(15, 154, 160, 0.75); }
+.sidebar-nav a.active::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    transform: translateX(-100%); animation: mg-shimmer 3s ease-in-out infinite;
+}
+.sidebar-nav a i { transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+.sidebar-nav a:hover i { transform: scale(1.1); }
+@keyframes mg-nav-in { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes mg-shimmer { 0% { transform: translateX(-100%); } 60%, 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-nav a, .sidebar-nav a.active::after, .sidebar-nav a i { animation: none !important; transition: none !important; }
+    .sidebar-nav a:hover { transform: none; }
+}

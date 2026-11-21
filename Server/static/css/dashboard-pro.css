@@ -1,0 +1,120 @@
+/* Dashboard and Owner Summary layout (v87.18). Loaded only on those two pages.
+   Keeps every dv-* class and data-count hook from the templates; changes layout, hierarchy and motion. */
+
+:root {
+  --dp-ink: #14231f;
+  --dp-muted: #5b6b66;
+  --dp-line: #dfe6e3;
+  --dp-card: #ffffff;
+  --dp-canvas: #f3f6f5;
+  --dp-accent: #0f766e;
+  --dp-ease: cubic-bezier(.16, 1, .3, 1);
+  --dp-speed: var(--mg-speed, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --dp-ink: #e8efe9; --dp-muted: #9fb3aa; --dp-line: #2e4239;
+    --dp-card: #1a2b25; --dp-canvas: #13201c; --dp-accent: #6fc2a8;
+  }
+}
+:root[data-theme="dark"] {
+  --dp-ink: #e8efe9; --dp-muted: #9fb3aa; --dp-line: #2e4239;
+  --dp-card: #1a2b25; --dp-canvas: #13201c; --dp-accent: #6fc2a8;
+}
+
+/* Hero: welcome card reads as a banner, not a tall block */
+.d-welcome {
+  background: linear-gradient(120deg, var(--dp-card) 0%, color-mix(in srgb, var(--dp-accent) 9%, var(--dp-card)) 100%) !important;
+  border: 1px solid var(--dp-line) !important;
+  border-radius: 18px !important;
+}
+.d-greet { font-weight: 700; letter-spacing: -.01em; }
+
+/* KPI row: a tidy responsive grid with a soft accent line on top */
+.dv-kpis {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+.dv-kpi {
+  background: var(--dp-card);
+  border: 1px solid var(--dp-line);
+  border-radius: 16px;
+  padding: 16px 16px 14px;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  transition: transform calc(.3s / var(--dp-speed)) var(--dp-ease), box-shadow calc(.3s / var(--dp-speed)) var(--dp-ease);
+}
+.dv-kpi::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--c, var(--dp-accent));
+}
+.dv-kpi:hover {
+  transform: translateY(calc(-2px * var(--mg-strength, 1)));
+  box-shadow: 0 14px 30px -18px color-mix(in srgb, var(--c, #0f766e) 55%, transparent);
+}
+.dv-kpi .k { color: var(--dp-muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
+.dv-kpi .v { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 4px; letter-spacing: -.02em; }
+.dv-kpi .f { color: var(--dp-muted); font-size: 12.5px; margin-top: 2px; }
+
+/* Cards: consistent radius, hairline border, calm shadow */
+.dv-card, .dv-sec {
+  background: var(--dp-card);
+  border: 1px solid var(--dp-line);
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 40, 35, .04), 0 8px 24px -18px rgba(15, 40, 35, .25);
+}
+.dv-title { font-weight: 700; font-size: 16px; letter-spacing: -.01em; }
+.dv-title i { color: var(--dp-accent); }
+
+/* Section grid: cards fill rows evenly */
+.dv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.dv-two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+.dv-two > * { min-width: 0; }
+
+/* Quick actions: pill row with clear hover */
+.dv-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dv-action {
+  border-radius: 999px !important;
+  transition: transform calc(.2s / var(--dp-speed)) var(--dp-ease), box-shadow calc(.2s / var(--dp-speed)) var(--dp-ease);
+}
+.dv-action:hover { transform: translateY(calc(-1px * var(--mg-strength, 1))); box-shadow: 0 8px 18px -10px var(--c); }
+
+/* Bars and chart wrapper: thinner, with a gentle grow */
+.dv-bar { border-radius: 999px; overflow: hidden; }
+.dv-bar i { display: block; height: 100%; border-radius: inherit; animation: dp-grow calc(.8s / var(--dp-speed)) var(--dp-ease) both; animation-delay: var(--d, 0s); }
+@keyframes dp-grow { from { transform: scaleX(0); transform-origin: left; } to { transform: scaleX(1); transform-origin: left; } }
+
+/* Reveal: cards rise in once, in order. Visible at rest if the script never runs. */
+.dv-reveal, .dv-sec, .dv-kpi {
+  animation: dp-rise calc(.45s / var(--dp-speed)) var(--dp-ease) both;
+}
+@keyframes dp-rise {
+  from { opacity: 0; transform: translateY(calc(10px * var(--mg-strength, 1))); }
+  to   { opacity: 1; transform: none; }
+}
+.dv-kpi:nth-child(2) { animation-delay: calc(.04s / var(--dp-speed)); }
+.dv-kpi:nth-child(3) { animation-delay: calc(.08s / var(--dp-speed)); }
+.dv-kpi:nth-child(4) { animation-delay: calc(.12s / var(--dp-speed)); }
+.dv-kpi:nth-child(5) { animation-delay: calc(.16s / var(--dp-speed)); }
+.dv-kpi:nth-child(6) { animation-delay: calc(.2s / var(--dp-speed)); }
+
+@media (max-width: 640px) {
+  .dv-kpi .v { font-size: 22px; }
+  .dv-grid, .dv-two { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dv-bar i, .dv-reveal, .dv-sec, .dv-kpi { animation: none !important; }
+}

@@ -1,0 +1,53 @@
+/* v86.17 shared look for Medicines and product section pages: page header + stat cards */
+    /* ============ PAGE HEADER ============ */
+    .page-header { margin-bottom: 22px; }
+    .page-title {
+        font-size: 22px; font-weight: 700; color: var(--ink, #1b2a3b);
+        letter-spacing: -0.3px; margin: 0 0 4px 0;
+        display: flex; align-items: center; gap: 12px;
+    }
+    .page-title i {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 19px; margin-right: 0;
+        box-shadow: 0 6px 14px rgba(15, 154, 160, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+    .page-subtitle { font-size: 13.5px; color: var(--ink-2, #44546f); font-weight: 400; margin: 0 0 0 52px; }
+
+    /* ============ STAT CARDS ============ */
+    .stat-card {
+        background: #ffffff; border-radius: 16px; padding: 20px 22px 20px 26px;
+        position: relative; overflow: hidden;
+        border: 1px solid var(--line, #e3e9f2);
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        margin-bottom: 22px; min-height: 112px; color: var(--ink, #1b2a3b);
+        cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(15, 31, 61, 0.13); }
+    .stat-card::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+        background: var(--brand-grad, #0f9aa0);
+    }
+    .stat-label {
+        font-size: 13px; color: var(--ink-2, #44546f); font-weight: 600;
+        margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px;
+    }
+    .stat-label i { font-size: 16px; color: #0f9aa0; }
+    .stat-value {
+        font-size: 34px; font-weight: 800; color: var(--ink, #1b2a3b);
+        margin: 0; letter-spacing: -1px; line-height: 1;
+    }
+    .stat-icon-bg {
+        position: absolute; right: -12px; bottom: -22px;
+        font-size: 100px; color: #0f9aa0; opacity: 0.08;
+    }
+    .stat-card.alert::before { background: linear-gradient(180deg, #e5576c, #cf3f55); }
+    .stat-card.alert .stat-label i,
+    .stat-card.alert .stat-icon-bg { color: #cf3f55; }
+    .stat-card.alert .stat-value { color: #cf3f55; }
+    .stat-card.warn::before { background: linear-gradient(180deg, #e8a03a, #d98a1e); }
+    .stat-card.warn .stat-label i,
+    .stat-card.warn .stat-icon-bg { color: #d98a1e; }
+    .stat-card.warn .stat-value { color: #d98a1e; }
+
