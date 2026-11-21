@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+logs/*.log
+backups/
+instance/
+dist/
+*.keystore
+logs/*.log
+__pycache__/
+*.pyc
+instance/
+backups/
+dist/
