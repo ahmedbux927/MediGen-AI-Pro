@@ -29,6 +29,7 @@
 ## Contents
 
 - [Highlights](#highlights)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Tech stack](#tech-stack)
@@ -50,6 +51,19 @@
 | **AI that acts safely** | The Gemini assistant reads live shop data and performs actions only through a propose → confirm flow |
 | **Proven in production testing** | 2,509 automated tests, a 38-route role-based QA matrix, and screenshot audits in light and dark mode |
 | **One-click everything** | One launcher, one-click backup with a restore test, one-click Windows installer build |
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="Dashboard" width="49%">
+  <img src="docs/screenshots/pos.png" alt="New Sale / POS" width="49%">
+</p>
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="Login" width="49%">
+  <img src="docs/screenshots/chatbot.png" alt="AI Assistant" width="49%">
+</p>
+
+<p align="center"><i>From the live v101.03 app, running on sample data.</i></p>
 
 ## Features
 
