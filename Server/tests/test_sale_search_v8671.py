@@ -1,0 +1,21 @@
+"""v86.71: sale screen item search (live list under the search box, keyboard flow, row item labels).
+Static checks on the template. The browser behaviour was checked separately with Chromium."""
+import os
+ROOT = os.environ.get('MEDIGEN_ROOT') or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+def read(p): return open(os.path.join(ROOT, p), encoding='utf-8').read()
+t = read('templates/new_sale.html')
+ok = lambda c, msg: print(('PASS ' if c else 'FAIL ') + msg)
+ok('id="scanSuggest"' in t and 'function renderSuggest()' in t and 'function searchItems(q)' in t, 'live search list exists under the search box')
+ok('function pickSuggest(i)' in t and 'function moveSuggest(step)' in t, 'list can be picked with Enter and moved with arrow keys')
+ok("e.key === 'ArrowDown'" in t and "e.key === 'Escape'" in t, 'arrow keys and Esc are handled')
+ok('focusQtyAfterAdd = true;' not in t and 'function setRowItem(tr, value)' in t and 'row-flash' in t, 'after a pick the cursor stays in search and the row is highlighted')
+ok('id="liveTotal"' in t and 'scan-wrap' in t, 'search bar is sticky and shows items and total')
+ok('class="ri-pick"' in t and 'name="medicine_id[]" class="med" hidden' in t, 'row shows the item name; hidden select still submits medicine_id[]')
+ok('data-name="{{ m.name }}" data-sec="{{ label }}"' in t, 'every option carries name and section for the search list')
+ok("MediGen.shortcut('F3', function () { var b = document.getElementById('scanBox');" in t, 'F3 goes to the search box')
+ok('Build v{{ app_version }}' in read('templates/medicines.html'), 'build marker is v87.00')
+ok('class="qs-btn"' in t and 'function stepQty(btn, d)' in t, 'quantity has plus and minus buttons')
+ok("(e.key === '+' || e.key === '-') && !this.value" in t, 'plus and minus keys change the last added item in an empty search box')
+ok('id="multiMode"' in t and 'function addTray()' in t and 'id="pickTray"' in t, 'several cards can be chosen and added together')
+ok('function updateBadges()' in t and 'pc-badge' in t, 'picker cards show how many of each item are on the bill')
+ok("getElementById('pickSearch').addEventListener('keydown'" in t, 'Enter in the picker search adds the first match')
