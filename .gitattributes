@@ -1,0 +1,4 @@
+# Windows batch files must always check out with CRLF line endings,
+# on every platform (GitHub Actions included) — cmd.exe requires CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
