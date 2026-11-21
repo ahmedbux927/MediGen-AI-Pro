@@ -1,0 +1,330 @@
+/* ============================================================
+   MediGen AI Pro v92.00 - Signature Theme "Midnight Sapphire"
+   Owner asked: no green brand colour, professional palette,
+   and text that stays readable in dark mode in EVERY section.
+   Brand: deep navy rail + sapphire-to-violet gradient accents.
+   Every surface below sets background AND text colour as a pair.
+   ============================================================ */
+
+:root{
+  --mg-grad: linear-gradient(135deg,#1d4ed8 0%,#4f46e5 55%,#7c3aed 100%);
+  --mg-side: linear-gradient(180deg,#070d21 0%,#0b1737 55%,#101f49 100%);
+  --mg-shadow: 0 10px 30px rgba(7,17,48,.18);
+  --mg-ink: #0e1a2f;
+}
+
+/* ---------- Sidebar: deep navy rail, always readable ---------- */
+.sidebar{
+  background: var(--mg-side) !important;
+  box-shadow: 6px 0 28px rgba(3,8,30,.40);
+  border-right: 1px solid rgba(255,255,255,.08) !important;
+  color: #e8eefc;
+}
+.sidebar .sidebar-brand{ border-bottom: 1px solid rgba(255,255,255,.12) !important; }
+.sidebar .sidebar-brand h4{ color: #ffffff !important; letter-spacing: .12em; }
+.sidebar .sidebar-brand small{ color: #7dd3fc !important; }
+.sidebar .sidebar-brand-icon{
+  background: linear-gradient(135deg,#38bdf8,#2563eb) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 18px rgba(37,99,235,.50);
+  border-radius: 12px;
+}
+.sidebar .sidebar-user{
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-radius: 12px;
+}
+.sidebar .sidebar-user .info h6{ color: #ffffff !important; }
+.sidebar .sidebar-user .info small{ color: #93c5fd !important; }
+.sidebar .sidebar-user .avatar{
+  background: linear-gradient(135deg,#f59e0b,#f97316) !important;
+  color:#fff !important;
+}
+.sidebar .nav-section{ color: rgba(255,255,255,.50) !important; letter-spacing: .14em; }
+.sidebar .sidebar-nav a{
+  color: rgba(232,238,252,.88) !important;
+  border-radius: 10px;
+  margin: 2px 10px;
+  transition: background .18s ease, transform .18s ease;
+}
+.sidebar .sidebar-nav a i{
+  background: rgba(255,255,255,.09) !important;
+  color: #93c5fd !important;
+}
+.sidebar .sidebar-nav a:hover{
+  background: rgba(255,255,255,.12) !important;
+  color:#fff !important;
+  transform: translateX(3px);
+}
+.sidebar .sidebar-nav a.active{
+  background: linear-gradient(90deg,rgba(59,130,246,.40),rgba(124,58,237,.22)) !important;
+  color:#fff !important;
+  box-shadow: inset 3px 0 0 #38bdf8, 0 4px 14px rgba(0,0,0,.25);
+  font-weight: 600;
+}
+.sidebar .sidebar-nav a.active i{ background: rgba(255,255,255,.16) !important; color:#bae6fd !important; }
+.sidebar .sidebar-nav a.logout-link{ color: #fda4af !important; }
+.sidebar .sidebar-nav a.logout-link i{ background: rgba(253,164,175,.14) !important; color:#fda4af !important; }
+
+/* ---------- Top bar: solid, and it can never squeeze the heading ---------- */
+.top-bar{
+  background: rgba(255,255,255,.97) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(7,17,48,.10);
+  border-bottom: 1px solid rgba(30,64,175,.14) !important;
+  flex-wrap: wrap; row-gap: 8px;
+}
+html[data-theme="dark"] .top-bar{
+  background: rgba(9,17,38,.97) !important;
+  border-bottom-color: rgba(147,197,253,.16) !important;
+}
+:root:not([data-theme="dark"]) .top-bar .page-heading{ display: block !important; }
+:root:not([data-theme="dark"]) .top-bar .page-heading h3{ color: #0e1a2f !important; }
+:root:not([data-theme="dark"]) .top-bar .welcome-line{ color: #5b6b82 !important; }
+html[data-theme="dark"] .top-bar .page-heading h3{ color: #eef3fd !important; }
+html[data-theme="dark"] .top-bar .welcome-line{ color: #9db0c6 !important; }
+/* the owner's long name wrapped word-by-word and crushed the heading (v92 fix) */
+.top-bar .hero-left{ flex: 1 1 auto !important; min-width: 0 !important; }
+.top-bar .page-heading{ min-width: 0 !important; }
+.top-bar .page-heading h3{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-bar .welcome-line{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.top-bar .top-meta{ flex: 0 0 auto; }
+.top-bar .user-badge{ white-space: nowrap; }
+@media (max-width: 1280px){ .top-bar .date-chip{ display: none !important; } }
+@media (max-width: 1080px){ .top-bar .mg-live{ display: none !important; } }
+.top-bar .hero-icon{
+  background: var(--mg-grad) !important;
+  color:#fff !important;
+  box-shadow: 0 6px 16px rgba(37,99,235,.35);
+  border-radius: 12px;
+}
+.top-bar .user-badge{
+  background: linear-gradient(135deg,rgba(37,99,235,.10),rgba(124,58,237,.10));
+  border: 1px solid rgba(37,99,235,.25);
+  border-radius: 999px;
+}
+
+/* ---------- Buttons ---------- */
+.btn-primary, button.btn-primary, a.btn-primary{
+  background: var(--mg-grad) !important;
+  border: none !important;
+  box-shadow: 0 6px 16px rgba(37,99,235,.28);
+}
+.btn-primary:hover{ filter: brightness(1.07); }
+.btn-success{ background: linear-gradient(135deg,#2563eb,#4f46e5) !important; border:none !important; }
+.pf-btn:not(.ghost){ background: var(--mg-grad) !important; }
+html[data-theme="dark"] .pf-btn.ghost{ background: rgba(255,255,255,.06) !important; color: #dbeafe !important; border-color: rgba(255,255,255,.28) !important; }
+/* settings/profile hero + active tab: navy/sapphire, not teal */
+.pf-hero{ background: linear-gradient(115deg,#070d21 0%,#12245e 60%,#1e3a8a 100%) !important; }
+.pf-avatar{ background: linear-gradient(135deg,#38bdf8,#2563eb 60%,#7c3aed) !important; }
+.pf-hero .meta{ color: #b9d2f2 !important; }
+.pf-tab.on{ background: var(--mg-grad) !important; }
+
+/* ---------- Dashboard welcome banner: deep navy in BOTH modes ---------- */
+.dash .d-welcome{
+  background: linear-gradient(110deg,#070d21 0%,#12245e 55%,#1e3a8a 100%) !important;
+  border-color: rgba(255,255,255,.16) !important;
+  color: #ffffff !important;
+  border-radius: 16px;
+  box-shadow: var(--mg-shadow);
+}
+.dash .d-welcome::after{
+  background: linear-gradient(90deg, rgba(5,10,28,.94) 30%, rgba(5,10,28,.25) 100%) !important;
+}
+.dash .d-welcome-img{ opacity: .45 !important; }
+.dash .d-greet{ color: #ffffff !important; }
+.dash .d-accent{ color: #7dd3fc !important; }
+.dash .d-muted{ color: rgba(255,255,255,.86) !important; }
+.dash .d-welcome .d-chip{
+  background: rgba(255,255,255,.13) !important;
+  border-color: rgba(255,255,255,.28) !important;
+  color: #ffffff !important;
+}
+.dash .d-welcome .d-chip .bi{ color: #7dd3fc !important; }
+.dash .d-welcome-brand{ color: #ffffff !important; }
+.dash .d-welcome-kicker{ color: #fcd34d !important; }
+.dash .d-welcome-name em{ color: #7dd3fc !important; }
+
+/* ---------- Dashboard cards ---------- */
+.card, .dv-card, .d-card{ border-radius: 16px !important; }
+.d-card.d-kpi{
+  border-top: 4px solid var(--c, #2563eb) !important;
+  box-shadow: 0 8px 22px rgba(10,22,48,.08);
+  overflow: hidden;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.d-card.d-kpi:hover{ transform: translateY(-3px); box-shadow: 0 14px 28px rgba(10,22,48,.14); }
+.d-kpi .d-kpi-ico{
+  background: var(--c, #2563eb) !important;
+  color:#fff !important;
+  box-shadow: 0 6px 14px rgba(10,22,48,.22);
+  border-radius: 12px;
+}
+.d-kpi .d-value{ font-weight: 800; letter-spacing: -.01em; }
+
+/* v92 fix: the owner KPI row + section table used template-local variables
+   (--ink/--muted/--line) that were only ever set to LIGHT values, so in dark
+   mode the cards went dark but the writing stayed near-black. */
+html[data-theme="dark"] .dv{
+  --ink: #e8eef7; --muted: #9db0c6; --line: rgba(255,255,255,.13);
+  --d-card: #0d1830; --d-soft: #0a1428;
+}
+html[data-theme="dark"] .dv-kpi, html[data-theme="dark"] .dv-card{ background: #0d1830 !important; }
+html[data-theme="dark"] .dv-table th{ background: #0a1428 !important; }
+
+/* ---------- Tables / forms ---------- */
+.table thead th, table.data-table thead th{
+  background: linear-gradient(180deg,#e8effe,#d7e3fd) !important;
+  color:#1e3a8a !important;
+  border-bottom: 2px solid rgba(37,99,235,.25) !important;
+}
+html[data-theme="dark"] .table thead th{ background:#101f45 !important; color:#bfdbfe !important; }
+/* sale page items table header was deep green - navy now */
+#itemsTable thead th, .sale-grid thead th{
+  background: linear-gradient(180deg,#0b1737,#12245e) !important;
+  color: #dbeafe !important;
+}
+.form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus{
+  border-color:#2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.22) !important;
+  outline: none;
+}
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-thumb{ background: linear-gradient(180deg,#1d4ed8,#4f46e5); border-radius: 8px; }
+::-webkit-scrollbar-track{ background: rgba(37,99,235,.06); }
+
+/* ---------- Motion: gentle entrance ---------- */
+@keyframes mg92Up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.dash .d-card, .dash .dv-card{ animation: mg92Up .5s ease both; }
+.dash .d-kpis .d-card:nth-child(2){ animation-delay: .05s; }
+.dash .d-kpis .d-card:nth-child(3){ animation-delay: .10s; }
+.dash .d-kpis .d-card:nth-child(4){ animation-delay: .15s; }
+@media (prefers-reduced-motion: reduce){
+  .dash .d-card, .dash .dv-card{ animation: none; }
+}
+
+/* ---------- Login page ---------- */
+body .hero{
+  background:
+    radial-gradient(900px 500px at 15% 10%, rgba(56,189,248,.30), transparent 60%),
+    radial-gradient(700px 500px at 85% 90%, rgba(124,58,237,.25), transparent 55%),
+    linear-gradient(140deg,#050a1c 0%,#0b1c4d 48%,#1e3a8a 100%) !important;
+}
+.login-card, .formside .card, .card.login{
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(2,8,35,.40) !important;
+}
+.formside .btn-primary, .login-card .btn-primary{
+  background: var(--mg-grad) !important;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px){
+  .sidebar .sidebar-nav a{ margin: 2px 6px; }
+  .dash .d-welcome-text{ max-width: 100%; }
+}
+
+/* ---------- v92: brand gradient variable, recoloured navy/sapphire ----------
+   Many components read var(--brand-grad); redefining it once here moves
+   them all off the old teal at once. */
+:root{ --brand-grad: linear-gradient(135deg,#1d4ed8 0%,#4f46e5 60%,#7c3aed 100%); }
+
+/* ---------- v92: grid + utility shim ----------
+   Several pages (Expenses, Cash Drawer, Customers, Medicines, Profile...)
+   were written with Bootstrap-style grid/utility classes that no stylesheet
+   ever defined, so their forms stair-stepped and stat cards stacked
+   full-width. These definitions restore the intended layout. */
+.row{ display: flex; flex-wrap: wrap; margin-left: -8px; margin-right: -8px; }
+.row > *{ padding-left: 8px; padding-right: 8px; box-sizing: border-box; }
+.col-3{ flex: 0 0 25%; max-width: 25%; } .col-4{ flex: 0 0 33.333%; max-width: 33.333%; }
+.col-6{ flex: 0 0 50%; max-width: 50%; } .col-8{ flex: 0 0 66.666%; max-width: 66.666%; }
+.col-12{ flex: 0 0 100%; max-width: 100%; }
+@media (min-width: 768px){
+  .col-md-2{ flex: 0 0 16.666%; max-width: 16.666%; } .col-md-3{ flex: 0 0 25%; max-width: 25%; }
+  .col-md-4{ flex: 0 0 33.333%; max-width: 33.333%; } .col-md-6{ flex: 0 0 50%; max-width: 50%; }
+  .col-md-8{ flex: 0 0 66.666%; max-width: 66.666%; } .col-md-9{ flex: 0 0 75%; max-width: 75%; }
+  .col-md-10{ flex: 0 0 83.333%; max-width: 83.333%; } .col-md-12{ flex: 0 0 100%; max-width: 100%; }
+}
+.d-flex{ display: flex; } .flex-wrap{ flex-wrap: wrap; }
+.align-items-center{ align-items: center; } .align-items-end{ align-items: flex-end; }
+.justify-content-between{ justify-content: space-between; } .justify-content-end{ justify-content: flex-end; }
+.gap-1{ gap: 4px; } .gap-2{ gap: 8px; } .gap-3{ gap: 16px; }
+.mb-0{ margin-bottom: 0 !important; } .mb-1{ margin-bottom: 4px; } .mb-2{ margin-bottom: 8px; }
+.mb-3{ margin-bottom: 16px; } .mb-4{ margin-bottom: 24px; }
+.mt-1{ margin-top: 4px; } .mt-2{ margin-top: 8px; } .mt-3{ margin-top: 16px; } .mt-4{ margin-top: 24px; }
+.ms-auto{ margin-left: auto; } .me-2{ margin-right: 8px; } .p-2{ padding: 8px; } .p-3{ padding: 16px; }
+.small{ font-size: 12.5px; } .fs-4{ font-size: 24px; } .fs-5{ font-size: 20px; }
+.fw-bold{ font-weight: 700; } .text-end{ text-align: right; } .text-center{ text-align: center; }
+.w-100{ width: 100%; } .align-middle{ vertical-align: middle; }
+.form-label{ display: block; font-weight: 600; }
+.form-control-sm, .form-select-sm{ padding: 6px 10px !important; font-size: 13px !important; }
+.btn-sm{ padding: 6px 12px; font-size: 13px; }
+.btn-outline-secondary{ background: transparent !important; border: 1px solid #94a3b8 !important; color: #44546f !important; border-radius: 8px; }
+html[data-theme="dark"] .btn-outline-secondary{ border-color: rgba(255,255,255,.35) !important; color: #e8eef7 !important; }
+.row > *{ min-width: 0; }
+.row .form-control, .row .form-select{ width: 100%; min-width: 0; }
+.table-sm th, .table-sm td{ padding: 6px 10px; }
+.table-responsive{ overflow-x: auto; }
+
+/* ---------- v92 dark pairs: batches + reports stat values and bars ---------- */
+html[data-theme="dark"] .bt-card{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .bt-card .val{ color: #e8eef7 !important; }
+html[data-theme="dark"] .bt-card .lbl{ color: #9db0c6 !important; }
+html[data-theme="dark"] .bt-card .sub{ color: #8fa3bd !important; }
+html[data-theme="dark"] .rstat .val{ color: #e8eef7 !important; }
+html[data-theme="dark"] .rstat .lbl{ color: #9db0c6 !important; }
+html[data-theme="dark"] .rstat .sub{ color: #8fa3bd !important; }
+html[data-theme="dark"] .report-tabs{ background: #0d1830 !important; }
+html[data-theme="dark"] .report-tabs a{ color: #b9c6de !important; }
+html[data-theme="dark"] .report-tabs a:hover{ background: rgba(147,197,253,.12) !important; color: #ffffff !important; }
+html[data-theme="dark"] .report-tabs a.active{ background: var(--mg-grad) !important; color: #ffffff !important; }
+html[data-theme="dark"] .filter-bar{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .filter-bar label{ color: #b9c6de !important; }
+html[data-theme="dark"] .filter-bar input[type="date"]{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.18) !important; color: #e8eef7 !important; }
+html[data-theme="dark"] .preset-btns a{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.16) !important; color: #b9c6de !important; }
+html[data-theme="dark"] .preset-btns a:hover{ background: #1d4ed8 !important; color: #ffffff !important; }
+
+/* ---------- v92 dark pairs: prescriptions (rxp) family ---------- */
+html[data-theme="dark"] .rxp-stat, html[data-theme="dark"] .rxp-card{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .rxp-stat .val{ color: #e8eef7 !important; }
+html[data-theme="dark"] .rxp-stat .lbl{ color: #9db0c6 !important; }
+html[data-theme="dark"] .rxp-search input, html[data-theme="dark"] .rxp-filters select{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.18) !important; color: #e8eef7 !important; }
+html[data-theme="dark"] .rxp-card thead th{ background: #101f45 !important; color: #bfdbfe !important; }
+html[data-theme="dark"] .ibtn{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.18) !important; color: #dbeafe !important; }
+html[data-theme="dark"] .rxp-pager a, html[data-theme="dark"] .rxp-pager span{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.18) !important; color: #dbeafe !important; }
+html[data-theme="dark"] .rxp-foot{ background: #0a1428 !important; border-top-color: rgba(255,255,255,.10) !important; color: #9db0c6 !important; }
+.rxp-btn-add{ background: var(--mg-grad) !important; }
+
+/* ---------- v92 dark pairs: profile page (white cards, variable text) ---------- */
+html[data-theme="dark"] .ai-insights-card{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .ai-stat-item{ background: rgba(255,255,255,.05) !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .form-section{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .profile-tabs{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .profile-tabs button{ color: #b9c6de !important; }
+html[data-theme="dark"] .profile-tabs button:hover{ background: rgba(147,197,253,.12) !important; color: #ffffff !important; }
+html[data-theme="dark"] .profile-tabs button.active{ background: rgba(59,130,246,.28) !important; color: #ffffff !important; }
+
+/* ---- Dark-mode pairs (screenshot-verified in v91, re-tinted navy) ---- */
+html[data-theme="dark"] .dv-action{
+  background: #101f45 !important; color: #e8eef7 !important;
+  border-color: rgba(255,255,255,.12) !important; border-left: 4px solid var(--c, #2563eb) !important;
+}
+html[data-theme="dark"] .dv-action:hover{ color: #ffffff !important; }
+html[data-theme="dark"] .pf-tabs{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .pf-tab{ color: #b9c6de !important; }
+html[data-theme="dark"] .pf-tab.on{ color: #ffffff !important; }
+html[data-theme="dark"] .pf-card{ background: #0d1830 !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .pf-card-head{ border-bottom-color: rgba(255,255,255,.08) !important; }
+html[data-theme="dark"] .pf-card-head h3{ color: #e8eef7 !important; }
+html[data-theme="dark"] .pf-card-head p, html[data-theme="dark"] .pf-hint, html[data-theme="dark"] .st-tab-note{ color: #9db0c6 !important; }
+html[data-theme="dark"] .pf-label{ color: #b9c6de !important; }
+html[data-theme="dark"] .pf-input{ background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.16) !important; color: #e8eef7 !important; }
+html[data-theme="dark"] .pf-input[readonly]{ color: #9db0c6 !important; }
+html[data-theme="dark"] .pf-foot{ background: rgba(255,255,255,.03) !important; border-top-color: rgba(255,255,255,.08) !important; }
+html[data-theme="dark"] .pf-act{ border-bottom-color: rgba(255,255,255,.07) !important; }
+html[data-theme="dark"] .pf-act .t{ color: #e8eef7 !important; }
+html[data-theme="dark"] .pf-act .d{ color: #b9c6de !important; }
+html[data-theme="dark"] .st-tile{ background: rgba(255,255,255,.05) !important; border-color: rgba(255,255,255,.10) !important; }
+html[data-theme="dark"] .st-tile .v{ color: #e8eef7 !important; }
+html[data-theme="dark"] .st-preview{ background: rgba(255,255,255,.05) !important; color: #cfdcf3 !important; border-color: rgba(255,255,255,.20) !important; }
