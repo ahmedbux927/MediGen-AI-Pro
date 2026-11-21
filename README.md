@@ -80,6 +80,18 @@
 
 ---
 
+## Watch the film
+
+<p align="center">
+  <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/releases/tag/v101.03">
+    <img src="media/MediGen_Ad_Poster.jpg" alt="MediGen AI Pro — Official Ad Film" width="720">
+  </a>
+  <br>
+  <i>The official product film (2:21, Full HD) — plays on the <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/releases/tag/v101.03">release page</a>; a 720p copy also lives in <a href="media/MediGen_AI_Pro_Official_Ad.mp4">media/</a>.</i>
+</p>
+
+---
+
 ## Download
 
 **[⬇ Latest release — v101.03](https://github.com/ahmedbux927/MediGen-AI-Pro/releases/latest)**
