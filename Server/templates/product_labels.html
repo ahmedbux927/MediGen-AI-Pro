@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Barcode Labels{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Barcode Labels</h4>
+        <div class="text-muted small">Items chunein, copies likhen, Print dabayein — A4 sheet par Code 128 labels ki PDF ban jayegi (3 x 8 har page par). Jin items ke paas barcode nahi, un ka label nahi ban sakta — pehle Edit page se barcode set karein.</div>
+    </div>
+</div>
+
+<form method="POST" action="{{ url_for('product_labels_print') }}">
+    <div class="card border-0 shadow-sm p-3 mb-3">
+        <div class="d-flex flex-wrap gap-2 align-items-end">
+            <div>
+                <label class="form-label small mb-1">Har item ki copies</label>
+                <input type="number" name="copies" class="form-control" value="1" min="1" max="50" style="width:110px;">
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-printer"></i> Print labels (PDF)</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="document.querySelectorAll('input[name=medicine_id]').forEach(function(b){ if(!b.disabled) b.checked = true; });">Sab chunein</button>
+        </div>
+    </div>
+    <div class="card border-0 shadow-sm p-3">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead><tr><th style="width:40px;"></th><th>Medicine</th><th>Barcode</th><th>Price</th></tr></thead>
+                <tbody>
+                {% for m in meds %}
+                    <tr>
+                        <td><input type="checkbox" name="medicine_id" value="{{ m.medicine_id }}" {% if not m.barcode %}disabled{% endif %}></td>
+                        <td>{{ m.name }}</td>
+                        <td>{% if m.barcode %}{{ m.barcode }}{% else %}<span class="text-danger small">barcode nahi hai</span>{% endif %}</td>
+                        <td>Rs. {{ m.price }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+{% endblock %}

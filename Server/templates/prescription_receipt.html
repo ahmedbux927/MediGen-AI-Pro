@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prescription Receipt #{{ prescription.prescription_id }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="{{ vendor_asset('bootstrap/bootstrap.min.css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ vendor_asset('bootstrap-icons/bootstrap-icons.css', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css') }}" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1b2a3b; --ink-2: #44546f; --ink-3: #8593ab; --line: #e3e9f2;
+            --teal: #0f9aa0; --teal-dark: #0b7b80; --blue: #1f6fb2;
+            --brand-grad: linear-gradient(135deg, #0f9aa0 0%, #1f6fb2 100%);
+        }
+        body {
+            background: #eaf0f5; padding: 28px 16px;
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif; color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+        .receipt-box {
+            max-width: 800px; margin: auto; padding: 40px 42px;
+            background: #fff; border-radius: 18px; position: relative; overflow: hidden;
+            border: 1px solid #dde8f4;
+            box-shadow: 0 24px 56px rgba(11, 42, 74, 0.14);
+        }
+        .receipt-box::before {
+            content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: var(--brand-grad);
+        }
+        .receipt-header {
+            display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+            border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 26px;
+        }
+        .pharmacy-name { font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: 1.2px; display: flex; align-items: center; gap: 12px; }
+        .pharmacy-name i {
+            width: 44px; height: 44px; border-radius: 13px; background: var(--brand-grad); color: #fff;
+            display: inline-flex; align-items: center; justify-content: center; font-size: 22px;
+            box-shadow: 0 8px 18px rgba(31, 111, 178, 0.28);
+        }
+        .receipt-title { text-align: right; }
+        .receipt-title h2 { color: var(--teal-dark); margin: 0 0 4px; font-size: 20px; font-weight: 800; letter-spacing: 1.5px; }
+        .receipt-title p { margin: 0; color: var(--ink-2); font-size: 14px; }
+        .info-section { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 22px; }
+        .info-box { background: #f5f9fc; border: 1px solid #e3ecf4; border-radius: 12px; padding: 14px 18px; min-width: 220px; }
+        .info-box h6 { color: var(--teal-dark); margin-bottom: 6px; font-size: 13px; font-weight: 700; }
+        .info-box p { margin: 0; color: var(--ink); font-size: 14px; }
+        table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+        table th {
+            background: #f1f6fa; color: var(--ink-2); padding: 12px 14px; text-align: left;
+            font-size: 13px; font-weight: 700; border-bottom: 2px solid var(--teal);
+        }
+        table td { padding: 13px 14px; border-bottom: 1px solid #eef2f7; font-size: 14px; }
+        .rx-symbol { font-size: 54px; color: var(--teal); font-weight: bold; font-family: serif; line-height: 1; }
+        .footer-note { text-align: center; margin-top: 28px; padding-top: 18px; border-top: 1px dashed #c7d2df; color: var(--ink-3); font-size: 13px; }
+        .footer-note p { margin: 0 0 4px; }
+        .alert-info { background: #edf6fb; color: #1d6a91; border: 1px solid #c5dcf0; border-left: 4px solid var(--blue); border-radius: 10px; }
+        .btn-print {
+            background: var(--brand-grad); color: #fff; border: none; padding: 12px 28px; border-radius: 12px;
+            font-weight: 700; cursor: pointer; font-family: inherit;
+            box-shadow: 0 6px 16px rgba(31, 111, 178, 0.28);
+        }
+        .btn-print:hover { filter: brightness(1.06); }
+        .btn-back {
+            display: inline-block; background: #fff; color: var(--ink-2); border: 1px solid #d8e0ea;
+            padding: 11px 28px; border-radius: 12px; font-weight: 600; text-decoration: none; margin-left: 8px;
+        }
+        .btn-back:hover { background: #f4f7fb; color: var(--ink); }
+        @media (max-width: 600px) {
+            .receipt-box { padding: 28px 20px; }
+            .receipt-header, .info-section { flex-direction: column; }
+            .receipt-title, .info-box[style] { text-align: left !important; }
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #fff; padding: 0; }
+            .receipt-box { box-shadow: none; border: none; border-radius: 0; max-width: 100%; }
+            table th { background: #f1f6fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .receipt-box::before, .pharmacy-name i { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt-box">
+    <div class="receipt-header">
+        <div>
+            <div class="pharmacy-name"><i class="bi bi-capsule"></i> {{ shop.name|upper }}</div>
+            <p style="color:#5b6c82; margin:6px 0 0; font-size:13px;">AI-Powered Pharmacy Management</p>
+        </div>
+        <div class="receipt-title">
+            <h2>PRESCRIPTION</h2>
+            <p><strong>#{{ prescription.prescription_id }}</strong></p>
+            <p>{{ prescription.date_issued }}</p>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-box">
+            <h6><i class="bi bi-person"></i> Patient</h6>
+            <p><strong>{{ prescription.customer_name }}</strong></p>
+            {% if prescription.contact_number %}<p><i class="bi bi-telephone-fill" style="color:#0f9aa0;"></i> {{ prescription.contact_number }}</p>{% endif %}
+        </div>
+        <div class="info-box" style="text-align:right;">
+            <h6><i class="bi bi-person-badge"></i> Doctor</h6>
+            <p><strong>{{ doctor_label(prescription.doctor_name) }}</strong></p>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin: 18px 0;">
+        <span class="rx-symbol">℞</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th>Medicine</th>
+                <th>Dosage</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td><strong>{{ item.medicine_name }}</strong></td>
+            <td>{{ item.dosage or '-' }}</td>
+            <td>{{ item.duration_days }} days</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4" class="text-center text-muted">No medicines prescribed</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if prescription.notes %}
+    <div class="alert alert-info">
+        <strong><i class="bi bi-info-circle"></i> Notes:</strong> {{ prescription.notes }}
+    </div>
+    {% endif %}
+
+    {% if dispensed %}
+    <p style="font-size:13px;color:#44546f;margin-top:18px;"><strong>Dispensed as sale:</strong>
+        {% for s in dispensed %}#{{ s.sale_id }} ({{ s.sale_date }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+    {% endif %}
+
+    <div class="footer-note">
+        <p><i class="bi bi-heart-fill" style="color:#d6455a;"></i> Take care of your health!</p>
+        <p>This prescription is computer generated — MediGen AI Pharmacy</p>
+    </div>
+
+    <div class="text-center mt-4 no-print">
+        <button onclick="window.print()" class="btn-print">
+            <i class="bi bi-printer"></i> Print Receipt
+        </button>
+        {% if session.role in ['Admin', 'Pharmacist'] %}
+        <a href="{{ url_for('new_sale', rx=prescription.prescription_id) }}" class="btn-back"><i class="bi bi-bag-check"></i> Dispense (make sale)</a>
+        {% endif %}
+        <a href="{{ url_for('prescriptions') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

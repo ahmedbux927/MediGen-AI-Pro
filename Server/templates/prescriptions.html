@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% block title %}Prescriptions{% endblock %}
+{% block content %}
+<style>
+    .rxp { font-family: inherit; }
+    .rxp-head { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+    .rxp-head h2 { margin:0; font-size:24px; font-weight:800; color:#1b2a3b; display:flex; align-items:center; gap:10px; }
+    .rxp-head h2 i { color:#0f9aa0; }
+    .rxp-head p { margin:4px 0 0; color:#64748b; font-size:14px; }
+    .rxp-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:18px; }
+    .rxp-stat { background:#fff; border:1px solid #e3e9f2; border-radius:14px; padding:16px 18px; display:flex; align-items:center; gap:14px; box-shadow:0 6px 18px rgba(15,31,61,.06); }
+    .rxp-stat .ic { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; flex-shrink:0; }
+    .rxp-stat .lbl { font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+    .rxp-stat .val { font-size:26px; font-weight:800; color:#1b2a3b; line-height:1.1; }
+    .rxp-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .rxp-btn-add { display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border:none; border-radius:12px; padding:10px 18px; font-weight:700; text-decoration:none; box-shadow:0 6px 14px rgba(31,111,178,.25); }
+    .rxp-btn-add:hover { color:#fff; filter:brightness(1.06); }
+    .rxp-filters { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .rxp-search { position:relative; }
+    .rxp-search i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#8593ab; }
+    .rxp-search input { border:1.5px solid #e2e8f0; border-radius:10px; padding:9px 12px 9px 34px; font-size:14px; width:260px; background:#fff; }
+    .rxp-filters select { border:1.5px solid #e2e8f0; border-radius:10px; padding:9px 12px; font-size:14px; background:#fff; }
+    .rxp-filters button { border:none; background:#1b2a3b; color:#fff; border-radius:10px; padding:9px 16px; font-weight:700; }
+    .rxp-card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; box-shadow:0 10px 28px rgba(15,31,61,.07); overflow:hidden; }
+    .rxp-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
+    .rxp-table thead th { background:#f6f9fc; color:#475569; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; padding:14px 16px; border-bottom:1px solid #e3e9f2; text-align:left; white-space:nowrap; }
+    .rxp-table tbody td { padding:14px 16px; border-bottom:1px solid #f1f5f9; vertical-align:middle; color:#334155; }
+    .rxp-table tbody tr:hover td { background:#fafcfe; }
+    .rxp-table tbody tr:last-child td { border-bottom:none; }
+    .rx-no { font-weight:800; color:#1b2a3b; }
+    .rx-date { font-size:12px; color:#8593ab; }
+    .patient { display:flex; align-items:center; gap:10px; }
+    .avatar { width:34px; height:34px; border-radius:50%; background:#e6f4f5; color:#0b7b80; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .doctor { color:#44546f; font-weight:600; }
+    .pill { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:4px 11px; font-size:12px; font-weight:700; white-space:nowrap; }
+    .pill.done { background:#ecfdf3; color:#15803d; }
+    .pill.wait { background:#fff7e6; color:#b45309; }
+    .pill .dot { width:7px; height:7px; border-radius:50%; background:currentColor; }
+    .count { display:inline-block; background:#eef2f7; color:#334155; border-radius:8px; padding:3px 9px; font-weight:700; font-size:12px; }
+    .status-cell small { display:block; margin-top:5px; }
+    .status-cell a { font-size:12px; font-weight:700; color:#0b7b80; text-decoration:none; }
+    .status-cell a:hover { text-decoration:underline; }
+    .btn-dispense { display:inline-flex; align-items:center; gap:6px; background:#0f9aa0; color:#fff !important; border-radius:9px; padding:6px 12px; font-size:12px; font-weight:700; text-decoration:none !important; margin-top:6px; }
+    .btn-dispense:hover { filter:brightness(1.07); }
+    .actions { display:flex; gap:8px; justify-content:center; align-items:center; }
+    .ibtn { width:36px; height:36px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:17px; border:1px solid #e2e8f0; background:#fff; text-decoration:none; transition:all .15s ease; }
+    .ibtn:hover { transform:translateY(-1px); box-shadow:0 6px 14px rgba(15,31,61,.12); }
+    .ibtn.print { color:#0f9aa0; } .ibtn.print:hover { background:#e7f7f8; border-color:#0f9aa0; }
+    .ibtn.edit { color:#1f6fb2; }  .ibtn.edit:hover { background:#eaf3fb; border-color:#1f6fb2; }
+    .ibtn.del { color:#d6455a; }   .ibtn.del:hover { background:#fdf0f2; border-color:#d6455a; }
+    .empty { padding:46px 20px; text-align:center; color:#8593ab; }
+    .empty i { font-size:40px; display:block; margin-bottom:8px; }
+    .rxp-foot { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; padding:14px 16px; border-top:1px solid #f1f5f9; background:#fbfdff; }
+    .rxp-foot .info { color:#64748b; font-size:13px; }
+    .rxp-pager { display:flex; gap:6px; list-style:none; margin:0; padding:0; }
+    .rxp-pager a, .rxp-pager span { display:inline-block; min-width:36px; text-align:center; padding:7px 11px; border-radius:9px; border:1px solid #e2e8f0; color:#334155; text-decoration:none; font-size:13px; font-weight:600; background:#fff; }
+    .rxp-pager a:hover { background:#eaf6f6; border-color:#0f9aa0; }
+    .rxp-pager span.cur { background:#0f9aa0; border-color:#0f9aa0; color:#fff; }
+    .rxp-pager span.dis { opacity:.45; }
+    @media (max-width: 900px) { .rxp-search input { width:200px; } }
+</style>
+
+<div class="rxp">
+    <div class="rxp-head">
+        <div>
+            <h2><i class="bi bi-file-medical-fill"></i> Prescriptions</h2>
+            <p>Doctor prescriptions, their dispensing status, and printing</p>
+        </div>
+        <a href="{{ url_for('add_prescription') }}" class="rxp-btn-add"><i class="bi bi-plus-circle-fill"></i> New Prescription</a>
+    </div>
+
+    <div class="rxp-stats">
+        <div class="rxp-stat">
+            <div class="ic" style="background:linear-gradient(135deg,#0f9aa0,#1f6fb2);"><i class="bi bi-file-medical"></i></div>
+            <div><div class="lbl">Total</div><div class="val">{{ stats.total }}</div></div>
+        </div>
+        <div class="rxp-stat">
+            <div class="ic" style="background:#f59e0b;"><i class="bi bi-hourglass-split"></i></div>
+            <div><div class="lbl">Not dispensed</div><div class="val">{{ stats.open }}</div></div>
+        </div>
+        <div class="rxp-stat">
+            <div class="ic" style="background:#22a876;"><i class="bi bi-bag-check-fill"></i></div>
+            <div><div class="lbl">Dispensed</div><div class="val">{{ stats.dispensed }}</div></div>
+        </div>
+    </div>
+
+    <div class="rxp-bar">
+        <form method="GET" action="{{ url_for('prescriptions') }}" class="rxp-filters">
+            <div class="rxp-search">
+                <i class="bi bi-search"></i>
+                <input type="text" name="q" value="{{ q }}" placeholder="Patient, doctor or Rx number">
+            </div>
+            <select name="filter">
+                <option value="all" {% if flt == 'all' %}selected{% endif %}>All prescriptions</option>
+                <option value="open" {% if flt == 'open' %}selected{% endif %}>Not dispensed</option>
+                <option value="dispensed" {% if flt == 'dispensed' %}selected{% endif %}>Dispensed</option>
+            </select>
+            <button type="submit">Search</button>
+            {% if q or flt != 'all' %}<a href="{{ url_for('prescriptions') }}" style="font-size:13px;color:#64748b;">Clear</a>{% endif %}
+        </form>
+    </div>
+
+    <div class="rxp-card">
+        <table class="rxp-table">
+            <thead>
+                <tr>
+                    <th style="width:90px;">Rx No</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th style="text-align:center;">Medicines</th>
+                    <th>Status</th>
+                    <th style="text-align:center;width:150px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in prescriptions %}
+            <tr>
+                <td>
+                    <div class="rx-no">#{{ p.prescription_id }}</div>
+                    <div class="rx-date">{{ p.date_issued }}</div>
+                </td>
+                <td>
+                    <div class="patient">
+                        <div class="avatar">{{ (p.customer_name or '?')[:1]|upper }}</div>
+                        <div style="font-weight:700;color:#1b2a3b;">{{ p.customer_name }}</div>
+                    </div>
+                </td>
+                <td><span class="doctor">{{ doctor_label(p.doctor_name) }}</span></td>
+                <td style="text-align:center;"><span class="count">{{ p.item_count }}</span></td>
+                <td class="status-cell">
+                    {% if p.dispensed_count and p.dispensed_count > 0 %}
+                        <span class="pill done"><span class="dot"></span> Dispensed</span>
+                        {% if p.sale_id %}<small><a href="{{ url_for('invoice', sale_id=p.sale_id) }}">View sale #{{ p.sale_id }}</a></small>{% endif %}
+                    {% else %}
+                        <span class="pill wait"><span class="dot"></span> Not dispensed</span>
+                        <div><a class="btn-dispense" href="{{ url_for('new_sale', rx=p.prescription_id) }}"><i class="bi bi-bag-check"></i> Dispense</a></div>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="actions">
+                        <a href="{{ url_for('prescription_receipt', pid=p.prescription_id) }}" class="ibtn print" title="Print receipt"><i class="bi bi-printer"></i></a>
+                        <a href="{{ url_for('edit_prescription', pid=p.prescription_id) }}" class="ibtn edit" title="Edit prescription"><i class="bi bi-pencil-square"></i></a>
+                        {% if session.role == 'Admin' %}
+                        <a href="{{ url_for('delete_prescription', pid=p.prescription_id) }}" data-method="post" class="ibtn del" title="Delete prescription"
+                           onclick="return confirm('Delete prescription #{{ p.prescription_id }}? This cannot be undone.');"><i class="bi bi-trash3"></i></a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6">
+                <div class="empty"><i class="bi bi-inbox"></i>No prescriptions found. Try another search, or add a new prescription.</div>
+            </td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="rxp-foot">
+            <div class="info">{% if total %}Showing {{ offset + 1 }} - {{ offset + prescriptions|length }} of {{ total }}{% else %}No results{% endif %}</div>
+            {% if pages > 1 %}
+            <ul class="rxp-pager">
+                {% if page > 1 %}<li><a href="{{ url_for('prescriptions', page=page-1, **qs) }}">&laquo; Prev</a></li>{% else %}<li><span class="dis">&laquo; Prev</span></li>{% endif %}
+                {% for n in range([page - 2, 1]|max, [page + 2, pages]|min + 1) %}
+                <li>{% if n == page %}<span class="cur">{{ n }}</span>{% else %}<a href="{{ url_for('prescriptions', page=n, **qs) }}">{{ n }}</a>{% endif %}</li>
+                {% endfor %}
+                {% if page < pages %}<li><a href="{{ url_for('prescriptions', page=page+1, **qs) }}">Next &raquo;</a></li>{% else %}<li><span class="dis">Next &raquo;</span></li>{% endif %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
