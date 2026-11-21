@@ -195,9 +195,11 @@ python tests\run_all.py
 <p>
   <a href="https://www.linkedin.com/in/ahmed-bux-5a096a310"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
   <a href="https://github.com/ahmedbux927"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="mailto:ahmedbux927@gmail.com"><img alt="Email" src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white"></a>
 </p>
 
 - **Professional enquiries & licensing:** [LinkedIn](https://www.linkedin.com/in/ahmed-bux-5a096a310) — the best way to reach the author
+- **Email:** [ahmedbux927@gmail.com](mailto:ahmedbux927@gmail.com)
 - **More work:** [github.com/ahmedbux927](https://github.com/ahmedbux927)
 
 ## License
