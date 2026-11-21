@@ -1,0 +1,527 @@
+{% extends 'base.html' %}
+{% block title %}Records Clear{% endblock %}
+{% block content %}
+
+<style>
+    /* ============ PAGE HEADER ============ */
+    .page-header { margin-bottom: 22px; }
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--ink, #1b2a3b);
+        letter-spacing: -0.3px;
+        margin: 0 0 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .page-title i {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        margin-right: 0;
+        box-shadow: 0 6px 14px rgba(15, 154, 160, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+    .page-subtitle {
+        font-size: 13.5px;
+        color: var(--ink-2, #44546f);
+        font-weight: 400;
+        margin: 0 0 0 52px;
+    }
+
+    /* ============ STAT CARDS ============ */
+    .stat-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px 22px 20px 26px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line, #e3e9f2);
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        margin-bottom: 22px;
+        min-height: 112px;
+        color: var(--ink, #1b2a3b);
+    }
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: var(--brand-grad, #0f9aa0);
+    }
+    .stat-label {
+        font-size: 13px;
+        color: var(--ink-2, #44546f);
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .stat-label i { font-size: 16px; color: #0f9aa0; }
+    .stat-value {
+        font-size: 34px;
+        font-weight: 800;
+        color: var(--ink, #1b2a3b);
+        margin: 0;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+    .stat-icon-bg {
+        position: absolute;
+        right: -12px;
+        bottom: -22px;
+        font-size: 100px;
+        color: #0f9aa0;
+        opacity: 0.08;
+    }
+    .stat-card.alert {
+        background: #ffffff;
+        color: var(--ink, #1b2a3b);
+        border: 1px solid var(--line, #e3e9f2);
+        padding: 20px 22px 20px 26px;
+        font-weight: inherit;
+    }
+    .stat-card.alert::before { background: linear-gradient(180deg, #e5576c, #cf3f55); }
+    .stat-card.alert .stat-label i,
+    .stat-card.alert .stat-icon-bg { color: #cf3f55; }
+    .stat-card.alert .stat-value { color: #cf3f55; }
+
+    /* ============ ADD BUTTON ============ */
+    .btn-add {
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 6px 16px rgba(31, 111, 178, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transition: box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    .btn-add:hover {
+        color: #fff;
+        filter: brightness(1.06);
+        box-shadow: 0 8px 20px rgba(31, 111, 178, 0.36), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    .btn-add:active { transform: translateY(1px); }
+
+    /* ============ SEARCH ============ */
+    .search-box {
+        padding: 12px 18px 12px 44px;
+        border-radius: 12px;
+        border: 1px solid #d8e0ea;
+        font-size: 14px;
+        font-weight: 500;
+        background: #fff;
+        color: var(--ink, #1b2a3b);
+        width: 380px;
+        max-width: 100%;
+        box-shadow: inset 0 1px 2px rgba(15, 31, 61, 0.06);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .search-box:focus {
+        outline: none;
+        border-color: #0f9aa0;
+        box-shadow: 0 0 0 4px rgba(15, 154, 160, 0.14);
+    }
+    .search-wrapper { position: relative; }
+    .search-wrapper::before {
+        content: '\F52A';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0f9aa0;
+        font-size: 15px;
+        z-index: 2;
+    }
+
+    /* ============ DATA CARD + TABLE ============ */
+    .data-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 8px;
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        border: 1px solid var(--line, #e3e9f2);
+    }
+    .data-table { margin: 0; width: 100%; }
+    .data-table > thead > tr > th {
+        background: #f4f7fb;
+        color: var(--ink-2, #44546f);
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        padding: 15px 16px;
+        border: none;
+        border-bottom: 1px solid #dbe4f0;
+        white-space: nowrap;
+    }
+    .data-table > thead > tr > th:first-child { border-radius: 12px 0 0 0; }
+    .data-table > thead > tr > th:last-child { border-radius: 0 12px 0 0; }
+    .data-table tbody tr { transition: background 0.15s ease; border-bottom: 1px solid #eef2f7; }
+    .data-table tbody tr:hover { background: rgba(15, 154, 160, 0.05); }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody td {
+        padding: 15px 16px;
+        vertical-align: middle;
+        font-size: 14px;
+        font-weight: 500;
+        color: #34475f;
+    }
+
+    .sno {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        background: rgba(15, 154, 160, 0.10);
+        color: #0b7b80;
+        border-radius: 9px;
+        font-weight: 700;
+        font-size: 12.5px;
+    }
+
+    .med-name, .cat-name, .mfr-name, .customer-name {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--ink, #1b2a3b);
+    }
+    .cat-name, .mfr-name { display: inline-flex; align-items: center; gap: 10px; }
+    .cat-name i, .mfr-name i { color: #0f9aa0; }
+
+    .info-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #5b6c82;
+        font-weight: 500;
+    }
+    .info-text i { color: #0f9aa0; font-size: 14px; }
+
+    /* Stock badges */
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+        border: 1px solid;
+    }
+    .stock-high { background: #edf8f2; color: #17784f; border-color: #bfe6d3; }
+    .stock-medium { background: #fdf6ea; color: #8f5a0f; border-color: #f1d9a8; }
+    .stock-low { background: #fdf0f2; color: #a8283b; border-color: #f4c4cc; }
+
+    .reorder-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: #f4f7fb;
+        color: #44546f;
+        border: 1px solid #e3e9f2;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Customers */
+    .data-table .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 0 0 3px rgba(15, 154, 160, 0.14), 0 4px 10px rgba(31, 111, 178, 0.25);
+        margin-right: 14px;
+        flex-shrink: 0;
+    }
+    .data-table .avatar.female {
+        background: linear-gradient(135deg, #c2557f, #a23a63);
+        box-shadow: 0 0 0 3px rgba(194, 85, 127, 0.16), 0 4px 10px rgba(162, 58, 99, 0.25);
+    }
+    .gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+        border: 1px solid;
+    }
+    .gender-male { background: #edf5fc; color: #1f6fb2; border-color: #c5dcf0; }
+    .gender-female { background: #fbf0f5; color: #a23a63; border-color: #f0cddd; }
+    .gender-other { background: #f4f7fb; color: #44546f; border-color: #e3e9f2; }
+    .history-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: #f4f7fb;
+        color: #44546f;
+        border: 1px solid #e3e9f2;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Action button */
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid #f1d0d6;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: none;
+        background: #fff;
+        color: #cf3f55;
+    }
+    .btn-action:hover { background: #cf3f55; border-color: #cf3f55; color: #fff; }
+
+    .no-results { text-align: center; padding: 56px 20px; color: #8795a6; }
+    .no-results i { font-size: 52px; color: #c7d2df; display: block; margin-bottom: 14px; }
+    .no-results p { font-size: 15px; font-weight: 500; margin: 0; }
+
+    /* ============ MODAL ============ */
+    .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 26px 64px rgba(11, 42, 74, 0.30);
+    }
+    .modal-header-custom {
+        position: relative;
+        background: linear-gradient(115deg, #ffffff 0%, #f4f8fc 55%, #ebf6f6 100%);
+        color: var(--ink, #1b2a3b);
+        padding: 20px 28px;
+        border: none;
+        border-bottom: 1px solid var(--line, #e3e9f2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .modal-header-custom::before {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; top: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #0f9aa0, #1f6fb2);
+    }
+    .modal-header-custom h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .modal-header-custom h5 i {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        margin-right: 0;
+    }
+    .modal-header-custom .btn-close { filter: none !important; opacity: 0.55; }
+    .modal-header-custom .btn-close:hover { opacity: 0.9; }
+    .form-label-pro {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-2, #44546f);
+        margin-bottom: 7px;
+        display: block;
+    }
+    .form-control-pro {
+        border: 1px solid #d8e0ea;
+        border-radius: 10px;
+        padding: 11px 15px;
+        font-size: 14px;
+        color: var(--ink, #1b2a3b);
+        background: #f9fbfd;
+        box-shadow: inset 0 1px 2px rgba(15, 31, 61, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        width: 100%;
+    }
+    .form-control-pro:focus {
+        outline: none;
+        border-color: #0f9aa0;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(15, 154, 160, 0.14);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    .main-content .d-flex.justify-content-between.align-items-center.mb-4 { flex-wrap: wrap; gap: 12px; }
+    @media (max-width: 768px) {
+        .search-wrapper { width: 100%; }
+        .search-box { width: 100%; }
+        .data-card { overflow-x: auto; }
+        .page-subtitle { margin-left: 0; margin-top: 8px; }
+    }
+
+    a.btn-add { text-decoration: none; }
+
+    .page-title i { background: linear-gradient(135deg, #e5576c, #cf3f55); box-shadow: 0 6px 14px rgba(207, 63, 85, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
+    .warning-banner {
+        background: #fdf0f2; border: 1px solid #f4c4cc; border-left: 5px solid #d6455a;
+        border-radius: 16px; padding: 20px 24px; margin-bottom: 26px;
+        display: flex; align-items: flex-start; gap: 15px;
+    }
+    .warning-banner i { font-size: 26px; color: #cf3f55; flex-shrink: 0; }
+    .warning-banner h5 { font-size: 16px; font-weight: 700; color: #a8283b; margin: 0 0 5px 0; }
+    .warning-banner p { font-size: 14px; color: #8a2a38; margin: 0; line-height: 1.55; }
+    .clear-card {
+        background: #fff; border-radius: 18px; padding: 26px;
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        border: 1px solid var(--line, #e3e9f2); margin-bottom: 22px;
+    }
+    .clear-icon-box {
+        width: 52px; height: 52px; border-radius: 15px; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 24px; color: #fff; margin-bottom: 14px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        box-shadow: 0 8px 18px rgba(31, 111, 178, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+    .clear-card h5 { font-size: 17px; font-weight: 700; color: var(--ink, #1b2a3b); margin: 0 0 4px 0; }
+    .clear-count { font-size: 32px; font-weight: 800; color: #0b7b80; margin: 6px 0 2px 0; letter-spacing: -1px; }
+    .clear-count-label { font-size: 13px; color: #5b6c82; font-weight: 600; margin-bottom: 4px; }
+    .btn-clear {
+        width: 100%; padding: 12px 20px; background: #fff; color: #cf3f55; border: 1px solid #e9b4bd;
+        border-radius: 12px; font-weight: 700; font-size: 14px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .btn-clear:hover { background: #cf3f55; border-color: #cf3f55; color: #fff; }
+    .btn-clear:active { transform: translateY(1px); }
+
+</style>
+
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-trash3-fill"></i>Records Clear</h2>
+    <p class="page-subtitle">Permanently delete records from the system</p>
+</div>
+
+<!-- Warning Banner -->
+<div class="warning-banner">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <div>
+        <h5>Warning — This action cannot be undone</h5>
+        <p>All records will be permanently deleted. Please think carefully before clicking any "Clear" button. Deleted records cannot be recovered.</p>
+    </div>
+</div>
+
+<!-- Clear Cards Grid -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="clear-card">
+            <div class="clear-icon-box"><i class="bi bi-cart-fill"></i></div>
+            <h5>Sales Records</h5>
+            <div class="clear-count">{{ total_sales }}</div>
+            <div class="clear-count-label">Total Invoices</div>
+            <form method="POST" action="{{ url_for('clear_records', table_name='sales') }}" style="margin-top: 15px;">
+                <input type="password" name="admin_password" required autocomplete="current-password"
+                       placeholder="Type your password to confirm"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;">
+                <button type="submit" class="btn-clear" onclick="return confirm('Are you sure? All sales records will be permanently deleted!')">
+                    <i class="bi bi-trash-fill"></i> Clear All Sales
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="clear-card">
+            <div class="clear-icon-box"><i class="bi bi-bag-fill"></i></div>
+            <h5>Purchase Records</h5>
+            <div class="clear-count">{{ total_purchases }}</div>
+            <div class="clear-count-label">Total Orders</div>
+            <form method="POST" action="{{ url_for('clear_records', table_name='purchase_orders') }}" style="margin-top: 15px;">
+                <input type="password" name="admin_password" required autocomplete="current-password"
+                       placeholder="Type your password to confirm"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;">
+                <button type="submit" class="btn-clear" onclick="return confirm('Are you sure? All purchase records will be permanently deleted!')">
+                    <i class="bi bi-trash-fill"></i> Clear All Purchases
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="clear-card">
+            <div class="clear-icon-box"><i class="bi bi-file-medical-fill"></i></div>
+            <h5>Prescriptions</h5>
+            <div class="clear-count">{{ total_prescriptions }}</div>
+            <div class="clear-count-label">Total Prescriptions</div>
+            <form method="POST" action="{{ url_for('clear_records', table_name='prescriptions') }}" style="margin-top: 15px;">
+                <input type="password" name="admin_password" required autocomplete="current-password"
+                       placeholder="Type your password to confirm"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;">
+                <button type="submit" class="btn-clear" onclick="return confirm('Are you sure? All prescriptions will be permanently deleted!')">
+                    <i class="bi bi-trash-fill"></i> Clear All Prescriptions
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="clear-card">
+            <div class="clear-icon-box"><i class="bi bi-people-fill"></i></div>
+            <h5>Customers</h5>
+            <div class="clear-count">{{ total_customers }}</div>
+            <div class="clear-count-label">Total Customers</div>
+            <form method="POST" action="{{ url_for('clear_records', table_name='customers') }}" style="margin-top: 15px;">
+                <input type="password" name="admin_password" required autocomplete="current-password"
+                       placeholder="Type your password to confirm"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;">
+                <button type="submit" class="btn-clear" onclick="return confirm('Are you sure? All customers will be permanently deleted!')">
+                    <i class="bi bi-trash-fill"></i> Clear All Customers
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="clear-card">
+            <div class="clear-icon-box"><i class="bi bi-truck"></i></div>
+            <h5>Suppliers</h5>
+            <div class="clear-count">{{ total_suppliers }}</div>
+            <div class="clear-count-label">Total Suppliers</div>
+            <form method="POST" action="{{ url_for('clear_records', table_name='suppliers') }}" style="margin-top: 15px;">
+                <input type="password" name="admin_password" required autocomplete="current-password"
+                       placeholder="Type your password to confirm"
+                       style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:10px;">
+                <button type="submit" class="btn-clear" onclick="return confirm('Are you sure? All suppliers will be permanently deleted!')">
+                    <i class="bi bi-trash-fill"></i> Clear All Suppliers
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

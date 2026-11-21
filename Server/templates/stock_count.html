@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Stock Count{% endblock %}
+{% block content %}
+{% set state_label = {'open': 'Counting', 'submitted': 'Waiting for approval', 'approved': 'Approved', 'cancelled': 'Cancelled'} %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-clipboard-data"></i> Stock Count</h2>
+    <p>Count the shelf, enter what you find, then submit. An Admin approves the count, and stock changes only after approval.</p>
+</div>
+
+{% if open_count %}
+<section class="sp-card">
+    <h3><i class="bi bi-hourglass-split"></i> Count #{{ open_count.count_id }} is in progress</h3>
+    <p>Status: <b>{{ state_label[open_count.status] }}</b> &middot; started {{ open_count.started_at }} by {{ open_count.started_name or 'a user' }}{% if open_count.note %} &middot; {{ open_count.note }}{% endif %}</p>
+    <a class="btn btn-primary" href="{{ url_for('stock_count_detail', count_id=open_count.count_id) }}">Open this count</a>
+</section>
+{% else %}
+<section class="sp-card">
+    <h3><i class="bi bi-plus-circle-fill"></i> Start a new count</h3>
+    <p>Current stock is saved as the starting point. If stock changes for any medicine while counting (for example a sale), the Admin approval is refused and the count must be redone.</p>
+    <form method="post" action="{{ url_for('stock_count_start') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input type="text" name="note" maxlength="255" class="form-control" placeholder="Note (optional), e.g. Monthly shelf count" style="max-width:420px;">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-play-fill"></i> Start stock count</button>
+    </form>
+</section>
+{% endif %}
+
+<section class="sp-card">
+    <h3><i class="bi bi-clock-history"></i> Recent counts</h3>
+    {% if counts %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>#</th><th>Status</th><th>Started</th><th>Submitted</th><th>Approved</th><th>Counted</th><th>Note</th><th></th></tr></thead>
+        <tbody>
+        {% for c in counts %}
+            <tr>
+                <td>{{ c.count_id }}</td>
+                <td>{{ state_label[c.status] }}</td>
+                <td>{{ c.started_at }}<br><small class="text-muted">{{ c.started_name or '' }}</small></td>
+                <td>{{ c.submitted_at or '-' }}</td>
+                <td>{{ c.approved_at or '-' }}{% if c.approved_name %}<br><small class="text-muted">{{ c.approved_name }}</small>{% endif %}</td>
+                <td>{{ c.counted_total }} / {{ c.line_total }}</td>
+                <td>{{ c.note or '' }}</td>
+                <td><a href="{{ url_for('stock_count_detail', count_id=c.count_id) }}">Open</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No stock counts yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

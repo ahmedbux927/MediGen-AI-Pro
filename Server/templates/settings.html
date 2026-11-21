@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<style>
+    .pf-wrap { max-width:1040px; margin:0 auto; display:grid; gap:18px; }
+    .pf-hero { display:flex; gap:22px; align-items:center; flex-wrap:wrap; background:linear-gradient(115deg,#0b2a4a 0%,#0f4b5c 100%);
+               color:#fff; border-radius:20px; padding:26px 28px; box-shadow:0 16px 36px rgba(11,42,74,.25); }
+    .pf-avatar { width:96px; height:96px; border-radius:24px; object-fit:cover; background:linear-gradient(135deg,#0f9aa0,#1f6fb2);
+                 display:flex; align-items:center; justify-content:center; font-size:40px; font-weight:800; color:#fff; border:3px solid rgba(255,255,255,.25); flex-shrink:0; }
+    .pf-hero h2 { margin:0; font-size:26px; font-weight:800; }
+    .pf-hero .meta { color:#a9d6da; font-size:14px; margin-top:4px; }
+    .pf-badges { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .pf-badge { background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700; }
+    .pf-badge.on { background:rgba(52,211,153,.2); border-color:rgba(52,211,153,.4); }
+    .pf-tabs { display:flex; gap:6px; flex-wrap:wrap; background:#fff; border:1px solid #e3e9f2; border-radius:14px; padding:6px; }
+    .pf-tab { border:none; background:transparent; color:#475569; font-weight:700; padding:9px 16px; border-radius:10px; font-size:14px; }
+    .pf-tab.on { background:#0f9aa0; color:#fff; box-shadow:0 6px 14px rgba(15,154,160,.28); }
+    .pf-pane { display:none; } .pf-pane.on { display:block; }
+    .pf-card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; box-shadow:0 10px 28px rgba(15,31,61,.07); overflow:hidden; }
+    .pf-card-head { padding:16px 22px; border-bottom:1px solid #f1f5f9; }
+    .pf-card-head h3 { margin:0; font-size:17px; font-weight:800; color:#1b2a3b; }
+    .pf-card-head p { margin:3px 0 0; font-size:13px; color:#64748b; }
+    .pf-body { padding:20px 22px; }
+    .pf-section { font-size:12px; font-weight:800; color:#0b7b80; text-transform:uppercase; letter-spacing:.7px; margin:16px 0 10px; }
+    .pf-section:first-child { margin-top:0; }
+    .pf-label { font-size:11px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; display:block; }
+    .pf-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 13px; font-size:14px; background:#f8fafc; width:100%; margin-bottom:14px; color:#1b2a3b; }
+    .pf-input:focus { outline:none; border-color:#0f9aa0; background:#fff; box-shadow:0 0 0 3px rgba(15,154,160,.12); }
+    .pf-input[readonly] { background:#eef2f6; color:#64748b; }
+    .pf-foot { padding:14px 22px; background:#fbfdff; border-top:1px solid #f1f5f9; display:flex; justify-content:flex-end; gap:10px; }
+    .pf-btn { border:none; border-radius:11px; padding:10px 22px; font-weight:700; font-size:14px; color:#fff; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); box-shadow:0 6px 14px rgba(31,111,178,.25); }
+    .pf-btn:hover { filter:brightness(1.06); color:#fff; }
+    .pf-btn.ghost { background:#fff; color:#334155; border:1px solid #d8e0ea; box-shadow:none; }
+    .pf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:0 18px; }
+    .pf-pw { position:relative; }
+    .pf-pw button { position:absolute; right:10px; top:9px; border:none; background:none; color:#64748b; font-size:16px; }
+    .pf-meter { height:6px; border-radius:6px; background:#eef2f6; overflow:hidden; margin:-6px 0 6px; }
+    .pf-meter > div { height:100%; width:0; transition:width .25s, background .25s; }
+    .pf-hint { font-size:12px; color:#64748b; margin:-8px 0 14px; }
+    .pf-act { display:flex; gap:12px; padding:11px 0; border-bottom:1px solid #f1f5f9; align-items:flex-start; }
+    .pf-act:last-child { border-bottom:none; }
+    .pf-dot { width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; background:#0f9aa0; }
+    .pf-dot.bad { background:#d6455a; } .pf-dot.warn { background:#f59e0b; }
+    .pf-act .t { font-weight:700; color:#1b2a3b; font-size:14px; font-family:monospace; }
+    .pf-act .d { font-size:13px; color:#475569; }
+    .pf-act .w { font-size:11px; color:#8593ab; font-family:monospace; }
+    @media (max-width:600px) { .pf-hero { padding:20px; } .pf-avatar { width:76px; height:76px; font-size:30px; } }
+
+    .st-tab-note { font-size:13px; color:#64748b; margin:0 0 14px; }
+    .st-about-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
+    .st-tile { background:#f6f9fc; border:1px solid #e3e9f2; border-radius:14px; padding:14px 16px; }
+    .st-tile .l { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.6px; }
+    .st-tile .v { font-size:19px; font-weight:800; color:#1b2a3b; margin-top:3px; word-break:break-word; }
+    .st-ok { color:#15803d; } .st-no { color:#b8324a; }
+    .st-preview { background:#f6f9fc; border:1px dashed #b8c7d9; border-radius:12px; padding:14px 16px; font-family:Consolas,monospace; font-size:13px; color:#334155; }
+</style>
+<div class="pf-wrap">
+    <div class="pf-hero">
+        <div class="pf-avatar" style="border-radius:22px;"><i class="bi bi-gear-fill"></i></div>
+        <div style="flex:1;min-width:220px;">
+            <h2>Settings</h2>
+            <div class="meta">Shop details, money rules, your security and system information</div>
+            <div class="pf-badges">
+                <span class="pf-badge">Version {{ about.version }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pf-tabs" role="tablist">
+        <button class="pf-tab {% if tab == 'shop' %}on{% endif %}" data-tab="shop" type="button"><i class="bi bi-shop"></i> Shop</button>
+        <button class="pf-tab {% if tab == 'money' %}on{% endif %}" data-tab="money" type="button"><i class="bi bi-cash-stack"></i> Money rules</button>
+        <button class="pf-tab {% if tab == 'security' %}on{% endif %}" data-tab="security" type="button"><i class="bi bi-shield-lock"></i> Security</button>
+        <button class="pf-tab {% if tab == 'ai' %}on{% endif %}" data-tab="ai" type="button"><i class="bi bi-robot"></i> AI Assistant</button>
+        <button class="pf-tab {% if tab == 'about' %}on{% endif %}" data-tab="about" type="button"><i class="bi bi-info-circle"></i> About</button>
+    </div>
+
+    <!-- Shop -->
+    <div class="pf-pane {% if tab == 'shop' %}on{% endif %}" id="pane-shop">
+        <form method="POST" action="{{ url_for('settings_page') }}" class="pf-card">
+            <div class="pf-card-head"><h3>Shop details</h3><p>These appear on every invoice, receipt and the 80mm thermal print.</p></div>
+            <div class="pf-body">
+                <div class="pf-grid">
+                    <div><label class="pf-label">Shop / pharmacy name</label><input name="shop_name" class="pf-input" maxlength="100" required value="{{ s.shop_name }}"></div>
+                    <div><label class="pf-label">Phone</label><input name="shop_phone" class="pf-input" maxlength="50" value="{{ s.shop_phone }}" placeholder="0300 0000000"></div>
+                    <div><label class="pf-label">Owner WhatsApp (Daily Digest ke liye)</label><input name="owner_whatsapp" class="pf-input" maxlength="20" value="{{ s.owner_whatsapp or '' }}" placeholder="0300 0000000"></div>
+                </div>
+                <label class="pf-label">Address</label>
+                <input name="shop_address" class="pf-input" maxlength="255" value="{{ s.shop_address }}" placeholder="Shop address, city">
+                <label class="pf-label">Receipt footer message</label>
+                <input name="receipt_footer" class="pf-input" maxlength="255" value="{{ s.receipt_footer }}">
+                <input type="hidden" name="tax_rate" value="{{ s.tax_rate }}">
+                <input type="hidden" name="cashier_max_discount" value="{{ s.cashier_max_discount }}">
+                <div class="pf-section">Receipt preview</div>
+                <div class="st-preview">
+                    <b>{{ s.shop_name }}</b><br>
+                    {% if s.shop_address %}{{ s.shop_address }}<br>{% endif %}
+                    {% if s.shop_phone %}Tel: {{ s.shop_phone }}<br>{% endif %}
+                    ------------------------------<br>
+                    {{ s.receipt_footer }}
+                </div>
+            </div>
+            <div class="pf-foot"><button type="submit" class="pf-btn ghost" formaction="{{ url_for('settings_reset') }}" name="group" value="shop" formnovalidate onclick="return confirm('Shop details wapas default par? Name MEDIGEN ho jayega aur address, phone, footer khali/default ho jayenge.');"><i class="bi bi-arrow-counterclockwise"></i> Reset to defaults</button><button type="submit" class="pf-btn"><i class="bi bi-check2-circle"></i> Save shop details</button></div>
+        </form>
+    </div>
+
+    <!-- Money -->
+    <div class="pf-pane {% if tab == 'money' %}on{% endif %}" id="pane-money">
+        <form method="POST" action="{{ url_for('settings_page') }}" class="pf-card">
+            <div class="pf-card-head"><h3>Money rules</h3><p>Tax and discount rules used for every new sale.</p></div>
+            <div class="pf-body">
+                <input type="hidden" name="shop_name" value="{{ s.shop_name }}">
+                <input type="hidden" name="shop_address" value="{{ s.shop_address }}">
+                <input type="hidden" name="shop_phone" value="{{ s.shop_phone }}">
+                <input type="hidden" name="receipt_footer" value="{{ s.receipt_footer }}">
+                <div class="pf-grid">
+                    <div>
+                        <label class="pf-label">Tax rate (%)</label>
+                        <input name="tax_rate" type="number" step="0.01" min="0" max="30" class="pf-input" value="{{ s.tax_rate }}">
+                        <div class="pf-hint">0 = no tax. Added after the discount.</div>
+                    </div>
+                    <div>
+                        <label class="pf-label">Cashier maximum discount (%)</label>
+                        <input name="cashier_max_discount" type="number" step="0.01" min="0" max="100" class="pf-input" value="{{ s.cashier_max_discount }}">
+                        <div class="pf-hint">Pharmacist and Admin can give any discount.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="pf-foot"><button type="submit" class="pf-btn ghost" formaction="{{ url_for('settings_reset') }}" name="group" value="money" formnovalidate onclick="return confirm('Money rules wapas default par? Tax aur cashier discount limit default ho jayenge.');"><i class="bi bi-arrow-counterclockwise"></i> Reset to defaults</button><button type="submit" class="pf-btn"><i class="bi bi-check2-circle"></i> Save money rules</button></div>
+        </form>
+    </div>
+
+    <!-- Security -->
+    <div class="pf-pane {% if tab == 'security' %}on{% endif %}" id="pane-security">
+        <form method="POST" action="{{ url_for('change_password') }}" class="pf-card">
+            <input type="hidden" name="next" value="settings">
+            <div class="pf-card-head"><h3>Change my password</h3><p>Use at least 8 characters with letters and numbers.</p></div>
+            <div class="pf-body" style="max-width:520px;">
+                <label class="pf-label">Current password</label>
+                <div class="pf-pw"><input type="password" name="old_password" id="pwOld" class="pf-input" required autocomplete="current-password"><button type="button" onclick="togglePw('pwOld')"><i class="bi bi-eye"></i></button></div>
+                <label class="pf-label">New password</label>
+                <div class="pf-pw"><input type="password" name="new_password" id="pwNew" class="pf-input" required minlength="8" autocomplete="new-password" oninput="pwStrength(this.value)"><button type="button" onclick="togglePw('pwNew')"><i class="bi bi-eye"></i></button></div>
+                <div class="pf-meter"><div id="pwBar"></div></div>
+                <div class="pf-hint" id="pwText">Strength: enter a password</div>
+                <label class="pf-label">Confirm new password</label>
+                <div class="pf-pw"><input type="password" name="confirm_password" id="pwConf" class="pf-input" required minlength="8" autocomplete="new-password"><button type="button" onclick="togglePw('pwConf')"><i class="bi bi-eye"></i></button></div>
+            </div>
+            <div class="pf-foot"><button type="submit" class="pf-btn"><i class="bi bi-shield-check"></i> Update password</button></div>
+        </form>
+    <form method="POST" action="{{ url_for('settings_backup_now') }}" class="pf-card">
+        <div class="pf-card-head"><h3>Backup</h3><p>A full copy of the database, saved on this PC in the Server backups folder. Nothing is uploaded anywhere.</p></div>
+        <div class="pf-body">
+            <button type="submit" class="pf-btn"><i class="bi bi-database-down"></i> Take backup now</button>
+            {% if backup and backup.exists %}<div class="pf-hint mt-2">Aakhri backup: <strong>{{ backup.name }}</strong> &middot; {{ backup.when }} &middot; {{ backup.size_kb }} KB &middot; kul {{ backup.count }} backups{% if backup.stale %} &middot; <span class="text-danger fw-semibold">48 ghante se purana hai — naya backup lein!</span>{% endif %}</div>
+            {% elif backup %}<div class="pf-hint mt-2 text-danger">Abhi tak koi backup file nahi mili.</div>{% endif %}
+            <div class="pf-hint">Roz khud-kar backup (raat 11:30) ke liye ek dafa <span class="font-monospace">scripts\schedule_daily_backup.bat</span> ko Administrator se chalayen. Dusri copy (USB / doosra folder) ke liye .env me <span class="font-monospace">OFFSITE_BACKUP_DIR</span> set karein.</div>
+        </div>
+    </form>
+    <form method="POST" action="{{ url_for('settings_restore_test') }}" class="pf-card">
+        <div class="pf-card-head"><h3>Backup restore test</h3><p>Aakhri backup ko alag test database me restore karke parakhta hai ke wo asal me kaam ka hai ya nahi. Asal data ko haath nahi lagta; test database baad me khud delete ho jata hai.</p></div>
+        <div class="pf-body">
+            <button type="submit" class="pf-btn"><i class="bi bi-database-check"></i> Test backup restore</button>
+        </div>
+    </form>
+    </div>
+
+    <!-- AI Assistant (v91.00) -->
+    <div class="pf-pane {% if tab == 'ai' %}on{% endif %}" id="pane-ai">
+        <form method="POST" action="{{ url_for('settings_page') }}" class="pf-card" autocomplete="off">
+            <div class="pf-card-head"><h3>Online AI (Google Gemini)</h3>
+                <p>With a key, the AI Assistant also answers general questions - any medicine in the world, health topics, anything - like Gemini. Without a key it still answers shop questions and 116 common medicines offline. Keys are stored only in your shop database and are never shown again.</p></div>
+            <div class="pf-body" style="max-width:560px;">
+                <input type="hidden" name="ai_pane" value="1">
+                <input type="hidden" name="shop_name" value="{{ s.shop_name }}">
+                <input type="hidden" name="tax_rate" value="{{ s.tax_rate }}">
+                <input type="hidden" name="cashier_max_discount" value="{{ s.cashier_max_discount }}">
+                {% for field in ['gemini_api_key'] %}
+                <label class="pf-label">{{ ai_keys[field].label }} API key
+                    {% if ai_keys[field].set %}<span style="color:#047857;">— saved {{ ai_keys[field].mask }}</span>{% else %}<span style="color:#94a3b8;">— not set</span>{% endif %}
+                </label>
+                <input type="password" name="{{ field }}" class="pf-input" maxlength="255"
+                       placeholder="{% if ai_keys[field].set %}Leave blank to keep the saved key{% else %}Paste the API key here{% endif %}" autocomplete="new-password">
+                {% if ai_keys[field].set %}
+                <label style="display:block;font-size:13px;color:#b91c1c;margin:-6px 0 6px;">
+                    <input type="checkbox" name="clear_{{ field }}" value="1"> Remove the saved {{ ai_keys[field].label }} key
+                </label>
+                {% endif %}
+                <div style="margin:0 0 16px;">
+                    <button type="button" class="pf-btn ghost" style="padding:7px 14px; font-size:13px;" onclick="testAiKey('{{ field.replace('_api_key', '') }}', this)"><i class="bi bi-plug"></i> Test connection</button>
+                    <span class="pf-hint" id="aiTest-{{ field }}" style="margin:0 0 0 8px;"></span>
+                </div>
+                {% endfor %}
+                <label style="display:block;font-size:14px;margin:4px 0 14px;">
+                    <input type="checkbox" name="ai_daily_summary" value="1" {% if s.ai_daily_summary == '1' %}checked{% endif %}>
+                    Daily AI summary on the dashboard (aaj ki sale, low stock, expiry aur udhaar ka 5-line khulasa; sirf kul number bheje jate hain)
+                </label>
+                <div class="pf-section">Free Gemini key</div>
+                <p class="pf-hint" style="margin:0;">Open <b>aistudio.google.com</b> → sign in with Google → <b>Get API key</b> → Create → copy it here. The free key is enough for a shop. The assistant uses Google Gemini only.</p>
+            </div>
+            <div class="pf-foot"><button type="submit" class="pf-btn"><i class="bi bi-robot"></i> Save AI keys</button></div>
+        </form>
+    </div>
+
+    <!-- About -->
+    <div class="pf-pane {% if tab == 'about' %}on{% endif %}" id="pane-about">
+        <div class="pf-card">
+            <div class="pf-card-head"><h3>About MediGen AI Pro</h3><p>System information. Useful when asking for help or reporting a problem.</p></div>
+            <div class="pf-body">
+                <div class="st-about-grid">
+                    <div class="st-tile"><div class="l">Version</div><div class="v">{{ about.version }}</div><div class="pf-hint" style="margin:4px 0 0;">Released {{ about.released }}</div></div>
+                    <div class="st-tile"><div class="l">Database</div><div class="v">{{ about.db_name }}</div><div class="pf-hint" style="margin:4px 0 0;">MySQL {{ about.db_version }}</div></div>
+                    <div class="st-tile"><div class="l">Python</div><div class="v">{{ about.python }}</div><div class="pf-hint" style="margin:4px 0 0;">{{ about.os }}</div></div>
+                </div>
+                <div class="pf-section">Records in the database</div>
+                <div class="st-about-grid">
+                    {% for label, n in about.counts.items() %}
+                    <div class="st-tile"><div class="l">{{ label }}</div><div class="v">{{ n }}</div></div>
+                    {% endfor %}
+                </div>
+                <div class="pf-section">Help</div>
+                <p class="st-tab-note">Before reporting a problem, copy the Request ID shown on the error page, and the Admin details text. That is enough for the developer to find the cause.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+/* v92.00: live-test a saved AI key and show the provider's real answer */
+async function testAiKey(prov, btn) {
+    var out = document.getElementById('aiTest-' + prov + '_api_key');
+    btn.disabled = true; out.textContent = 'Testing...'; out.style.color = '';
+    try {
+        var fd = new FormData(); fd.append('provider', prov);
+        var r = await fetch('{{ url_for('settings_ai_test') }}', { method: 'POST', body: fd,
+            headers: { 'X-CSRFToken': (document.querySelector('meta[name="csrf-token"]') || {}).content || '' } });
+        var d = await r.json();
+        out.textContent = d.message;
+        out.style.color = d.ok ? '#15803d' : '#b91c1c';
+        out.style.fontWeight = '700';
+    } catch (e) { out.textContent = 'The test could not run (network problem).'; out.style.color = '#b91c1c'; }
+    btn.disabled = false;
+}
+function setTab(name) {
+    document.querySelectorAll('.pf-tab').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === name); });
+    document.querySelectorAll('.pf-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'pane-' + name); });
+    history.replaceState(null, '', '#' + name);
+}
+document.querySelectorAll('.pf-tab').forEach(function (b) { b.addEventListener('click', function () { setTab(b.dataset.tab); }); });
+if (location.hash && document.getElementById('pane-' + location.hash.slice(1))) { setTab(location.hash.slice(1)); }
+function togglePw(id) { var i = document.getElementById(id); i.type = i.type === 'password' ? 'text' : 'password'; }
+function pwStrength(v) {
+    var score = 0;
+    if (v.length >= 8) score++;
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    var bar = document.getElementById('pwBar'), txt = document.getElementById('pwText');
+    var levels = [['#d6455a', 'Very weak', '20%'], ['#f97316', 'Weak', '40%'], ['#f59e0b', 'Fair', '60%'], ['#22a876', 'Good', '80%'], ['#15803d', 'Strong', '100%']];
+    if (!v.length) { bar.style.width = '0'; txt.textContent = 'Strength: enter a password'; return; }
+    var l = levels[Math.max(0, Math.min(4, score - 1))];
+    bar.style.width = l[2]; bar.style.background = l[0]; txt.textContent = 'Strength: ' + l[1];
+}
+</script>
+{% endblock %}

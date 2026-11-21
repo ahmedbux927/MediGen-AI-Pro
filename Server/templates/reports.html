@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+
+<style>
+    .page-header { margin-bottom: 22px; }
+    .page-title {
+        font-size: 22px; font-weight: 700; color: var(--ink, #1b2a3b);
+        display: flex; align-items: center; gap: 12px; margin: 0 0 4px;
+    }
+    .page-title i {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 19px;
+    }
+    .page-subtitle { font-size: 13.5px; color: #44546f; margin: 0 0 0 52px; }
+
+    /* Tabs */
+    .report-tabs {
+        display: flex; gap: 6px; background: #f4f7fb;
+        padding: 5px; border-radius: 12px; margin-bottom: 20px;
+        overflow-x: auto;
+    }
+    .report-tabs a {
+        padding: 10px 18px; border-radius: 9px;
+        font-size: 13.5px; font-weight: 700; color: #44546f;
+        text-decoration: none; white-space: nowrap;
+        display: inline-flex; align-items: center; gap: 7px;
+        transition: all 0.2s ease;
+    }
+    .report-tabs a:hover { background: rgba(15, 154, 160, 0.08); color: #0b7b80; }
+    .report-tabs a.active {
+        background: var(--brand-grad, #0f9aa0); color: #fff;
+        box-shadow: 0 4px 12px rgba(15, 154, 160, 0.3);
+    }
+
+    /* Filter bar */
+    .filter-bar {
+        background: #fff; border: 1px solid #e3e9f2; border-radius: 14px;
+        padding: 14px 20px; margin-bottom: 22px;
+        display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+        box-shadow: 0 4px 12px rgba(15, 31, 61, 0.05);
+    }
+    .filter-bar label { font-size: 13px; font-weight: 700; color: #44546f; }
+    .filter-bar input[type="date"] {
+        padding: 9px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px;
+        font-size: 13.5px; background: #f9fbfd;
+    }
+    .filter-bar input[type="date"]:focus { outline: none; border-color: #0f9aa0; background: #fff; }
+    .btn-primary-pro {
+        background: var(--brand-grad, #0f9aa0); color: #fff; border: none;
+        padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13.5px;
+        display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(31, 111, 178, 0.25); text-decoration: none;
+    }
+    .btn-primary-pro:hover { color: #fff; filter: brightness(1.06); }
+    .preset-btns { display: flex; gap: 6px; margin-left: auto; }
+    .preset-btns a {
+        padding: 7px 14px; border-radius: 9px; font-size: 12.5px; font-weight: 700;
+        color: #44546f; background: #f4f7fb; text-decoration: none;
+        border: 1px solid #e3e9f2; transition: all 0.2s ease;
+    }
+    .preset-btns a:hover { background: #0f9aa0; color: #fff; border-color: #0f9aa0; }
+
+    /* Stat cards */
+    .report-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .rstat {
+        background: #fff; border: 1px solid #e3e9f2; border-radius: 16px;
+        padding: 20px 22px; box-shadow: 0 8px 22px rgba(15, 31, 61, 0.06);
+        border-left: 5px solid var(--accent, #0f9aa0);
+        position: relative; overflow: hidden;
+    }
+    .rstat .lbl { font-size: 12.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .rstat .val { font-size: 28px; font-weight: 800; color: #1b2a3b; margin: 6px 0 2px; letter-spacing: -0.5px; }
+    .rstat .sub { font-size: 12px; color: #8593ab; }
+    .rstat .bg-icon {
+        position: absolute; right: -10px; bottom: -20px;
+        font-size: 90px; color: var(--accent, #0f9aa0); opacity: 0.08;
+    }
+    .rstat.green { --accent: #22a876; }
+    .rstat.amber { --accent: #d98a1e; }
+    .rstat.red { --accent: #cf3f55; }
+    .rstat.blue { --accent: #1f6fb2; }
+
+    /* Chart card */
+    .chart-card {
+        background: #fff; border-radius: 16px; border: 1px solid #e3e9f2;
+        padding: 22px; box-shadow: 0 8px 22px rgba(15, 31, 61, 0.06);
+        margin-bottom: 22px;
+    }
+    .chart-card h5 {
+        font-size: 15px; font-weight: 800; color: #1b2a3b;
+        margin: 0 0 16px; padding-bottom: 12px;
+        border-bottom: 1px solid #e3e9f2;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .chart-card h5 i { color: #0f9aa0; }
+
+    /* Data card */
+    .data-card {
+        background: #fff; border-radius: 16px; padding: 8px;
+        box-shadow: 0 8px 22px rgba(15, 31, 61, 0.06);
+        border: 1px solid #e3e9f2; margin-bottom: 22px;
+    }
+    .data-card h5 {
+        padding: 18px 20px 12px; margin: 0; font-size: 15px; font-weight: 800;
+        color: #1b2a3b; display: flex; align-items: center; gap: 10px;
+    }
+    .data-card h5 i { color: #0f9aa0; }
+    .data-table { margin: 0; width: 100%; }
+    .data-table thead th {
+        background: #f4f7fb; color: #44546f; font-size: 11.5px;
+        font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+        padding: 12px 16px; border-bottom: 1px solid #dbe4f0;
+    }
+    .data-table tbody td {
+        padding: 12px 16px; font-size: 13.5px;
+        border-bottom: 1px solid #eef2f7; vertical-align: middle;
+    }
+    .data-table tbody tr:hover { background: rgba(15, 154, 160, 0.04); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    .profit-pos { color: #17784f; font-weight: 700; }
+    .profit-neg { color: #a8283b; font-weight: 700; }
+    .badge-soft {
+        display: inline-block; padding: 4px 10px; border-radius: 8px;
+        font-size: 11.5px; font-weight: 700;
+    }
+    .badge-red { background: #fdf0f2; color: #a8283b; }
+    .badge-amber { background: #fdf6ea; color: #8f5a0f; }
+    .badge-green { background: #edf8f2; color: #17784f; }
+
+    .empty-state { text-align: center; padding: 50px 20px; color: #8795a6; }
+    .empty-state i { font-size: 50px; color: #c7d2df; display: block; margin-bottom: 12px; }
+
+    /* Print */
+    @media print {
+        .report-tabs, .filter-bar, .preset-btns, .btn-primary-pro, .top-bar, .sidebar { display: none !important; }
+        .main-content { margin-left: 0 !important; padding: 0 !important; }
+        .chart-card, .data-card, .rstat { box-shadow: none !important; border: 1px solid #ccc !important; page-break-inside: avoid; }
+    }
+</style>
+
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-graph-up-arrow"></i>Business Reports</h2>
+    <p class="page-subtitle">Sales, profit, stock and expiry insights</p>
+</div>
+
+<!-- Tabs -->
+<div class="report-tabs">
+    <a href="{{ url_for('reports', tab='overview', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'overview' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i> Overview
+    </a>
+    <a href="{{ url_for('reports', tab='sales', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'sales' %}active{% endif %}">
+        <i class="bi bi-cart-check"></i> Sales
+    </a>
+    <a href="{{ url_for('reports', tab='profit', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'profit' %}active{% endif %}">
+        <i class="bi bi-cash-coin"></i> Profit
+    </a>
+    <a href="{{ url_for('reports', tab='stock', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'stock' %}active{% endif %}">
+        <i class="bi bi-box-seam"></i> Stock
+    </a>
+    <a href="{{ url_for('reports', tab='expiry', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'expiry' %}active{% endif %}">
+        <i class="bi bi-calendar-x"></i> Expiry
+    </a>
+    <a href="{{ url_for('reports', tab='sections', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'sections' %}active{% endif %}">
+        <i class="bi bi-grid"></i> Sections
+    </a>
+    <a href="{{ url_for('reports', tab='slow', start_date=start_date, end_date=end_date) }}"
+       class="{% if tab == 'slow' %}active{% endif %}">
+        <i class="bi bi-hourglass-split"></i> Slow movers
+    </a>
+</div>
+
+<!-- Filter bar -->
+<form method="GET" action="{{ url_for('reports') }}" class="filter-bar">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <label><i class="bi bi-calendar3"></i> From:</label>
+    <input type="date" name="start_date" value="{{ start_date }}">
+    <label>To:</label>
+    <input type="date" name="end_date" value="{{ end_date }}">
+    <button type="submit" class="btn-primary-pro">
+        <i class="bi bi-search"></i> Apply
+    </button>
+    <div class="preset-btns">
+        <a href="{{ url_for('reports', tab=tab, start_date=today, end_date=today) }}">Today</a>
+        <a href="{{ url_for('reports', tab=tab, start_date=week_ago, end_date=today) }}">7 Days</a>
+        <a href="{{ url_for('reports', tab=tab, start_date=month_ago, end_date=today) }}">30 Days</a>
+        <a href="{{ url_for('reports', tab=tab, start_date=year_ago, end_date=today) }}">1 Year</a>
+    </div>
+</form>
+
+<!-- ==================== OVERVIEW TAB ==================== -->
+{% if tab == 'overview' %}
+<div class="report-stats">
+    <div class="rstat">
+        <div class="lbl">Total Revenue</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(total_revenue) }}</div>
+        <div class="sub">{{ total_invoices }} invoices</div>
+        <i class="bi bi-cash-stack bg-icon"></i>
+    </div>
+    <div class="rstat green">
+        <div class="lbl">Total Profit</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(total_profit) }}</div>
+        <div class="sub">Margin: {{ '{:.1f}'.format(margin_pct) }}%</div>
+        <i class="bi bi-graph-up-arrow bg-icon"></i>
+    </div>
+    <div class="rstat blue">
+        <div class="lbl">Items Sold</div>
+        <div class="val">{{ total_items }}</div>
+        <div class="sub">units across all sales</div>
+        <i class="bi bi-capsule bg-icon"></i>
+    </div>
+    <div class="rstat amber">
+        <div class="lbl">Avg Invoice</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(avg_invoice) }}</div>
+        <div class="sub">per transaction</div>
+        <i class="bi bi-receipt bg-icon"></i>
+    </div>
+</div>
+
+<div class="chart-card">
+    <h5><i class="bi bi-bar-chart-line-fill"></i> Daily Revenue Trend</h5>
+    <canvas id="revenueChart" height="90"></canvas>
+</div>
+
+<div class="data-card">
+    <h5><i class="bi bi-trophy-fill"></i> Top 10 Best Sellers</h5>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Medicine</th><th>Qty Sold</th><th>Revenue</th><th>Profit</th></tr></thead>
+        <tbody>
+        {% for b in best %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ b.name }}</strong></td>
+            <td>{{ b.sold }} units</td>
+            <td>Rs. {{ '{:,.0f}'.format(b.revenue|float) }}</td>
+            <td class="{% if (b.profit|float) >= 0 %}profit-pos{% else %}profit-neg{% endif %}">
+                Rs. {{ '{:,.0f}'.format(b.profit|float) }}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="empty-state"><i class="bi bi-inbox"></i>No sales in this period</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ==================== SALES TAB ==================== -->
+{% if tab == 'sales' %}
+<div class="chart-card">
+    <h5><i class="bi bi-bar-chart-line-fill"></i> Daily Sales</h5>
+    <canvas id="revenueChart" height="90"></canvas>
+</div>
+
+<div class="data-card">
+    <h5>
+        <i class="bi bi-table"></i> Daily Sales Breakdown
+        <span style="margin-left: auto; display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ url_for('export_report', rtype='sales', start_date=start_date, end_date=end_date, fmt='xlsx') }}"
+           class="btn-primary-pro" style="font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+        <a href="{{ url_for('export_report', rtype='sales', start_date=start_date, end_date=end_date, fmt='pdf') }}"
+           class="btn-primary-pro" style="font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+        </a>
+        <a href="{{ url_for('export_report', rtype='sales', start_date=start_date, end_date=end_date, fmt='docx') }}"
+           class="btn-primary-pro" style="font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-word"></i> Word (.docx)
+        </a>
+        <a href="{{ url_for('export_report', rtype='tax', start_date=start_date, end_date=end_date, fmt='xlsx') }}"
+           class="btn-primary-pro" style="font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-receipt"></i> Tax summary (Excel)
+        </a>
+        <a href="{{ url_for('export_report', rtype='tax', start_date=start_date, end_date=end_date, fmt='pdf') }}"
+           class="btn-primary-pro" style="font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-receipt"></i> Tax summary (PDF)
+        </a>
+        </span>
+    </h5>
+    <table class="data-table">
+        <thead><tr><th>Date</th><th>Invoices</th><th>Revenue</th><th>Avg Invoice</th></tr></thead>
+        <tbody>
+        {% for d in daily %}
+        <tr>
+            <td><strong>{{ d.sale_day }}</strong></td>
+            <td>{{ d.invoices }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(d.revenue|float) }}</td>
+            <td>Rs. {{ '{:,.0f}'.format((d.revenue|float) / (d.invoices|int) if d.invoices else 0) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-state"><i class="bi bi-inbox"></i>No sales in this period</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ==================== PROFIT TAB ==================== -->
+{% if tab == 'profit' %}
+<div class="report-stats">
+    <div class="rstat green">
+        <div class="lbl">Total Profit</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(total_profit) }}</div>
+        <div class="sub">{{ '{:.1f}'.format(margin_pct) }}% margin</div>
+        <i class="bi bi-graph-up-arrow bg-icon"></i>
+    </div>
+    <div class="rstat">
+        <div class="lbl">Total Revenue</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(total_revenue) }}</div>
+        <div class="sub">from sales</div>
+        <i class="bi bi-cash-stack bg-icon"></i>
+    </div>
+    <div class="rstat red">
+        <div class="lbl">Total Cost</div>
+        <div class="val">Rs. {{ '{:,.0f}'.format(total_cost) }}</div>
+        <div class="sub">purchase cost of sold items</div>
+        <i class="bi bi-bag-dash bg-icon"></i>
+    </div>
+</div>
+
+<div class="data-card">
+    <h5>
+        <i class="bi bi-table"></i> Profit by Medicine
+        <a href="{{ url_for('export_report', rtype='profit', start_date=start_date, end_date=end_date) }}"
+           class="btn-primary-pro" style="margin-left: auto; font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+    </h5>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th><th>Medicine</th><th>Qty Sold</th>
+                <th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for p in profit_rows %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td>{{ p.sold }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(p.revenue|float) }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(p.cost|float) }}</td>
+            <td class="{% if (p.profit|float) >= 0 %}profit-pos{% else %}profit-neg{% endif %}">
+                Rs. {{ '{:,.0f}'.format(p.profit|float) }}
+            </td>
+            <td>
+                <span class="badge-soft {% if (p.margin|float) >= 20 %}badge-green{% elif (p.margin|float) >= 5 %}badge-amber{% else %}badge-red{% endif %}">
+                    {{ '{:.1f}'.format(p.margin|float) }}%
+                </span>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="empty-state"><i class="bi bi-inbox"></i>No data in this period</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ==================== STOCK TAB ==================== -->
+{% if tab == 'stock' %}
+<div class="data-card">
+    <h5>
+        <i class="bi bi-exclamation-triangle-fill" style="color: #d98a1e;"></i> Low Stock Items
+        <a href="{{ url_for('export_report', rtype='stock') }}"
+           class="btn-primary-pro" style="margin-left: auto; font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+    </h5>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Medicine</th><th>Stock</th><th>Reorder Level</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for l in low %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ l.name }}</strong></td>
+            <td>{{ l.stock_quantity }}</td>
+            <td>{{ l.reorder_level }}</td>
+            <td>
+                {% if l.stock_quantity <= 0 %}
+                    <span class="badge-soft badge-red">Out of Stock</span>
+                {% else %}
+                    <span class="badge-soft badge-amber">Low — Reorder</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="empty-state"><i class="bi bi-check-circle" style="color: #17784f;"></i>All stock levels are healthy</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- ==================== EXPIRY TAB ==================== -->
+{% if tab == 'expiry' %}
+<div class="data-card">
+    <h5>
+        <i class="bi bi-calendar-x-fill" style="color: #cf3f55;"></i> Expiring Within 90 Days
+        <a href="{{ url_for('export_report', rtype='expiry') }}"
+           class="btn-primary-pro" style="margin-left: auto; font-size: 12px; padding: 7px 14px;">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+    </h5>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Qty</th><th>Days Left</th></tr></thead>
+        <tbody>
+        {% for e in exp %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ e.name }}</strong></td>
+            <td>{{ e.batch_number }}</td>
+            <td>{{ e.expiry_date }}</td>
+            <td>{{ e.quantity }}</td>
+            <td>
+                {% set days = (e.expiry_date - today_date).days %}
+                {% if days < 0 %}<span class="badge-soft badge-red">EXPIRED</span>
+                {% elif days <= 30 %}<span class="badge-soft badge-red">{{ days }} days</span>
+                {% elif days <= 60 %}<span class="badge-soft badge-amber">{{ days }} days</span>
+                {% else %}<span class="badge-soft badge-green">{{ days }} days</span>{% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="empty-state"><i class="bi bi-check-circle" style="color: #17784f;"></i>No medicines expiring in 90 days</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Charts: Chart.js (local first, CDN fallback) + the shared MediGen chart style -->
+<script src="{{ vendor_asset('chartjs/chart.umd.js', 'https://cdn.jsdelivr.net/npm/chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/charts.js') }}?v=25"></script>
+{% if tab == 'sections' %}
+<div class="data-card">
+    <h5><i class="bi bi-grid-fill"></i> Sales by Section</h5>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Section</th><th>Units</th><th>Revenue (Rs.)</th><th>Profit (Rs.)</th><th>Share</th></tr></thead>
+        <tbody>
+        {% for s in sec_rows %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ s.label }}</strong></td>
+            <td>{{ s.sold }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(s.revenue) }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(s.profit) }}</td>
+            <td>{{ '{:.1f}'.format(s.share) }}%</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if tab == 'slow' %}
+<div class="data-card">
+    <h5><i class="bi bi-hourglass-split"></i> Slow Movers (in stock, no sale in this period)</h5>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Medicine</th><th>Section</th><th>Stock</th><th>Value at price (Rs.)</th></tr></thead>
+        <tbody>
+        {% for s in slow_rows %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ s.name }}</strong></td>
+            <td>{{ s.section }}</td>
+            <td>{{ s.stock }}</td>
+            <td>Rs. {{ '{:,.0f}'.format(s.value) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">Every item in stock sold in this period.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    MediCharts.revenueLine('revenueChart', {{ chart_days|tojson }}, {{ chart_revenue|tojson }});
+});
+</script>
+
+{% endblock %}

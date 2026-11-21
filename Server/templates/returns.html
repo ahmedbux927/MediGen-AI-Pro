@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Return Items{% endblock %}
+{% block content %}
+<style>
+    .rt-card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; padding:26px; box-shadow:0 10px 28px rgba(15,31,61,.08); max-width:900px; margin:0 auto; }
+    .rt-card h3 { font-weight:800; margin-bottom:4px; }
+    .rt-meta { color:#64748b; font-size:14px; margin-bottom:18px; }
+    .rt-table th { font-size:11px; text-transform:uppercase; color:#475569; letter-spacing:.5px; }
+    .rt-table td { vertical-align:middle; }
+    .rt-sum { display:flex; justify-content:flex-end; align-items:center; gap:14px; margin:6px 0 14px; }
+    .rt-sum strong { font-size:22px; color:#4338ca; }
+</style>
+<div class="rt-card">
+    <h3><i class="bi bi-arrow-return-left"></i> Return items - Invoice #{{ sale.sale_id }}</h3>
+    <div class="rt-meta">
+        {{ sale.customer_name or 'Walk-in customer' }} &middot; {{ sale.sale_date }} &middot; Total Rs. {{ sale.total_amount }}
+        {% if sale.discount_amount and sale.discount_amount > 0 %}&middot; (discount and tax are shared in the refund){% endif %}
+    </div>
+
+    <form method="POST" id="retForm">
+        <table class="table rt-table">
+            <thead><tr><th>Medicine</th><th>Sold</th><th>Already returned</th><th>Refund per unit</th><th style="width:130px;">Return now</th></tr></thead>
+            <tbody>
+            {% for it in items %}
+            <tr>
+                <td>{{ it.name }}</td>
+                <td>{{ it.quantity }}</td>
+                <td>{{ it.returned_qty }}</td>
+                <td>Rs. {{ '{:,.2f}'.format(it.unit_refund) }}</td>
+                <td>
+                    {% if it.returnable > 0 %}
+                    <input type="number" name="ret_{{ it.sale_item_id }}" class="form-control ret" min="0" max="{{ it.returnable }}"
+                           value="0" data-unit="{{ it.unit_refund }}">
+                    {% else %}<span class="text-muted">nothing left</span>{% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-muted">This sale has no items.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Reason (optional)</label>
+            <input type="text" name="reason" maxlength="255" class="form-control" placeholder="Wrong medicine, damaged, doctor changed the prescription...">
+        </div>
+        <div class="rt-sum"><span>Value of returned medicines</span><strong id="refundTotal">Rs. 0</strong></div>
+        <button type="submit" class="btn btn-primary" onclick="return confirm('Save this return? Stock will increase.');"><i class="bi bi-check-circle"></i> Save return</button>
+        <a href="{{ url_for('invoice', sale_id=sale.sale_id) }}" class="btn btn-light">Cancel</a>
+    </form>
+</div>
+<script>
+function recalcRefund() {
+    var sum = 0;
+    document.querySelectorAll('.ret').forEach(function (i) {
+        var q = Math.min(parseInt(i.value) || 0, parseInt(i.max) || 0);
+        sum += q * parseFloat(i.dataset.unit);
+    });
+    document.getElementById('refundTotal').textContent = 'Rs. ' + (Math.round(sum * 100) / 100).toLocaleString();
+}
+document.getElementById('retForm').addEventListener('input', recalcRefund);
+</script>
+{% endblock %}
