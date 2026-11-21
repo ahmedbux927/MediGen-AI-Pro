@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Stock Count #{{ count.count_id }}{% endblock %}
+{% block content %}
+{% set state_label = {'open': 'Counting', 'submitted': 'Waiting for approval', 'approved': 'Approved', 'cancelled': 'Cancelled'} %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-clipboard-data"></i> Stock Count #{{ count.count_id }}</h2>
+    <p>Status: <b>{{ state_label[count.status] }}</b> &middot; started {{ count.started_at }} by {{ count.started_name or 'a user' }}{% if count.note %} &middot; {{ count.note }}{% endif %}{% if count.approved_at %} &middot; approved {{ count.approved_at }} by {{ count.approved_name or 'Admin' }}{% endif %}</p>
+    <p><a href="{{ url_for('stock_count_home') }}"><i class="bi bi-arrow-left"></i> All stock counts</a></p>
+</div>
+
+<section class="sp-card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;">
+        <div><div class="text-muted small">Medicines</div><b>{{ summary['lines'] }}</b></div>
+        <div><div class="text-muted small">Counted</div><b>{{ summary['counted'] }}</b></div>
+        <div><div class="text-muted small">Not counted yet</div><b>{{ summary['uncounted'] }}</b></div>
+        <div><div class="text-muted small">Changed</div><b>{{ summary['changed'] }}</b></div>
+        <div><div class="text-muted small">Units short</div><b style="color:#b91c1c;">{{ summary['short_units'] }}</b></div>
+        <div><div class="text-muted small">Units extra</div><b style="color:#15803d;">{{ summary['over_units'] }}</b></div>
+        <div><div class="text-muted small">Value change (approx.)</div><b>{{ '%.2f'|format(summary['value_change']) }}</b><div class="text-muted small">at last purchase price</div></div>
+    </div>
+</section>
+
+{% if count.status == 'submitted' and clash %}
+<div class="alert alert-danger">{{ clash }} medicine(s) changed stock after this count started (for example a sale). Approval is refused. Send the count back to counting, or cancel it and start again.</div>
+{% endif %}
+
+{% if count.status == 'open' %}
+<section class="sp-card">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('stock_count_submit', count_id=count.count_id) }}" onsubmit="return confirm('Submit this count? Every medicine must have a counted quantity.');">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Submit for approval</button>
+        </form>
+        <form method="post" action="{{ url_for('stock_count_cancel', count_id=count.count_id) }}" onsubmit="return confirm('Cancel this count? Nothing will change in stock.');">
+            <button type="submit" class="btn btn-outline-danger"><i class="bi bi-x-circle"></i> Cancel count</button>
+        </form>
+    </div>
+    <p class="text-muted small" style="margin:10px 0 0;">Save your counts before you submit. Submitting needs a counted quantity for every medicine.</p>
+</section>
+{% elif count.status == 'submitted' %}
+<section class="sp-card">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        {% if is_admin %}
+        <form method="post" action="{{ url_for('stock_count_approve', count_id=count.count_id) }}" onsubmit="return confirm('Approve this count? Stock will be set to the counted quantities for every changed medicine.');">
+            <button type="submit" class="btn btn-success" {% if clash %}disabled{% endif %}><i class="bi bi-check2-circle"></i> Approve and update stock</button>
+        </form>
+        {% else %}
+        <span class="text-muted">Waiting for an Admin to approve.</span>
+        {% endif %}
+        <form method="post" action="{{ url_for('stock_count_reopen', count_id=count.count_id) }}">
+            <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-pencil-square"></i> Send back to counting</button>
+        </form>
+    </div>
+</section>
+{% endif %}
+
+<section class="sp-card">
+    <form method="get" action="{{ url_for('stock_count_detail', count_id=count.count_id) }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <input type="search" name="q" value="{{ q }}" maxlength="60" class="form-control" placeholder="Search name or barcode" style="max-width:300px;">
+        <select name="view" class="form-select" style="max-width:200px;">
+            <option value="all" {% if view == 'all' %}selected{% endif %}>All medicines</option>
+            <option value="todo" {% if view == 'todo' %}selected{% endif %}>Not counted yet</option>
+            <option value="changed" {% if view == 'changed' %}selected{% endif %}>Changed only</option>
+        </select>
+        <button type="submit" class="btn btn-outline-primary btn-sm">Show</button>
+    </form>
+
+    {% if editable %}<form method="post" action="{{ url_for('stock_count_save', count_id=count.count_id) }}" id="countForm">
+        <input type="hidden" name="q" value="{{ q }}">
+        <input type="hidden" name="view" value="{{ view }}">
+    {% endif %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Medicine</th><th>Barcode</th><th class="text-end">System qty</th><th style="width:140px;">Counted</th><th class="text-end">Difference</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+            <tr>
+                <td>{{ r.name }}{% if r.dosage_form %} <small class="text-muted">{{ r.dosage_form }}</small>{% endif %}</td>
+                <td><small>{{ r.barcode or '' }}</small></td>
+                <td class="text-end">{{ r.system_qty }}</td>
+                <td>
+                    {% if editable %}
+                    <input type="hidden" name="medicine_id" value="{{ r.medicine_id }}">
+                    <input type="number" name="counted_qty" min="0" max="1000000" step="1" inputmode="numeric" class="form-control form-control-sm" value="{{ r.counted_qty if r.counted_qty is not none else '' }}" aria-label="Counted quantity for {{ r.name }}">
+                    {% elif r.counted %}
+                    {{ r.counted_qty }}
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    {% if r.diff is none %}<span class="text-muted">-</span>
+                    {% elif r.diff < 0 %}<b style="color:#b91c1c;">{{ r.diff }}</b>
+                    {% elif r.diff > 0 %}<b style="color:#15803d;">+{{ r.diff }}</b>
+                    {% else %}<span class="text-muted">0</span>{% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-muted">No medicines match this view.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% if editable %}
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save counts</button>
+        <span class="text-muted small">Empty boxes are skipped, so you can save in parts.</span>
+    </form>{% endif %}
+</section>
+{% endblock %}

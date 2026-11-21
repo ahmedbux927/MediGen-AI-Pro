@@ -1,0 +1,782 @@
+{% extends 'base.html' %}
+{% block title %}Users Management{% endblock %}
+{% block content %}
+
+<style>
+    /* ============ PAGE HEADER ============ */
+    .page-header { margin-bottom: 22px; }
+    .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--ink, #1b2a3b);
+        letter-spacing: -0.3px;
+        margin: 0 0 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .page-title i {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 19px;
+        margin-right: 0;
+        box-shadow: 0 6px 14px rgba(15, 154, 160, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+    .page-subtitle {
+        font-size: 13.5px;
+        color: var(--ink-2, #44546f);
+        font-weight: 400;
+        margin: 0 0 0 52px;
+    }
+
+    /* ============ STAT CARDS ============ */
+    .stat-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 20px 22px 20px 26px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--line, #e3e9f2);
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        margin-bottom: 22px;
+        min-height: 112px;
+        color: var(--ink, #1b2a3b);
+    }
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: var(--brand-grad, #0f9aa0);
+    }
+    .stat-label {
+        font-size: 13px;
+        color: var(--ink-2, #44546f);
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .stat-label i { font-size: 16px; color: #0f9aa0; }
+    .stat-value {
+        font-size: 34px;
+        font-weight: 800;
+        color: var(--ink, #1b2a3b);
+        margin: 0;
+        letter-spacing: -1px;
+        line-height: 1;
+    }
+    .stat-icon-bg {
+        position: absolute;
+        right: -12px;
+        bottom: -22px;
+        font-size: 100px;
+        color: #0f9aa0;
+        opacity: 0.08;
+    }
+    .stat-card.alert {
+        background: #ffffff;
+        color: var(--ink, #1b2a3b);
+        border: 1px solid var(--line, #e3e9f2);
+        padding: 20px 22px 20px 26px;
+        font-weight: inherit;
+    }
+    .stat-card.alert::before { background: linear-gradient(180deg, #e5576c, #cf3f55); }
+    .stat-card.alert .stat-label i,
+    .stat-card.alert .stat-icon-bg { color: #cf3f55; }
+    .stat-card.alert .stat-value { color: #cf3f55; }
+
+    /* ============ ADD BUTTON ============ */
+    .btn-add {
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 6px 16px rgba(31, 111, 178, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transition: box-shadow 0.2s ease, filter 0.2s ease;
+    }
+    .btn-add:hover {
+        color: #fff;
+        filter: brightness(1.06);
+        box-shadow: 0 8px 20px rgba(31, 111, 178, 0.36), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    }
+    .btn-add:active { transform: translateY(1px); }
+
+    /* ============ SEARCH ============ */
+    .search-box {
+        padding: 12px 18px 12px 44px;
+        border-radius: 12px;
+        border: 1px solid #d8e0ea;
+        font-size: 14px;
+        font-weight: 500;
+        background: #fff;
+        color: var(--ink, #1b2a3b);
+        width: 380px;
+        max-width: 100%;
+        box-shadow: inset 0 1px 2px rgba(15, 31, 61, 0.06);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .search-box:focus {
+        outline: none;
+        border-color: #0f9aa0;
+        box-shadow: 0 0 0 4px rgba(15, 154, 160, 0.14);
+    }
+    .search-wrapper { position: relative; }
+    .search-wrapper::before {
+        content: '\F52A';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #0f9aa0;
+        font-size: 15px;
+        z-index: 2;
+    }
+
+    /* ============ DATA CARD + TABLE ============ */
+    .data-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 8px;
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+        border: 1px solid var(--line, #e3e9f2);
+    }
+    .data-table { margin: 0; width: 100%; }
+    .data-table > thead > tr > th {
+        background: #f4f7fb;
+        color: var(--ink-2, #44546f);
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        padding: 15px 16px;
+        border: none;
+        border-bottom: 1px solid #dbe4f0;
+        white-space: nowrap;
+    }
+    .data-table > thead > tr > th:first-child { border-radius: 12px 0 0 0; }
+    .data-table > thead > tr > th:last-child { border-radius: 0 12px 0 0; }
+    .data-table tbody tr { transition: background 0.15s ease; border-bottom: 1px solid #eef2f7; }
+    .data-table tbody tr:hover { background: rgba(15, 154, 160, 0.05); }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody td {
+        padding: 15px 16px;
+        vertical-align: middle;
+        font-size: 14px;
+        font-weight: 500;
+        color: #34475f;
+    }
+
+    .sno {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        background: rgba(15, 154, 160, 0.10);
+        color: #0b7b80;
+        border-radius: 9px;
+        font-weight: 700;
+        font-size: 12.5px;
+    }
+
+    .med-name, .cat-name, .mfr-name, .customer-name {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: var(--ink, #1b2a3b);
+    }
+    .cat-name, .mfr-name { display: inline-flex; align-items: center; gap: 10px; }
+    .cat-name i, .mfr-name i { color: #0f9aa0; }
+
+    .info-text {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #5b6c82;
+        font-weight: 500;
+    }
+    .info-text i { color: #0f9aa0; font-size: 14px; }
+
+    /* Stock badges */
+    .stock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+        border: 1px solid;
+    }
+    .stock-high { background: #edf8f2; color: #17784f; border-color: #bfe6d3; }
+    .stock-medium { background: #fdf6ea; color: #8f5a0f; border-color: #f1d9a8; }
+    .stock-low { background: #fdf0f2; color: #a8283b; border-color: #f4c4cc; }
+
+    .reorder-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: #f4f7fb;
+        color: #44546f;
+        border: 1px solid #e3e9f2;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Customers */
+    .data-table .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 0 0 3px rgba(15, 154, 160, 0.14), 0 4px 10px rgba(31, 111, 178, 0.25);
+        margin-right: 14px;
+        flex-shrink: 0;
+    }
+    .data-table .avatar.female {
+        background: linear-gradient(135deg, #c2557f, #a23a63);
+        box-shadow: 0 0 0 3px rgba(194, 85, 127, 0.16), 0 4px 10px rgba(162, 58, 99, 0.25);
+    }
+    .gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12.5px;
+        font-weight: 700;
+        border: 1px solid;
+    }
+    .gender-male { background: #edf5fc; color: #1f6fb2; border-color: #c5dcf0; }
+    .gender-female { background: #fbf0f5; color: #a23a63; border-color: #f0cddd; }
+    .gender-other { background: #f4f7fb; color: #44546f; border-color: #e3e9f2; }
+    .history-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        background: #f4f7fb;
+        color: #44546f;
+        border: 1px solid #e3e9f2;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Action button */
+    .btn-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid #f1d0d6;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: none;
+        background: #fff;
+        color: #cf3f55;
+    }
+    .btn-action:hover { background: #cf3f55; border-color: #cf3f55; color: #fff; }
+
+    .no-results { text-align: center; padding: 56px 20px; color: #8795a6; }
+    .no-results i { font-size: 52px; color: #c7d2df; display: block; margin-bottom: 14px; }
+    .no-results p { font-size: 15px; font-weight: 500; margin: 0; }
+
+    /* ============ MODAL ============ */
+    .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 26px 64px rgba(11, 42, 74, 0.30);
+    }
+    .modal-header-custom {
+        position: relative;
+        background: linear-gradient(115deg, #ffffff 0%, #f4f8fc 55%, #ebf6f6 100%);
+        color: var(--ink, #1b2a3b);
+        padding: 20px 28px;
+        border: none;
+        border-bottom: 1px solid var(--line, #e3e9f2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .modal-header-custom::before {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; top: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #0f9aa0, #1f6fb2);
+    }
+    .modal-header-custom h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .modal-header-custom h5 i {
+        width: 36px; height: 36px;
+        border-radius: 10px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        margin-right: 0;
+    }
+    .modal-header-custom .btn-close { filter: none !important; opacity: 0.55; }
+    .modal-header-custom .btn-close:hover { opacity: 0.9; }
+    .form-label-pro {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ink-2, #44546f);
+        margin-bottom: 7px;
+        display: block;
+    }
+    .form-control-pro {
+        border: 1px solid #d8e0ea;
+        border-radius: 10px;
+        padding: 11px 15px;
+        font-size: 14px;
+        color: var(--ink, #1b2a3b);
+        background: #f9fbfd;
+        box-shadow: inset 0 1px 2px rgba(15, 31, 61, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        width: 100%;
+    }
+    .form-control-pro:focus {
+        outline: none;
+        border-color: #0f9aa0;
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(15, 154, 160, 0.14);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    .main-content .d-flex.justify-content-between.align-items-center.mb-4 { flex-wrap: wrap; gap: 12px; }
+    @media (max-width: 768px) {
+        .search-wrapper { width: 100%; }
+        .search-box { width: 100%; }
+        .data-card { overflow-x: auto; }
+        .page-subtitle { margin-left: 0; margin-top: 8px; }
+    }
+
+    a.btn-add { text-decoration: none; }
+
+    .stat-card.alert::before { background: linear-gradient(180deg, #27ad7b, #1b9163); }
+    .stat-card.alert .stat-label i, .stat-card.alert .stat-icon-bg { color: #1b9163; }
+    .stat-card.alert .stat-value { color: #1b9163; }
+    .stat-card.admin-card::before { background: linear-gradient(180deg, #e5576c, #cf3f55); }
+    .stat-card.admin-card .stat-label i, .stat-card.admin-card .stat-icon-bg { color: #cf3f55; }
+    .stat-card.admin-card .stat-value { color: #cf3f55; }
+
+    .avatar {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        display: inline-flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 700; font-size: 16px; margin-right: 14px; flex-shrink: 0;
+        box-shadow: 0 0 0 3px rgba(15, 154, 160, 0.14), 0 4px 10px rgba(31, 111, 178, 0.25);
+    }
+    .avatar.admin, .data-table .avatar.admin { background: linear-gradient(135deg, #e5576c, #cf3f55); box-shadow: 0 0 0 3px rgba(207, 63, 85, 0.14), 0 4px 10px rgba(207, 63, 85, 0.25); }
+    .avatar.pharmacist, .data-table .avatar.pharmacist { background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2)); }
+    .avatar.cashier, .data-table .avatar.cashier { background: linear-gradient(135deg, #3a9fc9, #2a86b0); box-shadow: 0 0 0 3px rgba(42, 134, 176, 0.16), 0 4px 10px rgba(42, 134, 176, 0.25); }
+
+    .user-name { font-size: 14.5px; font-weight: 700; color: var(--ink, #1b2a3b); }
+    .username-code {
+        background: #f4f7fb; padding: 4px 11px; border-radius: 8px; font-size: 13px; font-weight: 600;
+        color: #0b7b80; border: 1px solid #e3e9f2; font-family: 'Consolas', monospace;
+    }
+    .role-badge, .status-badge, .time-badge, .you-badge {
+        display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+        border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1px solid;
+    }
+    .role-admin { background: #fdf0f2; color: #a8283b; border-color: #f4c4cc; }
+    .role-pharmacist { background: #e9f6f6; color: #0b7b80; border-color: #bfe3e5; }
+    .role-cashier { background: #edf5fc; color: #1f6fb2; border-color: #c5dcf0; }
+    .status-active { background: #edf8f2; color: #17784f; border-color: #bfe6d3; }
+    .status-inactive { background: #f4f7fb; color: #5b6c82; border-color: #e3e9f2; }
+    .time-badge { background: #f4f7fb; color: #44546f; border-color: #e3e9f2; font-weight: 600; }
+    .time-badge.full-access { background: #edf8f2; color: #17784f; border-color: #bfe6d3; }
+    .you-badge { background: #fdf6ea; color: #8f5a0f; border-color: #f1d9a8; }
+
+    .btn-action { margin: 0 2px; border-color: #e3e9f2; }
+    .btn-time { color: #1f6fb2; }
+    .btn-time:hover { background: #1f6fb2; border-color: #1f6fb2; color: #fff; }
+    .btn-toggle { color: #b8730f; }
+    .btn-toggle:hover { background: #d98a1e; border-color: #d98a1e; color: #fff; }
+    .btn-delete { color: #cf3f55; border-color: #f1d0d6; }
+    .btn-delete:hover { background: #cf3f55; border-color: #cf3f55; color: #fff; }
+
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-person-gear"></i>Users Management</h2>
+    <p class="page-subtitle">Manage all system users and their access permissions</p>
+</div>
+
+<!-- Stats Row -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-people-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-people-fill"></i> Total Users</div>
+            <div class="stat-value">{{ users|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card alert">
+            <i class="bi bi-check-circle-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-check-circle-fill"></i> Active</div>
+            <div class="stat-value">{{ users|selectattr('is_active')|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card admin-card">
+            <i class="bi bi-shield-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-shield-fill"></i> Admins</div>
+            <div class="stat-value">{{ users|selectattr('role_name', 'equalto', 'Admin')|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-capsule stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-capsule"></i> Pharmacists</div>
+            <div class="stat-value">{{ users|selectattr('role_name', 'equalto', 'Pharmacist')|list|length }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Header Row -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addModal">
+        <i class="bi bi-person-plus-fill"></i> Add New User
+    </button>
+    <div class="search-wrapper">
+        <input type="text" id="searchBox" class="search-box" placeholder="Search by name, username, role...">
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="data-card">
+    <table class="table data-table">
+        <thead>
+            <tr>
+                <th style="width: 70px;">S.No</th>
+                <th>User</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Access Time</th>
+                <th style="text-align:center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="usersTable">
+        {% for u in users %}
+        <tr>
+            <td><span class="sno">{{ loop.index }}</span></td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="avatar {% if u.role_name == 'Admin' %}admin{% elif u.role_name == 'Pharmacist' %}pharmacist{% else %}cashier{% endif %}">
+                        {{ u.full_name[0]|upper }}
+                    </div>
+                    <span class="user-name">{{ u.full_name }}</span>
+                </div>
+            </td>
+            <td><span class="username-code">{{ u.username }}</span></td>
+            <td>
+                {% if u.role_name == 'Admin' %}
+                    <span class="role-badge role-admin"><i class="bi bi-shield-fill"></i> Admin</span>
+                {% elif u.role_name == 'Pharmacist' %}
+                    <span class="role-badge role-pharmacist"><i class="bi bi-capsule"></i> Pharmacist</span>
+                {% else %}
+                    <span class="role-badge role-cashier"><i class="bi bi-cash-coin"></i> Cashier</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if u.is_active %}
+                    <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+                {% else %}
+                    <span class="status-badge status-inactive"><i class="bi bi-x-circle-fill"></i> Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if u.role_name == 'Admin' %}
+                    <span class="time-badge full-access"><i class="bi bi-infinity"></i> Full Access</span>
+                {% else %}
+                    <span class="time-badge">
+                        <i class="bi bi-clock-fill"></i>
+                        {{ u.access_start_time if u.access_start_time else '08:00' }} - {{ u.access_end_time if u.access_end_time else '22:00' }}
+                    </span>
+                {% endif %}
+            </td>
+            <td style="text-align:center;">
+                {% if u.user_id == session.user_id %}
+                    <span class="you-badge"><i class="bi bi-star-fill"></i> You</span>
+                {% else %}
+                    <button class="btn-action btn-time" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#timeModal{{ u.user_id }}"
+                            title="Set Access Time">
+                        <i class="bi bi-clock-history"></i>
+                    </button>
+                    <form method="POST" action="{{ url_for('reset_user_code', uid=u.user_id) }}" class="d-inline"
+                          onsubmit="return confirm('Make a one-time reset code for this user?')">
+                        <button type="submit" class="btn-action btn-code" title="Make one-time reset code">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </button>
+                    </form>
+                    <button class="btn-action btn-reset" data-bs-toggle="modal"
+                            data-bs-target="#resetModal{{ u.user_id }}" title="Set new password now">
+                        <i class="bi bi-key"></i>
+                    </button>
+                    <button class="btn-action btn-edit" data-bs-toggle="modal"
+                            data-bs-target="#editModal{{ u.user_id }}" title="Edit name and role">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <a data-method="post" href="{{ url_for('toggle_user', uid=u.user_id) }}" 
+                       class="btn-action btn-toggle"
+                       title="Toggle Status"
+                       onclick="return confirm('Change this user status?')">
+                        <i class="bi bi-power"></i>
+                    </a>
+                    <button class="btn-action btn-delete" data-bs-toggle="modal"
+                            data-bs-target="#deleteModal{{ u.user_id }}" title="Delete user">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div id="noResults" class="no-results" style="display:none;">
+        <i class="bi bi-search"></i>
+        <p>No users found</p>
+    </div>
+</div>
+
+<!-- Reset Password Modals -->
+{% for u in users %}{% if u.user_id != session.user_id %}
+<div class="modal fade" id="resetModal{{ u.user_id }}" tabindex="-1" aria-labelledby="resetLabel{{ u.user_id }}">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{{ url_for('reset_user_password', uid=u.user_id) }}" class="modal-content" style="border-radius:20px;border:none;">
+      <div class="modal-header" style="border:none;">
+        <h5 class="modal-title" id="resetLabel{{ u.user_id }}"><i class="bi bi-key"></i> Reset password: {{ u.username }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label fw-semibold">New password</label>
+        <input type="password" name="new_password" class="form-control" minlength="8" required autocomplete="new-password"
+               placeholder="At least 8 characters, letters and numbers">
+        <small class="text-muted d-block mt-2">Give the new password to the user in person. Do not share it on chat.</small>
+      </div>
+      <div class="modal-footer" style="border:none;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Reset</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}{% endfor %}
+
+<!-- Edit User Modals (Stage 9: name + role; the last Admin cannot be demoted) -->
+{% for u in users %}{% if u.user_id != session.user_id %}
+<div class="modal fade" id="editModal{{ u.user_id }}" tabindex="-1" aria-labelledby="editLabel{{ u.user_id }}">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{{ url_for('edit_user', uid=u.user_id) }}" class="modal-content" style="border-radius:20px;border:none;">
+      <div class="modal-header" style="border:none;">
+        <h5 class="modal-title" id="editLabel{{ u.user_id }}"><i class="bi bi-pencil"></i> Edit user: {{ u.username }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label fw-semibold">Full name</label>
+        <input type="text" name="full_name" class="form-control" minlength="2" maxlength="80" required value="{{ u.full_name }}">
+        <label class="form-label fw-semibold mt-3">Role</label>
+        <select name="role_id" class="form-control" required>
+          {% for r in roles %}<option value="{{ r.role_id }}" {% if r.role_id == u.role_id %}selected{% endif %}>{{ r.role_name }}</option>{% endfor %}
+        </select>
+        <small class="text-muted d-block mt-2">Username aur password yahan se nahi badalte. Password ke liye key wala button use karein.</small>
+      </div>
+      <div class="modal-footer" style="border:none;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}{% endfor %}
+
+<!-- Delete User Modals (v101.03: permanent delete moves records to 'Deleted user') -->
+{% for u in users %}{% if u.user_id != session.user_id %}
+<div class="modal fade" id="deleteModal{{ u.user_id }}" tabindex="-1" aria-labelledby="deleteLabel{{ u.user_id }}">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="POST" action="{{ url_for('delete_user', uid=u.user_id) }}" class="modal-content" style="border-radius:20px;border:none;">
+      <div class="modal-header" style="border:none;">
+        <h5 class="modal-title" id="deleteLabel{{ u.user_id }}"><i class="bi bi-trash"></i> Delete user: {{ u.username }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">Agar is user ki koi sales ya records hain to account aam tor par sirf <b>band (OFF)</b> hota hai, taake dukaan ki history mehfooz rahe.</p>
+        <label class="d-flex gap-2 align-items-start mt-3">
+          <input type="checkbox" name="force" value="1" class="form-check-input mt-1">
+          <span><b>Delete permanently</b> — account khatm kar dein. Is user ki sales aur records <b>'Deleted user'</b> ke naam par chale jayenge, history nahi tootegi.</span>
+        </label>
+      </div>
+      <div class="modal-footer" style="border:none;">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}{% endfor %}
+
+<!-- Time Set Modals -->
+{% for u in users %}
+<div class="modal fade" id="timeModal{{ u.user_id }}">
+<div class="modal-dialog">
+<div class="modal-content">
+<form method="POST" action="{{ url_for('set_user_time', uid=u.user_id) }}">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-clock-history"></i>Set Access Time</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        <div style="background: #f8fafc; padding: 15px 18px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+            <div class="avatar {% if u.role_name == 'Admin' %}admin{% elif u.role_name == 'Pharmacist' %}pharmacist{% else %}cashier{% endif %}" style="margin-right: 0;">
+                {{ u.full_name[0]|upper }}
+            </div>
+            <div>
+                <strong style="display: block; color: #0f172a;">{{ u.full_name }}</strong>
+                <small style="color: #64748b;">{{ u.username }}</small>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label-pro">Access Start Time</label>
+            <input type="time" name="access_start_time" class="form-control-pro" 
+                   value="{{ u.access_start_time if u.access_start_time else '08:00' }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label-pro">Access End Time</label>
+            <input type="time" name="access_end_time" class="form-control-pro" 
+                   value="{{ u.access_end_time if u.access_end_time else '22:00' }}" required>
+        </div>
+        <div style="background: #eff6ff; padding: 12px 16px; border-radius: 10px; font-size: 13px; color: #1e40af;">
+            <i class="bi bi-info-circle-fill"></i> 
+            User can only login between these times.
+        </div>
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 11px 24px; font-weight: 600;">Cancel</button>
+        <button class="btn-add" style="padding: 11px 28px;">
+            <i class="bi bi-check2-circle"></i> Save Time
+        </button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+{% endfor %}
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<form method="POST" action="{{ url_for('add_user') }}">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-person-plus-fill"></i>Add New User</h5>
+        <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Full Name</label>
+                <input name="full_name" class="form-control-pro" placeholder="Enter full name" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Username</label>
+                <input name="username" class="form-control-pro" placeholder="Enter username" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Password</label>
+                <input name="password" type="password" class="form-control-pro" 
+                       placeholder="Min 8 characters, letters and numbers" required minlength="8">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Role</label>
+                <select name="role_id" class="form-control-pro" required>
+                    <option value="">Select Role</option>
+                    {% for r in roles %}
+                    <option value="{{ r.role_id }}">{{ r.role_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-12">
+                <div style="background: #eff6ff; padding: 14px 18px; border-radius: 10px; font-size: 13px; color: #1e40af;">
+                    <i class="bi bi-info-circle-fill"></i> <strong>Access Levels:</strong>
+                    <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                        <li><strong>Admin:</strong> Full system access</li>
+                        <li><strong>Pharmacist:</strong> Medicines + Sales</li>
+                        <li><strong>Cashier:</strong> Only Sales</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 11px 24px; font-weight: 600;">Cancel</button>
+        <button class="btn-add" style="padding: 11px 28px;">
+            <i class="bi bi-check2-circle"></i> Save User
+        </button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+document.getElementById('searchBox').addEventListener('keyup', function() {
+    const searchValue = this.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#usersTable tr');
+    let visibleCount = 0;
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        if (text.includes(searchValue)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    const noRes = document.getElementById('noResults');
+    if (noRes) noRes.style.display = visibleCount === 0 ? 'block' : 'none';
+});
+</script>
+
+{% endblock %}

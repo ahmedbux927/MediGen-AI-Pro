@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Phone sync stock conflicts{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Phone sync: stock conflicts</h4>
+        <div class="text-muted small">These bills were sold on a phone while offline and sold more than the server stock. The bill is saved. Check the shelf, correct the stock if needed, then mark it checked. {{ shop }}</div>
+    </div>
+    <span class="badge {% if open_count %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">{{ open_count }} to check</span>
+</div>
+
+{% if not rows %}
+<div class="data-card p-3 text-muted">No stock conflicts. Every phone bill was within stock.</div>
+{% endif %}
+
+{% for r in rows %}
+<div class="data-card mb-2 p-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <strong>{{ r.medicine_name }}</strong>
+            <div class="text-muted small">Sold {{ r.requested }} when server stock was {{ r.stock_before }} &middot; {{ r.created_at }}{% if r.sale_id %} &middot; bill #{{ r.sale_id }}{% endif %}</div>
+            {% if r.resolved %}<div class="small text-success">Checked {{ r.resolved_at }}: {{ r.resolve_note }}</div>{% endif %}
+        </div>
+        {% if not r.resolved %}
+        <form method="post" action="{{ url_for('sync_conflict_resolve', conflict_id=r.conflict_id) }}" class="d-flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input class="form-control form-control-sm" name="note" maxlength="255" placeholder="Note (optional)" style="min-width:180px">
+            <button class="btn btn-sm btn-primary" type="submit">Mark checked</button>
+        </form>
+        {% else %}
+        <span class="badge bg-success">Checked</span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
