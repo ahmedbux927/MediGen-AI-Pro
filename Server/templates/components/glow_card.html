@@ -1,0 +1,13 @@
+{#- Glowing Edge Card component.
+    Usage:
+      {% from 'components/glow_card.html' import glow_card %}
+      {% call glow_card(mode='dark', extra_class='my-class') %} ...content... {% endcall %}
+    Load once per page: css/glow-card.css and js/glow-card.js (see login.html). -#}
+{% macro glow_card(mode='dark', extra_class='') -%}
+<div class="glow-card{% if mode == 'light' %} glow-card--light{% endif %}{% if extra_class %} {{ extra_class }}{% endif %}">
+    <div class="glow-card__border" aria-hidden="true"></div>
+    <div class="glow-card__mesh" aria-hidden="true"></div>
+    <div class="glow-card__glow" aria-hidden="true"></div>
+    <div class="glow-card__inner">{{ caller() }}</div>
+</div>
+{%- endmacro %}

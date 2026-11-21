@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Alerts{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-bell-fill"></i> Alerts</h2>
+    <p>Low stock, expiring within 90 days, and expired batches that still have units.</p>
+</div>
+
+<div class="sp-grid">
+    <section class="sp-card">
+        <h3><i class="bi bi-exclamation-triangle-fill"></i> Low stock <span class="sp-count">{{ low|length }}</span></h3>
+        {% if low %}
+        <div class="sp-table-wrap">
+        <table class="sp-table">
+            <thead><tr><th>Medicine</th><th>Stock</th><th>Reorder level</th></tr></thead>
+            <tbody>
+            {% for m in low %}
+                <tr><td>{{ m.name }}</td><td><strong>{{ m.stock_quantity }}</strong></td><td>{{ m.reorder_level }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="sp-empty"><i class="bi bi-check-circle-fill"></i> All stock levels are fine.</p>
+        {% endif %}
+    </section>
+
+    <section class="sp-card">
+        <h3><i class="bi bi-calendar-event-fill"></i> Expiring within 90 days <span class="sp-count">{{ expiring|length }}</span></h3>
+        {% if expiring %}
+        <div class="sp-table-wrap">
+        <table class="sp-table">
+            <thead><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Days left</th><th>Units</th></tr></thead>
+            <tbody>
+            {% for e in expiring %}
+                <tr><td>{{ e.name }}</td><td>{{ e.batch_number }}</td><td>{{ e.expiry_date }}</td>
+                    <td>{{ e.days_left }}</td><td>{{ e.quantity }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        {% else %}
+        <p class="sp-empty"><i class="bi bi-check-circle-fill"></i> Nothing expires in the next 90 days.</p>
+        {% endif %}
+    </section>
+
+    <section class="sp-card sp-card-wide">
+        <h3><i class="bi bi-x-octagon-fill"></i> Expired batches with units <span class="sp-count">{{ expired|length }}</span></h3>
+        {% if expired %}
+        <div class="sp-table-wrap">
+        <table class="sp-table">
+            <thead><tr><th>Medicine</th><th>Batch</th><th>Expired on</th><th>Units</th></tr></thead>
+            <tbody>
+            {% for e in expired %}
+                <tr><td>{{ e.name }}</td><td>{{ e.batch_number }}</td><td>{{ e.expiry_date }}</td><td>{{ e.quantity }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <p class="sp-note">Send these back to the supplier from <a href="{{ url_for('supplier_returns') }}">Supplier Returns</a>, or write them off from Batches &amp; Expiry.</p>
+        {% else %}
+        <p class="sp-empty"><i class="bi bi-check-circle-fill"></i> No expired stock on the shelf.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

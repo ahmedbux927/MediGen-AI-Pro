@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Cash Drawer{% endblock %}
+{% block content %}
+<div class="mb-3">
+    <h4 class="mb-0">Cash Drawer</h4>
+    <div class="text-muted small">Open in the morning, count the cash for the day, close at night. Any shortage shows at once. {{ shop }}</div>
+</div>
+
+{% if not sess %}
+<div class="data-card p-3 mb-3">
+    <strong>The drawer is closed.</strong>
+    <form method="post" action="{{ url_for('cash_open') }}" class="row g-2 align-items-end mt-1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-8 col-md-3">
+            <label class="form-label small mb-1" for="cashOpening">Opening cash (Rs.)</label>
+            <input id="cashOpening" oninput="var w=document.getElementById('bigOpenWarn'); if(w) w.style.display=(parseFloat(this.value||0)>100000)?'block':'none'" name="opening" type="number" step="0.01" min="0" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-4 col-md-2"><button class="btn btn-primary btn-sm w-100" type="submit">Open drawer</button></div>
+        <div class="col-12"><div id="bigOpenWarn" style="display:none;color:#b45309;font-size:13px;">Bari opening rakam hai - dobara check kar lein, yehi rakam Cash in hand me nazar ayegi.</div></div>
+    </form>
+</div>
+{% else %}
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-2"><div class="stat-card"><div class="text-muted small">Opening</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(state.opening) }}</div></div></div>
+    <div class="col-6 col-md-2"><div class="stat-card"><div class="text-muted small">Cash sales</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(state.cash_sales) }}</div></div></div>
+    <div class="col-6 col-md-2"><div class="stat-card"><div class="text-muted small">Refunds</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(state.refunds) }}</div></div></div>
+    <div class="col-6 col-md-2"><div class="stat-card"><div class="text-muted small">Cash in</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(state.cash_in) }}</div></div></div>
+    <div class="col-6 col-md-2"><div class="stat-card"><div class="text-muted small">Cash out</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(state.cash_out) }}</div></div></div>
+    <div class="col-12 col-md-2"><div class="stat-card" style="border:2px solid #0f9aa0;"><div class="text-muted small">Expected now</div><div class="fs-4 fw-bold text-primary">Rs. {{ '%.0f'|format(state.expected) }}</div></div></div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-6">
+        <div class="data-card p-3 h-100">
+            <strong>Cash in / Cash out</strong>
+            <div class="small text-muted mb-2">Cash in: credit repaid by customers, other cash received. Cash out: tea, electricity, expenses.</div>
+            <form method="post" action="{{ url_for('cash_movement') }}" class="row g-2 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="mvKind">Kind</label>
+                    <select id="mvKind" name="kind" class="form-select form-select-sm">
+                        <option value="out">Cash out</option>
+                        <option value="in">Cash in</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="mvAmount">Amount</label>
+                    <input id="mvAmount" name="amount" type="number" step="0.01" min="0.01" class="form-control form-control-sm" required>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="mvReason">Reason</label>
+                    <input id="mvReason" name="reason" type="text" maxlength="255" class="form-control form-control-sm" required placeholder="tea, electricity, credit repaid...">
+                </div>
+                <div class="col-12 col-md-2"><button class="btn btn-outline-primary btn-sm w-100" type="submit">Save</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="data-card p-3 h-100">
+            <strong>Close drawer</strong>
+            <div class="small text-muted mb-2">Count the cash, then enter it here. Any difference from the expected amount shows at once.</div>
+            <form method="post" action="{{ url_for('cash_close') }}" class="row g-2 align-items-end">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="col-7">
+                    <label class="form-label small mb-1" for="cashCounted">Counted cash (Rs.)</label>
+                    <input id="cashCounted" name="counted" type="number" step="0.01" min="0" class="form-control form-control-sm" required>
+                </div>
+                <div class="col-5"><button class="btn btn-danger btn-sm w-100" type="submit" onclick="return confirm('Close the drawer?');">Close drawer</button></div>
+                <div class="col-12">
+                    <input name="note" type="text" maxlength="255" class="form-control form-control-sm" placeholder="Note (optional)">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="data-card mb-3">
+    <div class="p-2 fw-bold small">Today's entries (cash in / out)</div>
+    <div class="table-responsive">
+    <table class="table table-sm mb-0">
+        <thead><tr><th>Time</th><th>Kind</th><th class="text-end">Amount</th><th>Reason</th><th>By</th></tr></thead>
+        <tbody>
+        {% for m in moves %}
+            <tr><td class="small">{{ m.created_at }}</td><td>{{ 'In' if m.kind == 'in' else 'Out' }}</td><td class="text-end">{{ '%.2f'|format(m.amount) }}</td><td>{{ m.reason }}</td><td>{{ m.username or '-' }}</td></tr>
+        {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-3">No entries yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="data-card">
+    <div class="p-2 fw-bold small">Previous drawer sessions</div>
+    <div class="table-responsive">
+    <table class="table table-sm mb-0">
+        <thead><tr><th>Opened</th><th>Closed</th><th class="text-end">Opening</th><th class="text-end">Expected</th><th class="text-end">Counted</th><th class="text-end">Difference</th><th>By</th></tr></thead>
+        <tbody>
+        {% for h in hist %}
+            <tr>
+                <td class="small">{{ h.opened_at }}<div class="text-muted">{{ h.opened_by or '-' }}</div></td>
+                <td class="small">{{ h.closed_at or 'still open' }}<div class="text-muted">{{ h.closed_by or '' }}</div></td>
+                <td class="text-end">{{ '%.0f'|format(h.opening_amount) }}</td>
+                <td class="text-end">{{ '%.0f'|format(h.expected_amount) if h.expected_amount is not none else '-' }}</td>
+                <td class="text-end">{{ '%.0f'|format(h.counted_amount) if h.counted_amount is not none else '-' }}</td>
+                <td class="text-end fw-bold {% if h.shortage is not none and h.shortage < 0 %}text-danger{% elif h.shortage is not none and h.shortage > 0 %}text-warning{% endif %}">
+                    {% if h.shortage is none %}-{% elif h.shortage < 0 %}Short {{ '%.0f'|format(-h.shortage) }}{% elif h.shortage > 0 %}Extra {{ '%.0f'|format(h.shortage) }}{% else %}0{% endif %}
+                </td>
+                <td class="small">{{ h.opened_by or '-' }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="7" class="text-center text-muted py-3">No sessions yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+<div class="small text-muted mt-2">Expected = opening + cash sales (from today) − cash refunds + cash in − cash out. Credit repaid by customers must be recorded as "Cash in".</div>
+{% endblock %}

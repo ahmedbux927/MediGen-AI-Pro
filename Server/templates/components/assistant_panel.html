@@ -1,0 +1,72 @@
+{# MediGen AI assistant: slide-in side panel, included once from base.html for logged-in users.
+   Talks to the existing /chatbot/api route. Opens from the sidebar item, the Quick actions tile
+   or the floating button; on the dashboard it also opens on load. It closes itself only after
+   30 seconds with no activity (never while a question is being answered). #}
+<button type="button" id="aiFab" class="ai-fab" data-ai-open aria-controls="aiPanel" aria-expanded="false" aria-label="Open AI assistant">
+    <svg class="ai-fab-robot" viewBox="0 0 120 120" aria-hidden="true" focusable="false"><use href="#aiRobotArt"/></svg>
+</button>
+
+<aside id="aiPanel" class="ai-panel" role="dialog" aria-labelledby="aiTitle" aria-hidden="true"
+       data-autoopen="{{ '1' if request.endpoint == 'dashboard' else '0' }}" data-name="{{ session.user_name|default('', true)|e }}">
+    <header class="ai-hero">
+        <div class="ai-top">
+            <div class="ai-brand">
+                <span class="ai-logo" aria-hidden="true"><i class="bi bi-capsule-pill"></i></span>
+                <div class="ai-brand-text">
+                    <p id="aiTitle">MediGen AI Assistant</p>
+                    <small>Your smart pharmacy helper</small>
+                </div>
+            </div>
+            <button type="button" id="aiClose" class="ai-close" aria-label="Close assistant"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+        </div>
+
+        <div class="ai-intro">
+            <div class="ai-robot" aria-hidden="true">
+                <svg viewBox="0 0 120 120" focusable="false"><use href="#aiRobotArt"/></svg>
+            </div>
+            <div class="ai-hello">
+                <p><span id="aiHello">Hello!</span></p>
+                <p>How can I help you today?</p>
+            </div>
+        </div>
+
+        <div id="aiQuick" class="ai-quick" role="group" aria-label="Quick questions">
+            <button type="button" data-q="Low stock"><i class="bi bi-box-seam" aria-hidden="true"></i>Stock check</button>
+            <button type="button" data-q="Today sales"><i class="bi bi-graph-up" aria-hidden="true"></i>Sales report</button>
+            <button type="button" data-q="Expiring soon"><i class="bi bi-hourglass-split" aria-hidden="true"></i>Expiry alert</button>
+            <button type="button" data-q="Top selling"><i class="bi bi-trophy" aria-hidden="true"></i>Top selling</button>
+        </div>
+    </header>
+
+    <div id="aiMessages" class="ai-msgs" aria-live="polite"></div>
+
+    <form id="aiForm" class="ai-form" autocomplete="off">
+        <label for="aiInput" class="sr-only">Ask the assistant</label>
+        <input id="aiInput" type="text" maxlength="300" placeholder="Type your message…">
+        <button type="submit" class="ai-send" aria-label="Send message"><i class="bi bi-send-fill" aria-hidden="true"></i></button>
+    </form>
+    <p class="ai-foot">Powered by MediGen AI</p>
+</aside>
+
+{# Shared robot artwork, referenced by <use> above so it is drawn once. #}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+        <linearGradient id="aiHeadGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset="1" stop-color="#d9e4ef"/>
+        </linearGradient>
+        <g id="aiRobotArt">
+            <rect x="57" y="6" width="6" height="14" rx="3" fill="#9fb7cc"/>
+            <circle class="ai-antenna" cx="60" cy="8" r="5" fill="#5fe0d6"/>
+            <rect x="12" y="44" width="10" height="22" rx="4" fill="#9fb7cc"/>
+            <rect x="98" y="44" width="10" height="22" rx="4" fill="#9fb7cc"/>
+            <rect x="24" y="22" width="72" height="62" rx="22" fill="url(#aiHeadGrad)" stroke="#b7c9da" stroke-width="2"/>
+            <rect x="33" y="36" width="54" height="36" rx="14" fill="#14365c"/>
+            <circle class="ai-eye" cx="50" cy="54" r="6.5" fill="#5fe0d6"/>
+            <circle class="ai-eye" cx="70" cy="54" r="6.5" fill="#5fe0d6"/>
+            <path d="M52 64 Q60 70 68 64" fill="none" stroke="#5fe0d6" stroke-width="2.6" stroke-linecap="round"/>
+            <rect x="40" y="90" width="40" height="22" rx="10" fill="#dfe8f1" stroke="#b7c9da" stroke-width="2"/>
+            <circle cx="60" cy="101" r="3" fill="#2b6cb0"/>
+        </g>
+    </defs>
+</svg>

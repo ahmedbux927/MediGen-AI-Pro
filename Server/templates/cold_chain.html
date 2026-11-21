@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}Cold Chain Log{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-thermometer-half"></i> Cold Chain Log</h2>
+    <p>Record the fridge temperature (normal range {{ low }} to {{ high }} C). Readings outside the range are still saved and shown in red. Readings cannot be deleted.</p>
+</div>
+
+<section class="sp-card">
+    <h3><i class="bi bi-plus-circle-fill"></i> Record a reading</h3>
+    <form method="post" action="{{ url_for('cold_chain_record') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div>
+            <label class="form-label small" for="ccLocation">Place</label>
+            <input id="ccLocation" type="text" name="location" list="ccPlaces" maxlength="40" required value="{{ known[0] }}" class="form-control" style="max-width:220px;">
+            <datalist id="ccPlaces">{% for p in known %}<option value="{{ p }}"></option>{% endfor %}</datalist>
+        </div>
+        <div>
+            <label class="form-label small" for="ccTemp">Temperature (C)</label>
+            <input id="ccTemp" type="text" name="temperature" inputmode="decimal" required placeholder="e.g. 5.2" class="form-control" style="max-width:140px;">
+        </div>
+        <div>
+            <label class="form-label small" for="ccNote">Note (optional)</label>
+            <input id="ccNote" type="text" name="note" maxlength="200" class="form-control" style="max-width:300px;">
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save reading</button>
+    </form>
+</section>
+
+<section class="sp-card">
+    <h3><i class="bi bi-geo-alt"></i> Latest reading per place</h3>
+    {% if latest %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+    {% for r in latest %}
+        <div style="border:1px solid {% if r.in_range %}#bbf7d0{% else %}#fecaca{% endif %};border-radius:10px;padding:12px;background:{% if r.in_range %}#f0fdf4{% else %}#fef2f2{% endif %};">
+            <div class="small text-muted">{{ r.location }}</div>
+            <div style="font-size:26px;font-weight:700;color:{% if r.in_range %}#15803d{% else %}#b91c1c{% endif %};">{{ r.temperature_c }} C</div>
+            <div class="small">{% if r.in_range %}Within range{% else %}<b style="color:#b91c1c;">Outside range</b>{% endif %}</div>
+            <div class="small text-muted">{{ r.recorded_at }}</div>
+        </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No readings yet. Record the first reading above.</p>
+    {% endif %}
+</section>
+
+<section class="sp-card">
+    <h3><i class="bi bi-calendar-day"></i> Today</h3>
+    {% if today %}
+    <table class="table table-sm">
+        <thead><tr><th>Place</th><th class="text-end">Readings</th><th class="text-end">Outside range</th></tr></thead>
+        <tbody>
+        {% for t in today %}
+            <tr><td>{{ t.location }}</td><td class="text-end">{{ t.readings }}</td>
+                <td class="text-end">{% if t.outside %}<b style="color:#b91c1c;">{{ t.outside }}</b>{% else %}0{% endif %}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No readings today.</p>
+    {% endif %}
+</section>
+
+<section class="sp-card">
+    <h3><i class="bi bi-clock-history"></i> Recent readings</h3>
+    {% if logs %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Time</th><th>Place</th><th class="text-end">Temp (C)</th><th>Status</th><th>Recorded by</th><th>Note</th></tr></thead>
+        <tbody>
+        {% for r in logs %}
+            <tr>
+                <td>{{ r.recorded_at }}</td>
+                <td>{{ r.location }}</td>
+                <td class="text-end">{{ r.temperature_c }}</td>
+                <td>{% if r.in_range %}<span style="color:#15803d;">OK</span>{% else %}<b style="color:#b91c1c;">Outside range</b>{% endif %}</td>
+                <td>{{ r.recorded_name or '' }}</td>
+                <td>{{ r.note or '' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No readings yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

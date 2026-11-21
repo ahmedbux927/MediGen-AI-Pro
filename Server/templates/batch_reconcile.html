@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Sync Batches{% endblock %}
+{% block content %}
+<style>
+    .rc-card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; padding:26px; box-shadow:0 10px 28px rgba(15,31,61,.08); max-width:900px; margin:0 auto; }
+    .rc-card h3 { font-weight:800; }
+    .rc-note { color:#64748b; font-size:14px; }
+    .plus { color:#15803d; font-weight:700; } .minus { color:#b91c1c; font-weight:700; }
+</style>
+<div class="rc-card">
+    <h3><i class="bi bi-arrow-repeat"></i> Sync batches with stock</h3>
+    <p class="rc-note">The <strong>stock quantity</strong> of each medicine is treated as correct. Batches that do not add up to it are fixed like this:</p>
+    <ul class="rc-note">
+        <li><span class="plus">Batches have fewer units than stock</span> &rarr; one <em>OPENING</em> batch is created for the missing units.</li>
+        <li><span class="minus">Batches have more units than stock</span> &rarr; the extra units are removed, oldest expiry first (they were sold earlier).</li>
+    </ul>
+
+    {% if items %}
+    <table class="table">
+        <thead><tr><th>Medicine</th><th>Stock</th><th>In batches</th><th>Fix</th></tr></thead>
+        <tbody>
+        {% for r in items %}
+        <tr>
+            <td>{{ r.name }}</td><td>{{ r.stock }}</td><td>{{ r.batch_qty }}</td>
+            <td>{% if r.diff > 0 %}<span class="plus">add opening batch of {{ r.diff }}</span>{% else %}<span class="minus">remove {{ -r.diff }} from batches</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <form method="POST" onsubmit="return confirm('Apply these changes to the batches?');">
+        <label class="form-label fw-bold">Expiry date for the units that have no batch yet</label>
+        <input type="date" name="default_expiry" class="form-control" style="max-width:260px;" value="{{ default_expiry }}" min="{{ min_expiry }}" required>
+        <p class="rc-note" style="margin-top:6px;">Use a safe (early) date if you are not sure. You can write off the batch later.</p>
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Apply</button>
+        <a href="{{ url_for('batches') }}" class="btn btn-light">Cancel</a>
+    </form>
+    {% else %}
+    <div class="alert alert-success">Everything matches. Nothing to fix.</div>
+    <a href="{{ url_for('batches') }}" class="btn btn-light">Back to Batches</a>
+    {% endif %}
+</div>
+{% endblock %}

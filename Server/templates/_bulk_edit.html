@@ -1,0 +1,93 @@
+{# v86.41: one popup for "Edit selected" on Medicines and on section pages.
+   Needs: all_categories (list of {category_id, category_name}), bulk_forms (list of dosage forms). #}
+<div class="modal fade" id="bulkEditModal">
+<div class="modal-dialog">
+<div class="modal-content">
+    <form method="POST" action="{{ url_for('bulk_edit_medicines') }}" id="bulkEditForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <div class="modal-header-custom">
+            <h5><i class="bi bi-pencil-square"></i>Edit selected items</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+            <p class="text-muted" style="font-size:13px; margin:0 0 14px;">
+                <strong id="bulkEditCount">0</strong> item(s) selected. Fill only what you want to change. Blank fields stay as they are.
+            </p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                <div>
+                    <label class="form-label-pro">Category</label>
+                    <select name="category_id" class="form-control-pro">
+                        <option value="">No change</option>
+                        {% for c in all_categories %}<option value="{{ c.category_id }}">{{ c.category_name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label-pro">Dosage form</label>
+                    <select name="dosage_form" class="form-control-pro">
+                        <option value="">No change</option>
+                        {% for f in bulk_forms %}<option>{{ f }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label-pro">Expiry date (all batches)</label>
+                    <input name="expiry" type="date" class="form-control-pro">
+                </div>
+                <div>
+                    <label class="form-label-pro">Strength</label>
+                    <input name="strength" type="text" maxlength="60" class="form-control-pro" placeholder="e.g. 500 mg, 120 mg/5 ml">
+                </div>
+                <div>
+                    <label class="form-label-pro">Sale price (Rs.)</label>
+                    <input name="price" type="number" min="0" step="0.01" class="form-control-pro" placeholder="No change">
+                </div>
+            </div>
+            <div id="bulkEditSummary" style="margin-top:14px; padding:10px 14px; border-radius:10px; background:#f0f7ff; border:1px solid #cfe3fb; color:#1e3a5f; font-size:13px; font-weight:600;">
+                Fill at least one field to save.
+            </div>
+            <p class="text-muted" style="font-size:12px; margin:10px 0 0;">
+                Expiry sets every batch of the chosen items (items with stock but no batch get one). Dosage form decides the section (Syrups, Creams, Drip, Bandages).
+            </p>
+        </div>
+        <div class="modal-footer" style="border: none; padding: 18px 24px; background: #f8fafc;">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn-add" type="submit" id="bulkEditSave" disabled><i class="bi bi-check2-circle"></i> Save changes</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+<script>
+function openBulkEdit() {
+    var ids = Array.from(document.querySelectorAll('.row-select:checked')).map(function (cb) { return cb.value; });
+    if (!ids.length) return;
+    var f = document.getElementById('bulkEditForm');
+    f.querySelectorAll('input[name=mid]').forEach(function (n) { n.remove(); });
+    ids.forEach(function (id) {
+        var i = document.createElement('input'); i.type = 'hidden'; i.name = 'mid'; i.value = id; f.appendChild(i);
+    });
+    f.querySelectorAll('select, input[type=date], input[type=number], input[name=strength]').forEach(function (el) { el.value = ''; });
+    document.getElementById('bulkEditCount').textContent = ids.length;
+    bulkEditSummary();
+    new bootstrap.Modal(document.getElementById('bulkEditModal')).show();
+}
+/* v86.42: says in plain words what will change; Save stays off until something is filled (no browser confirm box) */
+function bulkEditSummary() {
+    var f = document.getElementById('bulkEditForm');
+    var n = document.getElementById('bulkEditCount').textContent;
+    var parts = [];
+    if (f.category_id.value) parts.push('category = ' + f.category_id.selectedOptions[0].text);
+    if (f.dosage_form.value) parts.push('dosage form = ' + f.dosage_form.value);
+    if (f.expiry.value) parts.push('expiry = ' + f.expiry.value);
+    if (f.price.value !== '') parts.push('price = Rs. ' + f.price.value);
+    if (f.strength.value.trim()) parts.push('strength = ' + f.strength.value.trim());
+    document.getElementById('bulkEditSummary').textContent = parts.length
+        ? 'Will change: ' + parts.join(', ') + ' for ' + n + ' item(s).'
+        : 'Fill at least one field to save.';
+    document.getElementById('bulkEditSave').disabled = !parts.length;
+}
+(function () {
+    var f = document.getElementById('bulkEditForm');
+    if (f) { f.addEventListener('input', bulkEditSummary); f.addEventListener('change', bulkEditSummary); }
+})();
+</script>

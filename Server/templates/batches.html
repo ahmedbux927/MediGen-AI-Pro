@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Batches & Expiry{% endblock %}
+{% block content %}
+
+<style>
+    .data-card {
+        background: white;
+        border-radius: 18px;
+        padding: 25px;
+        box-shadow: 6px 6px 20px rgba(148, 163, 184, 0.15);
+    }
+    .data-table { margin: 0; width: 100%; }
+    .data-table thead th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 15px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .data-table tbody td {
+        padding: 15px;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .badge-danger { background: #fef2f2; color: #b91c1c; padding: 6px 12px; border-radius: 8px; font-weight: 700; }
+    .badge-warning { background: #fffbeb; color: #a16207; padding: 6px 12px; border-radius: 8px; font-weight: 700; }
+    .badge-success { background: #f0fdf4; color: #15803d; padding: 6px 12px; border-radius: 8px; font-weight: 700; }
+
+    .badge-muted { background:#f1f5f9; color:#64748b; padding:6px 12px; border-radius:8px; font-weight:700; }
+    .bt-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:22px; }
+    .bt-card { background:#fff; border:1px solid #e3e9f2; border-top:4px solid #0f9aa0; border-radius:14px; padding:16px 18px; box-shadow:0 8px 22px rgba(15,31,61,.07); }
+    .bt-card.red { border-top-color:#d6455a; } .bt-card.amber { border-top-color:#d98a1e; }
+    .bt-card .lbl { font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.5px; }
+    .bt-card .val { font-size:28px; font-weight:800; color:#1b2a3b; margin:2px 0; }
+    .bt-card .sub { font-size:12px; color:#8593ab; }
+    .bt-warn { background:#fdf6ea; border:1px solid #f1d9a8; border-left:4px solid #d98a1e; color:#8f5a0f; border-radius:12px;
+               padding:12px 16px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .bt-warn a { font-weight:700; color:#0b7b80; }
+    .bt-tools { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; justify-content:flex-end; }
+    .bt-tools input, .bt-tools select { border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:14px; }
+    .bt-tools button { border:none; background:#0f9aa0; color:#fff; border-radius:10px; padding:10px 18px; font-weight:700; }
+    .btn-wo { border:1px solid #f4c4cc; background:#fdf0f2; color:#a8283b; border-radius:8px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; }
+    .btn-wo:hover { background:#d6455a; color:#fff; }
+    .pager { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:18px; }
+    .pager .info { color:#64748b; font-size:13px; }
+    .pager ul { list-style:none; display:flex; gap:6px; margin:0; padding:0; }
+    .pager a, .pager span { display:inline-block; min-width:36px; text-align:center; padding:7px 10px; border-radius:9px; border:1px solid #e2e8f0; color:#334155; text-decoration:none; font-size:13px; font-weight:600; background:#fff; }
+    .pager a:hover { background:#eaf6f6; border-color:#0f9aa0; }
+    .pager span.cur { background:#0f9aa0; border-color:#0f9aa0; color:#fff; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap" style="margin-bottom: 22px; gap:10px;">
+    <h2 class="page-title" style="margin:0;"><i class="bi bi-box-seam"></i> Batches &amp; Expiry Tracker</h2>
+    {% if session.role == 'Admin' %}
+    <a href="{{ url_for('reconcile_batches') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-repeat"></i> Sync batches with stock</a>
+    {% endif %}
+</div>
+
+{% if mismatch and session.role == 'Admin' %}
+<div class="bt-warn">
+    <span><i class="bi bi-exclamation-triangle-fill"></i> <strong>{{ mismatch }}</strong> medicine(s) have a stock quantity that does not match their batches.</span>
+    <a href="{{ url_for('reconcile_batches') }}">Fix now &rarr;</a>
+</div>
+{% endif %}
+
+<div class="bt-cards">
+    <div class="bt-card"><div class="lbl">Active batches</div><div class="val">{{ stats.active_batches }}</div><div class="sub">with stock on the shelf</div></div>
+    <div class="bt-card red"><div class="lbl">Expired (still in stock)</div><div class="val">{{ stats.expired_batches }}</div>
+        <div class="sub">{{ stats.expired_units }} units &middot; Rs. {{ '{:,.0f}'.format(stats.expired_value) }} at cost</div></div>
+    <div class="bt-card amber"><div class="lbl">Expiring in 90 days</div><div class="val">{{ stats.soon_batches }}</div><div class="sub">sell or return these first</div></div>
+</div>
+
+<form method="GET" action="{{ url_for('batches') }}" class="bt-tools">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search medicine or batch no...">
+    <select name="filter" onchange="this.form.submit()">
+        <option value="active" {% if flt == 'active' %}selected{% endif %}>Active batches</option>
+        <option value="expired" {% if flt == 'expired' %}selected{% endif %}>Expired</option>
+        <option value="soon" {% if flt == 'soon' %}selected{% endif %}>Expiring soon (90 days)</option>
+        <option value="ok" {% if flt == 'ok' %}selected{% endif %}>OK (more than 90 days)</option>
+        <option value="empty" {% if flt == 'empty' %}selected{% endif %}>Sold out (empty)</option>
+        <option value="all" {% if flt == 'all' %}selected{% endif %}>All</option>
+    </select>
+    <button type="submit"><i class="bi bi-search"></i> Search</button>
+</form>
+
+<div class="data-card">
+    <table class="table data-table">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Medicine</th>
+                <th>Batch Number</th>
+                <th>Expiry Date</th>
+                <th>Days Left</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for b in batches %}
+        <tr>
+            <td><strong>{{ offset + loop.index }}</strong></td>
+            <td>{{ b.medicine_name }}</td>
+            <td>{{ b.batch_number }}</td>
+            <td>{{ b.expiry_date }}</td>
+            <td>{% if b.days_left is not none %}{{ b.days_left if b.days_left >= 0 else 'expired ' ~ (-b.days_left) ~ ' d ago' }}{% else %}-{% endif %}</td>
+            <td>{{ b.quantity }}</td>
+            <td>
+                {% if b.status == 'empty' %}<span class="badge-muted">SOLD OUT</span>
+                {% elif b.status == 'expired' %}<span class="badge-danger">EXPIRED</span>
+                {% elif b.status == 'soon' %}<span class="badge-warning">EXPIRING SOON</span>
+                {% else %}<span class="badge-success">OK</span>{% endif %}
+            </td>
+            <td>
+                {% if b.status == 'expired' %}
+                <form method="POST" action="{{ url_for('writeoff_batch', bid=b.batch_id) }}" style="margin:0;"
+                      onsubmit="return confirm('Remove {{ b.quantity }} expired units from stock?');">
+                    <button type="submit" class="btn-wo"><i class="bi bi-trash3"></i> Write off</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No batches found</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pager">
+        <div class="info">{% if total %}Showing {{ offset + 1 }} - {{ offset + batches|length }} of {{ total }}{% else %}No results{% endif %}</div>
+        {% if pages > 1 %}
+        <ul>
+            {% if page > 1 %}<li><a href="{{ url_for('batches', q=q, filter=flt, page=page-1) }}">&laquo; Prev</a></li>{% endif %}
+            {% for n in range([page - 2, 1]|max, [page + 2, pages]|min + 1) %}
+            <li>{% if n == page %}<span class="cur">{{ n }}</span>{% else %}<a href="{{ url_for('batches', q=q, filter=flt, page=n) }}">{{ n }}</a>{% endif %}</li>
+            {% endfor %}
+            {% if page < pages %}<li><a href="{{ url_for('batches', q=q, filter=flt, page=page+1) }}">Next &raquo;</a></li>{% endif %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Activity Log{% endblock %}
+{% block content %}
+<div class="mb-3">
+    <h4 class="mb-0">Activity Log</h4>
+    <div class="text-muted small">Who did what, and when. For viewing only. {{ shop }}</div>
+</div>
+
+<form method="get" class="data-card p-3 mb-3 row g-2 align-items-end">
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-1" for="fUser">User</label>
+        <input id="fUser" name="user" class="form-control form-control-sm" value="{{ f_user }}" maxlength="50" placeholder="username">
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-1" for="fAction">Action</label>
+        <select id="fAction" name="action" class="form-select form-select-sm">
+            <option value="">All</option>
+            {% for a in actions %}<option value="{{ a }}" {% if a == f_action %}selected{% endif %}>{{ a }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-1" for="fEntity">Item type</label>
+        <input id="fEntity" name="entity" class="form-control form-control-sm" value="{{ f_entity }}" maxlength="40" placeholder="medicine, sale...">
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-1" for="fFrom">From</label>
+        <input id="fFrom" type="date" name="from" class="form-control form-control-sm" value="{{ f_from or '' }}">
+    </div>
+    <div class="col-6 col-md-2">
+        <label class="form-label small mb-1" for="fTo">To</label>
+        <input id="fTo" type="date" name="to" class="form-control form-control-sm" value="{{ f_to or '' }}">
+    </div>
+    <div class="col-12 col-md-2 d-flex gap-2">
+        <button class="btn btn-primary btn-sm flex-fill" type="submit">Filter</button>
+        <a class="btn btn-outline-secondary btn-sm flex-fill" href="{{ url_for('activity_log') }}">Clear</a>
+    </div>
+</form>
+
+<div class="data-card">
+<div class="table-responsive">
+<table class="table table-sm align-middle mb-0">
+    <thead><tr><th>When</th><th>User</th><th>Action</th><th>Item</th><th>Details</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+        <tr>
+            <td class="text-nowrap small">{{ r.created_at }}</td>
+            <td>{{ r.username or '-' }}</td>
+            <td><code>{{ r.action }}</code></td>
+            <td>{{ r.entity or '' }}{% if r.entity_id %} #{{ r.entity_id }}{% endif %}</td>
+            <td class="small">{{ r.details or '' }}</td>
+        </tr>
+    {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No entries match this filter.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+<div class="small text-muted mt-2">Only the latest {{ limit }} entries are shown. Use a filter to find older entries.</div>
+{% endblock %}
