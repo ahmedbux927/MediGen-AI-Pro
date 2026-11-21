@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="MediGen_Logo.png" alt="MediGen AI Pro" width="140">
+  <img src="MediGen_Logo.png" alt="MediGen AI Pro" width="150">
 </p>
 
 <h1 align="center">MediGen AI Pro</h1>
@@ -16,9 +16,40 @@
   <img alt="Flask" src="https://img.shields.io/badge/flask-3.x-lightgrey">
   <img alt="MySQL" src="https://img.shields.io/badge/mysql-8.0-orange">
   <img alt="Tests" src="https://img.shields.io/badge/tests-2509%20passing-brightgreen">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Windows%20%7C%20LAN%20%7C%20Android-informational">
+  <img alt="License" src="https://img.shields.io/badge/license-Proprietary-red">
+</p>
+
+<p align="center">
+  <img src="Server/static/img/hero.png" alt="MediGen AI Pro" width="820">
 </p>
 
 ---
+
+## Contents
+
+- [Highlights](#highlights)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Tech stack](#tech-stack)
+- [Quick start (Windows)](#quick-start-windows)
+- [Windows application (Setup file)](#windows-application-setup-file)
+- [Android app](#android-app)
+- [Project layout](#project-layout)
+- [Testing](#testing)
+- [Security notes](#security-notes)
+- [Author](#author)
+- [License](#license)
+
+## Highlights
+
+| | |
+|---|---|
+| **Built for one real shop** | Designed around a single pharmacy workbench PC — no cloud dependency, works fully offline on the local network |
+| **Expiry-safe selling** | Batch-wise stock with FEFO (first-expiry, first-out) selling and automatic expiry blocking |
+| **AI that acts safely** | The Gemini assistant reads live shop data and performs actions only through a propose → confirm flow |
+| **Proven in production testing** | 2,509 automated tests, a 38-route role-based QA matrix, and screenshot audits in light and dark mode |
+| **One-click everything** | One launcher, one-click backup with a restore test, one-click Windows installer build |
 
 ## Features
 
@@ -32,6 +63,26 @@
 - **Backup** — one-click real backup (mysqldump) plus a restore test that proves the backup works
 - **Roles & security** — Admin / Pharmacist / Cashier, bcrypt passwords, login lockout, CSRF protection, full audit log
 - **Runs anywhere in the shop** — Windows desktop app (own window), any browser on the LAN, and an Android companion app
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Shop["Shop network (LAN only)"]
+        PC["Workbench PC<br/>MediGen server (Flask + Waitress)"]
+        DB[("MySQL 8<br/>shop database")]
+        C1["Counter browsers"]
+        PH["Android app<br/>(WebView companion)"]
+        PC <--> DB
+        C1 --> PC
+        PH --> PC
+    end
+    PC -. "owner's key, server-side only" .-> G["Google Gemini API"]
+```
+
+The server runs on one Windows PC. Every other device in the shop reaches it
+over the local network — nothing about the shop's data needs the internet.
+The Gemini API is called from the server only, with the owner's own key.
 
 ## Tech stack
 
@@ -58,6 +109,8 @@ Server\START_MEDIGEN.bat
 
 The browser opens at `http://127.0.0.1:5000`. Other PCs and phones on the
 same network use `http://<this-pc-ip>:5000`.
+
+A full walkthrough is in [STEP_BY_STEP_GUIDE.md](STEP_BY_STEP_GUIDE.md).
 
 ## Windows application (Setup file)
 
@@ -96,12 +149,23 @@ cd Server
 python tests\run_all.py
 ```
 
-## Notes
+## Security notes
 
+- Passwords are bcrypt-hashed; API and "remember me" tokens are stored SHA-256 hashed.
+- All SQL is parameterized; templates never render unescaped user content.
 - No real `.env`, backup, or shop data is ever committed — see `.gitignore`.
 - Prescription images are processed locally (Tesseract OCR) and are never
   sent to the AI provider.
+- Found a security issue? Please see [SECURITY.md](SECURITY.md).
+
+## Author
+
+**Ahmed Bux** — Cybersecurity Professional | SOC Analyst | Linux Admin | AI + Threat Intelligence
+
+- LinkedIn: https://www.linkedin.com/in/ahmed-bux-5a096a310
+- GitHub: https://github.com/ahmedbux927
 
 ## License
 
 Proprietary software — © Ahmed Bux. All rights reserved.
+See [LICENSE](LICENSE) for the full text.
