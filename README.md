@@ -21,6 +21,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/actions/workflows/tests.yml"><img alt="CI tests" src="https://img.shields.io/github/actions/workflow/status/ahmedbux927/MediGen-AI-Pro/tests.yml?branch=main&label=CI%20tests"></a>
+  <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/ahmedbux927/MediGen-AI-Pro"></a>
+  <img alt="Last commit" src="https://img.shields.io/github/last-commit/ahmedbux927/MediGen-AI-Pro">
+</p>
+
+<p align="center">
   <img src="Server/static/img/hero.png" alt="MediGen AI Pro" width="820">
 </p>
 
@@ -29,6 +35,7 @@
 ## Contents
 
 - [Highlights](#highlights)
+- [Download](#download)
 - [Screenshots](#screenshots)
 - [Features](#features)
 - [Architecture](#architecture)
@@ -51,6 +58,15 @@
 | **AI that acts safely** | The Gemini assistant reads live shop data and performs actions only through a propose → confirm flow |
 | **Proven in production testing** | 2,509 automated tests, a 38-route role-based QA matrix, and screenshot audits in light and dark mode |
 | **One-click everything** | One launcher, one-click backup with a restore test, one-click Windows installer build |
+
+## Download
+
+**[⬇ Latest release — v101.03](https://github.com/ahmedbux927/MediGen-AI-Pro/releases/latest)**
+
+- `MediGenAIPro.apk` — Android companion app
+- `MediGen_FULL_v101.03_READY.zip` — complete package (Server + APK + step-by-step guide)
+
+Release notes and history: [Releases](https://github.com/ahmedbux927/MediGen-AI-Pro/releases) · [CHANGELOG.md](CHANGELOG.md)
 
 ## Screenshots
 
