@@ -46,7 +46,7 @@
 - [Project layout](#project-layout)
 - [Testing](#testing)
 - [Security notes](#security-notes)
-- [Author](#author)
+- [Author & Contact](#author--contact)
 - [License](#license)
 
 ## Highlights
@@ -188,12 +188,17 @@ python tests\run_all.py
   sent to the AI provider.
 - Found a security issue? Please see [SECURITY.md](SECURITY.md).
 
-## Author
+## Author & Contact
 
 **Ahmed Bux** — Cybersecurity Professional | SOC Analyst | Linux Admin | AI + Threat Intelligence
 
-- LinkedIn: https://www.linkedin.com/in/ahmed-bux-5a096a310
-- GitHub: https://github.com/ahmedbux927
+<p>
+  <a href="https://www.linkedin.com/in/ahmed-bux-5a096a310"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"></a>
+  <a href="https://github.com/ahmedbux927"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"></a>
+</p>
+
+- **Professional enquiries & licensing:** [LinkedIn](https://www.linkedin.com/in/ahmed-bux-5a096a310) — the best way to reach the author
+- **More work:** [github.com/ahmedbux927](https://github.com/ahmedbux927)
 
 ## License
 
