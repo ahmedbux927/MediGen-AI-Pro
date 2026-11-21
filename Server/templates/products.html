@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% block title %}{{ label }}{% endblock %}
+{% block content %}
+{# v86.36: section pages use the same look and behaviour as the Medicines page #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}?v=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/medicine-look.css') }}?v=4">
+<style>
+    .pd-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .pd-tab { padding:8px 14px; border-radius:12px; background:#fff; border:1px solid #e3e9f2; font-weight:700; color:#334155; text-decoration:none; font-size:13px; }
+    .pd-tab.on { background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border-color:transparent; }
+    .pd-card { background:#fff; border-radius:16px; padding:18px; border:1px solid #e3e9f2; box-shadow:0 10px 28px rgba(15,31,61,.08); margin-bottom:18px; }
+    .pd-card h3 { font-weight:800; font-size:17px; margin:0 0 10px; }
+    .pd-note { background:#f0f7ff; border:1px solid #cfe3fb; border-radius:10px; padding:10px 14px; font-size:13px; color:#1e3a5f; margin-bottom:12px; }
+    .pd-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:8px 10px; font-size:14px; background:#f8fafc; }
+    .pd-btn { border:none; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border-radius:11px; padding:8px 16px; font-weight:700; text-decoration:none; display:inline-block; font-size:13px; }
+    .pd-btn.light { background:#fff; color:#1f6fb2; border:1.5px solid #cfe3fb; }
+    .pd-btn.danger { background:#fff; color:#b91c1c; border:1px solid #fecaca; }
+    .pd-btn:disabled { opacity:.45; cursor:not-allowed; }
+    .pd-sub { font-size:11px; color:#64748b; }
+    .pd-scroll { overflow-x:auto; }
+    .pd-badge { background:#0f9aa0; color:#fff; border-radius:999px; padding:2px 9px; font-size:12px; font-weight:800; margin-left:6px; }
+</style>
+
+<div class="page-header" style="margin-bottom:6px;">
+    <h2 class="page-title" style="font-weight:800;font-size:24px;margin:0;"><i class="bi {{ icon }}"></i> {{ label }}</h2>
+    <p class="page-subtitle" style="color:#64748b;margin:4px 0 14px;">Stock, expiry and sales for this section. Only {{ label }} items are shown here.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px;">
+    <div class="stat-card" onclick="secStat('all')" style="cursor:pointer;">
+        <i class="bi bi-capsule-fill stat-icon-bg"></i>
+        <div class="stat-label"><i class="bi bi-collection"></i> Total items</div>
+        <div class="stat-value">{{ stats.total }}</div>
+    </div>
+    <div class="stat-card" onclick="secStat('in')" style="cursor:pointer;">
+        <i class="bi bi-box-seam stat-icon-bg"></i>
+        <div class="stat-label"><i class="bi bi-check2-circle"></i> In stock</div>
+        <div class="stat-value">{{ stats.in_stock }}</div>
+    </div>
+    <div class="stat-card alert" onclick="secStat('low')" style="cursor:pointer;">
+        <i class="bi bi-exclamation-triangle-fill stat-icon-bg"></i>
+        <div class="stat-label"><i class="bi bi-exclamation-triangle"></i> Low stock</div>
+        <div class="stat-value">{{ stats.low }}</div>
+    </div>
+    <div class="stat-card alert" onclick="secStat('out')" style="cursor:pointer;">
+        <i class="bi bi-x-circle-fill stat-icon-bg"></i>
+        <div class="stat-label"><i class="bi bi-x-circle"></i> Out of stock</div>
+        <div class="stat-value">{{ stats.out }}</div>
+    </div>
+    <div class="stat-card alert" onclick="secStat('exp')" style="cursor:pointer;">
+        <i class="bi bi-calendar-x-fill stat-icon-bg"></i>
+        <div class="stat-label"><i class="bi bi-calendar-x"></i> Expiring in 90 days</div>
+        <div class="stat-value">{{ stats.expiring }}</div>
+    </div>
+</div>
+
+<!-- Filter tabs: same as the Medicines page (All / In Stock / Low / Out). Section tabs were removed: the sidebar has them. -->
+<div class="filter-tabs" style="margin-bottom: 16px; display: inline-flex;">
+    <a href="#" data-kind="all" class="active" onclick="secStat('all'); return false;">
+        <i class="bi bi-grid-3x3-gap"></i> All <span class="count">{{ stats.total }}</span>
+    </a>
+    <a href="#" data-kind="in" onclick="secStat('in'); return false;">
+        <i class="bi bi-check-circle"></i> In Stock <span class="count">{{ stats.in_stock }}</span>
+    </a>
+    <a href="#" data-kind="low" onclick="secStat('low'); return false;">
+        <i class="bi bi-exclamation-triangle"></i> Low <span class="count">{{ stats.low }}</span>
+    </a>
+    <a href="#" data-kind="out" onclick="secStat('out'); return false;">
+        <i class="bi bi-x-octagon"></i> Out <span class="count">{{ stats.out }}</span>
+    </a>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    {% if session.role in ['Admin', 'Pharmacist'] %}
+    <button class="btn-ghost" type="button" onclick="openReceive('')"><i class="bi bi-box-arrow-in-down"></i> Receive stock</button>
+    <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addItemModal">
+        <i class="bi bi-plus-circle-fill"></i> Add item
+    </button>
+    <form method="POST" action="{{ url_for('products_import', key=key) }}" enctype="multipart/form-data" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="catalog" id="secImpFile" accept=".csv,.pdf,image/*" hidden onchange="this.form.submit()">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('secImpFile').click()" title="Choose a CSV, PDF or photo from the phone or PC gallery">
+            <i class="bi bi-upload"></i> Import list
+        </button>
+    </form>
+    <form method="POST" action="{{ url_for('products_import', key=key) }}" enctype="multipart/form-data" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="catalog_cam" id="secCamFile" accept="image/*" capture="environment" hidden onchange="this.form.submit()">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('secCamFile').click()" title="Take a straight photo of the list with the camera">
+            <i class="bi bi-camera"></i> Camera photo
+        </button>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('products_export', key=key) }}" class="btn-ghost">
+        <i class="bi bi-download"></i> Export
+    </a>
+    <a href="{{ url_for('products_hub') }}" class="btn-ghost"><i class="bi bi-grid"></i> All sections</a>
+    <div class="spacer"></div>
+    <form method="GET" action="{{ url_for('products_section', key=key) }}" style="display:inline-flex;margin:0;">
+        <input type="text" name="code" class="search-box scan-box" autocomplete="off" placeholder="Scan barcode and press Enter">
+    </form>
+    <form method="GET" action="{{ url_for('products_section', key=key) }}" class="search-wrapper" onsubmit="return false;">
+        <input type="text" name="q" value="{{ q }}" class="search-box has-mic" autocomplete="off" oninput="secFilter(this.value)"
+               placeholder="Search name, strength or barcode..." id="searchInput">
+        <button type="button" class="med-mic" data-voice-for="searchInput" aria-label="Voice search"><i class="bi bi-mic-fill"></i></button>
+        <button type="button" class="med-clear" title="Clear search" aria-label="Clear search" onclick="var b=document.getElementById('searchInput'); b.value=''; secFilter(''); b.focus();">&times;</button>
+    </form>
+    <div id="medCount" class="med-count"></div>
+<script src="{{ url_for('static', filename='js/voice-search.js') }}"></script>
+</div>
+
+<!-- Items table -->
+<div class="data-card pd-scroll" style="max-height:620px;overflow-y:auto;">   <!-- v86.36: table scrolls inside its card, Sell stays on screen -->
+    <table class="medicines-table table data-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;"><input type="checkbox" class="row-check" id="checkAll"></th>
+                <th style="width: 56px;">#</th>
+                <th>Item</th>
+                <th>Strength</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Next expiry</th>
+                <th style="text-align:center; width: 232px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="medicinesTable">
+        {% for r in rows %}
+        <tr data-mid="{{ r.medicine_id }}" data-st="{{ 'out' if r.stock <= 0 else ('low' if r.stock <= (r.reorder_level or 0) else 'ok') }}" data-exp="{{ 1 if r.exp_soon else 0 }}" data-q="{{ ((r.name or '') ~ ' ' ~ (r.strength or '') ~ ' ' ~ (r.generic_name or '') ~ ' ' ~ (r.dosage_form or '') ~ ' ' ~ (r.barcode or ''))|lower|e }}">
+            <td><input type="checkbox" class="row-check row-select" value="{{ r.medicine_id }}" aria-label="Select {{ r.name|e }}"></td>
+            <td style="color:#64748b;font-weight:700;">{{ loop.index }}</td>
+            <td>
+                <div class="med-name">
+                    <span class="pill-icon"><i class="bi {{ icon }}"></i></span>
+                    <div>
+                        {{ r.name }}
+                        <div class="sub">{{ r.dosage_form or label }}{% if r.barcode %} · {{ r.barcode }}{% endif %}</div>
+                    </div>
+                </div>
+            </td>
+            <td>{{ r.strength or '-' }}</td>
+            <td><div class="price-text">Rs. {{ '{:,.0f}'.format(r.price|float) }}</div></td>
+            <td>
+                {% if r.stock <= 0 %}
+                    <span class="stock-badge stock-low"><i class="bi bi-x-octagon-fill"></i> {{ r.stock }}</span>
+                {% elif r.stock <= (r.reorder_level or 0) %}
+                    <span class="stock-badge stock-medium"><i class="bi bi-exclamation-triangle-fill"></i> {{ r.stock }}</span>
+                {% else %}
+                    <span class="stock-badge stock-high"><i class="bi bi-check-circle-fill"></i> {{ r.stock }}</span>
+                {% endif %}
+            </td>
+            <td>{{ r.next_expiry or '-' }}</td>
+            <td>
+                <div class="action-btns">
+                    {% if r.stock > 0 %}
+                    <form method="POST" action="{{ url_for('cart_add') }}" style="margin:0;display:inline-flex;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="key" value="{{ key }}">
+                        <input type="hidden" name="mid" value="{{ r.medicine_id }}">
+                        <input type="hidden" name="qty" value="1">
+                        <button class="btn-icon" type="submit" title="Add one to sale"><i class="bi bi-cart-plus-fill"></i></button>
+                    </form>
+                    {% else %}
+                    <a class="btn-icon" title="Buy stock first" href="{{ url_for('new_purchase') }}"><i class="bi bi-bag-plus"></i></a>
+                    {% endif %}
+                    {% if session.role in ['Admin', 'Pharmacist'] %}
+                    <a class="btn-icon edit" title="Edit" href="{{ url_for('products_edit', mid=r.medicine_id) }}"><i class="bi bi-pencil-fill"></i></a>
+                    <button class="btn-icon adjust" type="button" title="Receive stock (batch and expiry)" onclick="openReceive({{ r.medicine_id }})"><i class="bi bi-box-arrow-in-down"></i></button>
+                    {% endif %}
+                    {% if session.role == 'Admin' %}
+                    <form method="POST" action="{{ url_for('products_remove', mid=r.medicine_id) }}" style="margin:0;display:inline-flex;" onsubmit="return confirm('Delete {{ r.name|e }}?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn-icon delete" type="submit" title="Delete"><i class="bi bi-trash"></i></button>
+                    </form>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8">
+                <div class="no-results">
+                    <i class="bi bi-search"></i>
+                    <p>No {{ label }} items{% if q %} for "{{ q }}"{% endif %}. {% if session.role in ['Admin', 'Pharmacist'] %}Add one, or import a list.{% endif %}</p>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulkBar">
+    <i class="bi bi-check2-square" style="font-size: 18px;"></i>
+    <span><span class="count" id="bulkCount">0</span> item(s) selected</span>
+    <div style="flex: 1;"></div>
+    <button class="btn-ghost" onclick="clearBulk()" style="background: transparent; color: #fff; border-color: rgba(255,255,255,0.3);">
+        <i class="bi bi-x-circle"></i> Clear all
+    </button>
+    <button class="btn-ghost" onclick="sellSelected()" style="background: #fff; color: #1f6fb2; border-color: #fff;">
+        <i class="bi bi-cash-coin"></i> Sell Selected
+    </button>
+    {% if session.role != 'Cashier' %}
+    <button class="btn-ghost" onclick="openBulkEdit()" style="background: #fff; color: #1f6fb2; border-color: #fff;">
+        <i class="bi bi-pencil-square"></i> Edit selected
+    </button>
+    {% endif %}
+    {% if session.role == 'Admin' %}
+    <button class="btn-ghost" onclick="bulkDelete()" style="background: #cf3f55; color: #fff; border-color: #cf3f55;">
+        <i class="bi bi-trash"></i> Delete selected
+    </button>
+    {% endif %}
+    <button class="btn-ghost" onclick="bulkExport()" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">
+        <i class="bi bi-download"></i> Export Selected
+    </button>
+</div>
+
+<form method="POST" action="{{ url_for('cart_add_selected') }}" id="sellSelForm" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="key" value="{{ key }}">
+</form>
+
+{% if cart %}
+<div class="pd-card" style="margin-top:18px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        <h3 style="margin:0;"><i class="bi bi-cart3"></i> Sale in progress <span class="pd-badge">{{ cart|length }}</span></h3>
+        <div style="display:flex;gap:8px;">
+            <form method="POST" action="{{ url_for('cart_clear') }}" style="margin:0;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button class="pd-btn danger" type="submit">Clear</button>
+            </form>
+            <a class="pd-btn" href="{{ url_for('new_sale') }}">Open sale ({{ cart|length }}) <i class="bi bi-arrow-right"></i></a>
+        </div>
+    </div>
+    <table class="table pd-table" style="margin:0;">
+        <thead><tr><th>Item</th><th>Qty</th><th></th></tr></thead>
+        <tbody>
+        {% for c in cart %}
+        <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ c.qty }}</td>
+            <td style="text-align:right;">
+                <form method="POST" action="{{ url_for('cart_remove', mid=c.mid) }}" style="margin:0;display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button class="pd-btn danger" type="submit" style="padding:4px 10px;">Remove</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% if session.role in ['Admin', 'Pharmacist'] %}
+<!-- Receive stock popup (v86.41: was a card at the bottom) -->
+<div class="modal fade" id="receiveModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-box-arrow-in-down"></i>Receive stock</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 24px;">
+        <div class="pd-sub" style="margin-bottom:12px;">Items from a list have 0 stock. Receive stock with batch and expiry, then the item appears in the sale screen.</div>
+        <form method="POST" id="recvform" action="" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;align-items:end;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div style="grid-column:span 2;"><div class="pd-sub">Product</div>
+            <select class="pd-input" id="recvSelect" style="width:100%;" required onchange="document.getElementById('recvform').action='/products/item/'+this.value+'/receive';">
+                <option value="">Choose product</option>
+                {% for r in rows %}<option value="{{ r.medicine_id }}">{{ r.name }}{% if r.strength %} {{ r.strength }}{% endif %} (stock {{ r.stock }})</option>{% endfor %}
+            </select></div>
+        <div><div class="pd-sub">Quantity</div><input class="pd-input" type="number" name="qty" min="1" value="1" required style="width:100%;"></div>
+        <div><div class="pd-sub">Batch (optional)</div><input class="pd-input" name="batch" maxlength="50" style="width:100%;"></div>
+        <div><div class="pd-sub">Expiry date</div><input class="pd-input" type="date" name="expiry" required style="width:100%;"></div>
+        <div><div class="pd-sub">Cost per unit (Rs.)</div><input class="pd-input" type="number" name="cost" min="0" step="0.01" value="0" style="width:100%;"></div>
+        <div><button class="pd-btn" type="submit"><i class="bi bi-check2"></i> Receive</button></div>
+    </form>
+    </div>
+</div>
+</div>
+</div>
+
+{% include '_bulk_edit.html' %}
+
+<!-- Add item modal -->
+<div class="modal fade" id="addItemModal">
+<div class="modal-dialog">
+<div class="modal-content">
+    <form method="POST" action="{{ url_for('products_add', key=key) }}">
+        <div class="modal-header-custom">
+            <h5><i class="bi bi-capsule"></i>Add item to {{ label }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding: 24px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="pd-note">Price is set here. Stock comes from Receive stock or Purchase.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div style="grid-column:span 2;"><div class="pd-sub">Name *</div><input class="pd-input" name="name" maxlength="100" required style="width:100%;"></div>
+                <div><div class="pd-sub">Strength</div><input class="pd-input" name="strength" maxlength="60" style="width:100%;"></div>
+                <div><div class="pd-sub">Dosage form</div>
+                    <select class="pd-input" name="dosage_form" style="width:100%;">{% for f in forms %}<option>{{ f }}</option>{% endfor %}</select></div>
+                <div><div class="pd-sub">Price (Rs.)</div><input class="pd-input" name="price" type="number" min="0" step="0.01" value="0" style="width:100%;"></div>
+            </div>
+        </div>
+        <div class="modal-footer" style="border: none; padding: 18px 24px; background: #f8fafc;">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn-add" type="submit"><i class="bi bi-check2-circle"></i> Save item</button>
+        </div>
+    </form>
+</div>
+</div>
+</div>
+
+{% if session.role == 'Admin' %}
+<form method="POST" action="{{ url_for('products_clear_unused', key=key) }}" style="margin-top:12px;" onsubmit="return confirm('Remove all {{ label|e }} items that have NO sales, stock or drip history? Items with history are kept.');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="pd-btn danger" type="submit"><i class="bi bi-eraser"></i> Clear unused items in this section</button>
+</form>
+{% endif %}
+{% endif %}
+
+<script>
+// v86.36: section pages use the same live search, selection and bulk actions as Medicines.
+var secState = { text: '', stock: 'all' };
+function secApply() {
+    var words = secState.text.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var shown = 0;
+    document.querySelectorAll('tr[data-mid]').forEach(function (tr) {
+        var hay = tr.getAttribute('data-q') || '';
+        var st = tr.getAttribute('data-st') || 'ok';
+        var stockOk = secState.stock === 'all'
+            || (secState.stock === 'in' && st !== 'out')
+            || (secState.stock === 'low' && st === 'low')
+            || (secState.stock === 'out' && st === 'out')
+            || (secState.stock === 'exp' && tr.getAttribute('data-exp') === '1');
+        var textOk = words.every(function (w) { return hay.indexOf(w) !== -1; });
+        var ok = stockOk && textOk;
+        tr.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+    });
+    var c = document.getElementById('medCount');
+    if (c) c.textContent = (secState.stock !== 'all' || words.length) ? shown + ' found' : '';
+}
+function secFilter(text) { secState.text = text || ''; secApply(); }
+function secStat(kind) {
+    secState.stock = kind;
+    secApply();
+    document.querySelectorAll('.filter-tabs a[data-kind]').forEach(function (a) {
+        a.classList.toggle('active', a.getAttribute('data-kind') === kind);
+    });
+    var bar = document.querySelector('.toolbar');
+    if (bar) bar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function selectedIds() {
+    return Array.from(document.querySelectorAll('.row-select:checked')).map(function (cb) { return cb.value; });
+}
+function updateBulkBar() {
+    var n = selectedIds().length;
+    document.getElementById('bulkCount').textContent = n;
+    document.getElementById('bulkBar').classList.toggle('show', n > 0);
+}
+document.addEventListener('change', function (e) {
+    if (e.target.classList.contains('row-select')) updateBulkBar();
+    if (e.target.id === 'checkAll') {
+        document.querySelectorAll('.row-select').forEach(function (cb) { cb.checked = e.target.checked; });
+        updateBulkBar();
+    }
+});
+function clearBulk() {
+    document.querySelectorAll('.row-select, #checkAll').forEach(function (cb) { cb.checked = false; });
+    updateBulkBar();
+}
+function sellSelected() {
+    var ids = selectedIds();
+    if (!ids.length) return;
+    var f = document.getElementById('sellSelForm');
+    f.querySelectorAll('input[name=mid]').forEach(function (n) { n.remove(); });
+    ids.forEach(function (id) {
+        var i = document.createElement('input'); i.type = 'hidden'; i.name = 'mid'; i.value = id; f.appendChild(i);
+    });
+    f.submit();
+}
+function bulkDelete() {
+    var ids = selectedIds();
+    if (!ids.length) return;
+    if (!confirm('Delete ' + ids.length + ' selected item(s)? Their bills and purchases stay in the records.')) return;
+    var f = document.createElement('form');
+    f.method = 'POST';
+    f.action = '{{ url_for("bulk_delete_medicines") }}';
+    var tok = document.createElement('input'); tok.type = 'hidden'; tok.name = 'csrf_token'; tok.value = '{{ csrf_token() }}';
+    f.appendChild(tok);
+    var nx = document.createElement('input'); nx.type = 'hidden'; nx.name = 'next'; nx.value = '{{ request.path }}';
+    f.appendChild(nx);
+    ids.forEach(function (id) {
+        var i = document.createElement('input'); i.type = 'hidden'; i.name = 'mid'; i.value = id; f.appendChild(i);
+    });
+    document.body.appendChild(f);
+    f.submit();
+}
+function bulkExport() {
+    var ids = selectedIds();
+    if (!ids.length) return;
+    window.location = '{{ url_for("products_export", key=key) }}?ids=' + ids.join(',');
+}
+function openReceive(mid) {
+    var sel = document.getElementById('recvSelect');
+    if (mid) {
+        sel.value = String(mid);
+        document.getElementById('recvform').action = '/products/item/' + mid + '/receive';
+    }
+    new bootstrap.Modal(document.getElementById('receiveModal')).show();
+}
+</script>
+{% endblock %}

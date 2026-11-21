@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Suggestions{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-cart-plus"></i> Purchase Suggestions</h2>
+    <p class="page-subtitle">Medicines that are low or will run out within {{ alert_days }} days, based on the last {{ sales_days }} days of sales.</p>
+</div>
+
+<div class="data-card">
+    <h5>
+        <i class="bi bi-list-check"></i> To order ({{ rows|length }} items, about Rs. {{ '{:,.0f}'.format(total_cost) }})
+        <a href="{{ url_for('purchase_suggestions', fmt='csv') }}" class="btn-primary-pro" style="margin-left:auto; font-size:12px; padding:7px 14px;">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export CSV
+        </a>
+    </h5>
+    <p class="text-muted" style="font-size:13px;">Suggested qty = enough for {{ cover_days }} days at the current sale rate, or the reorder level, minus stock now. This is only a suggestion. Create the order on the <a href="{{ url_for('purchase') }}">Purchase page</a>.</p>
+    <table class="data-table">
+        <thead><tr><th>#</th><th>Medicine</th><th>Stock</th><th>Reorder</th><th>Sold ({{ sales_days }}d)</th><th>Days left</th><th>Suggested qty</th><th>Est. cost (Rs.)</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr>
+            <td><strong>{{ loop.index }}</strong></td>
+            <td><strong>{{ r.name }}</strong>{% if r.low %} <span class="badge-soft badge-red">LOW</span>{% endif %}</td>
+            <td>{{ r.stock }}</td>
+            <td>{{ r.reorder }}</td>
+            <td>{{ r.sold }}</td>
+            <td>{% if r.days_left is none %}no sales{% else %}{{ r.days_left }}{% endif %}</td>
+            <td><strong>{{ r.qty }}</strong></td>
+            <td>{{ '{:,.0f}'.format(r.est_cost) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8">Nothing to order right now. Stock looks fine for the next {{ alert_days }} days.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

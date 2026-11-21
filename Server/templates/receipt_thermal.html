@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Receipt #{{ sale.sale_id }}</title>
+<style>
+    @page { size: 80mm auto; margin: 3mm; }
+    body { font-family: 'Courier New', monospace; font-size: 12px; width: 72mm; margin: 0 auto; color: #000; }
+    .c { text-align: center; }
+    .r { text-align: right; }
+    .b { font-weight: bold; }
+    hr { border: none; border-top: 1px dashed #000; margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    td { padding: 1px 0; vertical-align: top; }
+    .big { font-size: 15px; }
+    .no-print { margin: 10px 0; text-align: center; }
+    .mg-tick { width: 46px; height: 46px; display: block; margin: 0 auto 4px; }
+    .mg-tick circle { fill: none; stroke: #1faa55; stroke-width: 2.5; stroke-dasharray: 151; stroke-dashoffset: 151; animation: mgTickC .45s ease forwards; }
+    .mg-tick path { fill: none; stroke: #1faa55; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: mgTickP .3s .4s ease forwards; }
+    @keyframes mgTickC { to { stroke-dashoffset: 0; } }
+    @keyframes mgTickP { to { stroke-dashoffset: 0; } }
+    .done-line { font-family: Arial, sans-serif; font-weight: 700; color: #177245; font-size: 13px; }
+    .wa-btn { display: inline-block; background: #1faa55; color: #fff; text-decoration: none; padding: 6px 13px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; margin-left: 6px; }
+    .nav-btn { display: inline-block; background: #10243c; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-family: Arial, sans-serif; font-size: 13.5px; font-weight: 700; }
+    .nav-btn.alt { background: #e8edf3; color: #10243c; margin-left: 6px; }
+    .qrwrap { text-align: center; margin-top: 5px; }
+    .qrwrap svg { width: 92px; height: 92px; }
+    @media print { .no-print { display: none; } }
+</style>
+</head>
+<body>
+<div class="c b big">{{ shop.name }}</div>
+{% if shop.address %}<div class="c">{{ shop.address }}</div>{% endif %}
+{% if shop.phone %}<div class="c">Tel: {{ shop.phone }}</div>{% endif %}
+<hr>
+<div>Invoice: #{{ sale.sale_id }}</div>
+<div>Date: {{ sale.sale_date }}</div>
+<div>Cashier: {{ sale.cashier or 'N/A' }}</div>
+<div>Customer: {{ sale.customer_name or 'Walk-in' }}</div>
+<hr>
+<table>
+{% for g in groups %}
+<tr><td colspan="2" class="b">{{ g.label }}</td></tr>
+{% for it in g.lines %}
+<tr><td colspan="2">{{ it.medicine_name }}</td></tr>
+<tr><td>&nbsp;&nbsp;{{ it.quantity }} x {{ it.unit_price }}</td><td class="r">{{ it.subtotal }}</td></tr>
+{% endfor %}
+{% if groups|length > 1 %}<tr><td>&nbsp;&nbsp;{{ g.label }} total ({{ g.units }} units)</td><td class="r">{{ '%.2f'|format(g.subtotal) }}</td></tr>{% endif %}
+{% endfor %}
+<tr><td colspan="2">Items: {{ units }} unit(s) in {{ groups|length }} section(s)</td></tr>
+</table>
+<hr>
+<table>
+<tr><td>Subtotal</td><td class="r">{{ sale.subtotal_amount or sale.total_amount }}</td></tr>
+{% if sale.discount_amount and sale.discount_amount > 0 %}<tr><td>Discount</td><td class="r">-{{ sale.discount_amount }}</td></tr>{% endif %}
+{% if sale.tax_amount and sale.tax_amount > 0 %}<tr><td>Tax ({{ sale.tax_rate }}%)</td><td class="r">{{ sale.tax_amount }}</td></tr>{% endif %}
+<tr class="b"><td class="big">TOTAL</td><td class="r big">{{ sale.total_amount }}</td></tr>
+{% if sale.returned_amount and sale.returned_amount > 0 %}<tr><td>Returned</td><td class="r">-{{ sale.returned_amount }}</td></tr>{% endif %}
+<tr><td>Paid ({{ sale.payment_method }})</td><td class="r">{{ sale.paid_amount }}</td></tr>
+{% if sale.due_amount and sale.due_amount > 0.004 %}<tr class="b"><td>BALANCE DUE</td><td class="r">{{ sale.due_amount }}</td></tr>{% endif %}
+</table>
+<hr>
+<div class="c">{{ shop.footer }}</div>
+<div class="qrwrap"><span id="qrBox"></span><div style="font-size:10px;">Scan for bill details</div></div>
+{% set ph = (sale.contact_number or '')|replace(' ','')|replace('-','')|replace('+','') %}
+{% if ph[:1] == '0' %}{% set ph = '92' ~ ph[1:] %}{% endif %}
+{% set wa_text = shop.name ~ ' - Invoice #' ~ sale.sale_id ~ '\nTotal: Rs ' ~ sale.total_amount ~ '\nPayment: ' ~ sale.payment_method ~ '\nThank you!' %}
+<div class="no-print">
+    <svg class="mg-tick" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M14 27l8 8 16-16"/></svg>
+    <div class="done-line">Sale completed</div>
+    <div style="margin-top:8px;">
+    <button onclick="window.print()">Print 80mm receipt</button>
+    <a class="wa-btn" target="_blank" rel="noopener" href="https://wa.me/{% if ph %}{{ ph }}{% endif %}?text={{ wa_text|urlencode }}">Share on WhatsApp</a>
+    </div>
+    <div style="margin-top:10px;">
+    <a class="nav-btn" href="{{ url_for('new_sale') }}">&larr; Back — New Sale</a>
+    <a class="nav-btn alt" href="{{ url_for('dashboard') }}">Dashboard</a>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/qrcode.min.js') }}"></script>
+<script>
+/* v94: bill summary QR (prints on the receipt) */
+try {
+    var qr = qrcode(0, 'M');
+    qr.addData({{ (shop.name ~ ' | Invoice #' ~ sale.sale_id ~ ' | Total Rs ' ~ sale.total_amount ~ ' | ' ~ sale.payment_method)|tojson }});
+    qr.make();
+    document.getElementById('qrBox').innerHTML = qr.createSvgTag(2, 2);
+} catch (e) { var qb = document.querySelector('.qrwrap'); if (qb) qb.style.display = 'none'; }
+</script>
+<script>
+/* Auto-print when opened from a completed sale (?print=1). Manual button still works. */
+(function () {
+    try {
+        if (new URLSearchParams(window.location.search).get('print') === '1') {
+            window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });
+        }
+    } catch (e) { /* browser without URLSearchParams: just show the receipt */ }
+})();
+</script>
+</body>
+</html>

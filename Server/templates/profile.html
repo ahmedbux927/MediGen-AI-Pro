@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+
+<style>
+    /* ============ PAGE HEADER ============ */
+    .page-header { margin-bottom: 22px; }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--ink, #1b2a3b); letter-spacing: -0.3px; margin: 0 0 4px 0; display: flex; align-items: center; gap: 12px; }
+    .page-title i { width: 40px; height: 40px; border-radius: 12px; background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2)); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 19px; margin-right: 0; box-shadow: 0 6px 14px rgba(15, 154, 160, 0.30), inset 0 1px 2px rgba(255, 255, 255, 0.35); }
+    .page-subtitle { font-size: 13.5px; color: var(--ink-2, #44546f); margin: 0 0 0 52px; }
+
+    /* ============ PROFILE HEADER CARD (light) ============ */
+    .profile-header-card {
+        position: relative; overflow: hidden;
+        background: linear-gradient(115deg, #ffffff 0%, #f5f9fd 55%, #ebf6f6 100%);
+        border: 1px solid #dde8f4; border-radius: 20px; padding: 34px 36px; margin-bottom: 22px;
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+    }
+    .profile-header-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; background: linear-gradient(90deg, #0f9aa0, #1f6fb2); }
+    .profile-header-card::after { content: ""; position: absolute; width: 380px; height: 380px; right: -110px; top: -200px; border-radius: 50%; background: radial-gradient(circle, rgba(15, 154, 160, 0.16), transparent 68%); pointer-events: none; }
+    .profile-header-content { display: flex; align-items: center; gap: 28px; position: relative; z-index: 2; }
+    .profile-pic-wrapper { position: relative; flex-shrink: 0; }
+    .profile-pic {
+        width: 116px; height: 116px; border-radius: 50%;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 48px; font-weight: 800; color: #fff;
+        box-shadow: 0 0 0 5px #fff, 0 0 0 7px rgba(15, 154, 160, 0.25), 0 14px 30px rgba(31, 111, 178, 0.25);
+        overflow: hidden;
+    }
+    .profile-pic img { width: 100%; height: 100%; object-fit: cover; }
+    .edit-pic-btn {
+        position: absolute; bottom: 0; right: -2px; width: 38px; height: 38px; border-radius: 50%;
+        background: #0f9aa0; color: #fff; border: 3px solid #fff;
+        display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+        transition: background 0.2s ease; box-shadow: 0 4px 10px rgba(15, 31, 61, 0.2);
+    }
+    .edit-pic-btn:hover { background: #0b7b80; }
+    .profile-header-info h2 { font-size: 28px; font-weight: 800; color: var(--ink, #1b2a3b); margin: 0 0 6px 0; letter-spacing: -0.5px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .profile-header-info .role-line { color: #0b7b80; font-size: 15px; font-weight: 600; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; }
+    .profile-header-info .meta-info { display: flex; gap: 12px 22px; flex-wrap: wrap; margin-top: 12px; }
+    .profile-header-info .meta-info span { color: var(--ink-2, #44546f); font-size: 13.5px; display: flex; align-items: center; gap: 8px; }
+    .profile-header-info .meta-info i { color: #0f9aa0; }
+
+    .ai-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2)); color: #fff;
+        padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 0;
+        box-shadow: 0 4px 10px rgba(31, 111, 178, 0.28);
+    }
+
+    /* ============ AI INSIGHTS (light card with stat tiles) ============ */
+    .ai-insights-card {
+        background: #fff; border-radius: 20px; padding: 28px 30px; margin-bottom: 22px;
+        position: relative; overflow: hidden; border: 1px solid var(--line, #e3e9f2);
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08));
+    }
+    .ai-insights-card::before {
+        content: '\F3E5'; font-family: 'bootstrap-icons'; position: absolute; right: -20px; bottom: -40px;
+        font-size: 200px; color: #0f9aa0; opacity: 0.06;
+    }
+    .ai-insights-card h3 { font-size: 19px; font-weight: 700; color: var(--ink, #1b2a3b); margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px; }
+    .ai-insights-card h3 i { color: #0f9aa0; }
+    .ai-insights-card p { font-size: 14px; color: var(--ink-2, #44546f); margin: 0 0 20px 0; }
+    .ai-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; position: relative; z-index: 2; }
+    .ai-stat-item { background: #f5f9fc; padding: 16px 18px; border-radius: 14px; border: 1px solid #e3ecf4; border-top: 3px solid #0f9aa0; }
+    .ai-stat-item:nth-child(2) { border-top-color: #22a876; }
+    .ai-stat-item:nth-child(3) { border-top-color: #1f6fb2; }
+    .ai-stat-item:nth-child(4) { border-top-color: #d98a1e; }
+    .ai-stat-item h4 { font-size: 12.5px; color: var(--ink-2, #44546f); margin: 0 0 6px 0; font-weight: 600; }
+    .ai-stat-item .value { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--ink, #1b2a3b); }
+
+    /* ============ TABS ============ */
+    .profile-tabs {
+        display: flex; gap: 6px; margin-bottom: 22px; flex-wrap: wrap;
+        background: #fff; padding: 6px; border-radius: 14px; border: 1px solid var(--line, #e3e9f2);
+        box-shadow: var(--shadow-soft, 0 2px 8px rgba(15, 31, 61, 0.06));
+    }
+    .profile-tabs button {
+        padding: 10px 20px; background: transparent; border: none; border-radius: 10px;
+        font-weight: 600; font-size: 14px; color: var(--ink-2, #44546f); cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .profile-tabs button:hover { background: #f4f7fb; color: #0b7b80; }
+    .profile-tabs button.active { background: rgba(15, 154, 160, 0.12); color: #0b7b80; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ============ FORM CARDS ============ */
+    .form-section {
+        background: #fff; border-radius: 18px; padding: 28px; margin-bottom: 20px;
+        box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08)); border: 1px solid var(--line, #e3e9f2);
+    }
+    .section-header { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; margin-bottom: 20px; border-bottom: 1px solid var(--line, #e3e9f2); }
+    .section-header i {
+        width: 40px; height: 40px; border-radius: 12px; background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px;
+        box-shadow: 0 6px 14px rgba(15, 154, 160, 0.28), inset 0 1px 2px rgba(255, 255, 255, 0.35);
+    }
+    .section-header h5 { margin: 0; font-size: 17px; font-weight: 700; color: var(--ink, #1b2a3b); }
+
+    .form-label-pro { font-size: 13px; font-weight: 600; color: var(--ink-2, #44546f); margin-bottom: 7px; display: block; }
+    .form-control-pro {
+        border: 1px solid #d8e0ea; border-radius: 10px; padding: 11px 15px; font-size: 14px;
+        color: var(--ink, #1b2a3b); background: #f9fbfd; width: 100%; font-family: inherit;
+        box-shadow: inset 0 1px 2px rgba(15, 31, 61, 0.05);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .form-control-pro:focus { outline: none; border-color: #0f9aa0; background: #fff; box-shadow: 0 0 0 4px rgba(15, 154, 160, 0.14); }
+    textarea.form-control-pro { resize: vertical; min-height: 100px; }
+
+    .btn-save {
+        background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2)); color: #fff; border: none;
+        padding: 13px 30px; border-radius: 12px; font-weight: 700; font-size: 14px;
+        display: inline-flex; align-items: center; gap: 10px; cursor: pointer;
+        box-shadow: 0 6px 16px rgba(31, 111, 178, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        transition: filter 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-save:hover { filter: brightness(1.06); color: #fff; box-shadow: 0 8px 20px rgba(31, 111, 178, 0.36); }
+    .btn-save:active { transform: translateY(1px); }
+
+    /* ============ SETTINGS ITEMS ============ */
+    .settings-item {
+        display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;
+        background: #f9fbfd; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--line, #e3e9f2);
+        text-decoration: none; color: inherit; transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .settings-item:hover { background: rgba(15, 154, 160, 0.07); border-color: rgba(15, 154, 160, 0.35); color: inherit; }
+    .settings-item .left { display: flex; align-items: center; gap: 15px; }
+    .settings-item .left i {
+        width: 38px; height: 38px; border-radius: 10px; background: var(--brand-grad, linear-gradient(135deg, #0f9aa0, #1f6fb2));
+        color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .settings-item .left strong { display: block; font-size: 15px; font-weight: 700; color: var(--ink, #1b2a3b); }
+    .settings-item .left small { color: #5b6c82; font-size: 12.5px; }
+    .settings-item .right i { color: #8593ab; font-size: 18px; }
+
+    /* ============ INFO CARD ============ */
+    .info-card { background: #fff; border-radius: 18px; padding: 25px; margin-bottom: 20px; box-shadow: var(--shadow-card, 0 10px 28px rgba(15, 31, 61, 0.08)); border: 1px solid var(--line, #e3e9f2); }
+    .info-row { display: flex; align-items: center; gap: 15px; padding: 14px 0; border-bottom: 1px solid #eef2f7; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row i { width: 38px; height: 38px; border-radius: 10px; background: rgba(15, 154, 160, 0.10); color: #0b7b80; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+    .info-row .info-content strong { display: block; font-size: 12.5px; color: #5b6c82; font-weight: 600; margin-bottom: 2px; }
+    .info-row .info-content span { font-size: 15px; font-weight: 600; color: var(--ink, #1b2a3b); }
+
+    @media (max-width: 768px) {
+        .profile-header-content { flex-direction: column; text-align: center; }
+        .profile-header-info h2, .profile-header-info .role-line, .profile-header-info .meta-info { justify-content: center; }
+        .page-subtitle { margin-left: 0; margin-top: 8px; }
+    }
+
+    /* ============ additions: security, activity, shift ============ */
+    .pw-field { position: relative; }
+    .pw-field button { position: absolute; right: 10px; top: 10px; border: none; background: none; color: #64748b; font-size: 16px; }
+    .pw-meter { height: 6px; border-radius: 6px; background: #eef2f6; overflow: hidden; margin: -4px 0 6px; }
+    .pw-meter > div { height: 100%; width: 0; transition: width .25s, background .25s; }
+    .pw-hint { font-size: 12px; color: #64748b; margin: -6px 0 14px; }
+    .act-row { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f1f5f9; }
+    .act-row:last-child { border-bottom: none; }
+    .act-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; background: #0f9aa0; }
+    .act-dot.bad { background: #d6455a; } .act-dot.warn { background: #f59e0b; }
+    .act-action { font-family: monospace; font-weight: 700; color: #1b2a3b; font-size: 13.5px; }
+    .act-det { font-size: 13px; color: #475569; }
+    .act-when { font-size: 11.5px; color: #8593ab; font-family: monospace; }
+    .tab-note { font-size: 13px; color: #64748b; margin: -8px 0 16px; }
+    .help-card { display:flex; gap:14px; align-items:flex-start; background:#f6f9fc; border:1px solid #e3e9f2; border-radius:14px; padding:16px 18px; margin-bottom:12px; }
+    .help-card i { font-size: 22px; color: #0f9aa0; }
+    .help-card strong { display:block; color:#1b2a3b; }
+    .help-card span { font-size:13px; color:#64748b; }
+    .alert-info { background:#edf6fb; color:#1d6a91; border:1px solid #c5dcf0; border-radius:10px; }
+</style>
+<!-- Profile Header Card -->
+<div class="profile-header-card">
+    <div class="profile-header-content">
+        <div class="profile-pic-wrapper">
+            <div class="profile-pic">
+                {% if user.profile_pic %}
+                    <img src="{{ url_for('static', filename='profiles/' + user.profile_pic) }}" alt="Profile">
+                {% else %}
+                    {{ (user.full_name or user.username or '?')[:1]|upper }}
+                {% endif %}
+            </div>
+            <form method="POST" action="{{ url_for('upload_profile_pic') }}" enctype="multipart/form-data" id="picForm">
+                <label for="picInput" class="edit-pic-btn">
+                    <i class="bi bi-pencil-fill"></i>
+                </label>
+                <input type="file" name="profile_pic" id="picInput" accept="image/*" style="display:none;" onchange="document.getElementById('picForm').submit();">
+            </form>
+        </div>
+        <div class="profile-header-info">
+            <h2>{{ user.full_name }}
+                
+            </h2>
+            <p class="role-line">
+                <i class="bi bi-shield-fill-check"></i> {{ user.role_name }} — MediGen AI Pharmacy
+            </p>
+            <div class="meta-info">
+                <span><i class="bi bi-person-badge"></i> ID: #{{ user.user_id }}</span>
+                <span><i class="bi bi-calendar-check"></i> Joined: {{ user.created_at }}</span>
+                <span><i class="bi bi-clock"></i> Last login: {{ last_login or 'first login' }}</span>
+                {% if user.email %}<span><i class="bi bi-envelope-fill"></i> {{ user.email }}</span>{% endif %}
+                {% if user.phone %}<span><i class="bi bi-telephone-fill"></i> {{ user.phone }}</span>{% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Insights (real values) -->
+<div class="ai-insights-card">
+    <h3><i class="bi bi-person-check-fill"></i> Account overview</h3>
+    <p>Your profile completeness, account state and working hours.</p>
+    <div class="ai-stat-grid">
+        <div class="ai-stat-item">
+            <h4>Profile completeness</h4>
+            <div class="value">{{ ((1 if user.email else 0) + (1 if user.phone else 0) + (1 if user.about else 0) + (1 if user.position else 0) + (1 if user.home_address else 0) + (1 if user.birthday else 0) + (1 if user.gender else 0) + (1 if user.profile_pic else 0)) * 100 // 8 }}%</div>
+        </div>
+        <div class="ai-stat-item">
+            <h4>Account status</h4>
+            <div class="value">{{ '✓ Active' if user.is_active else 'Disabled' }}</div>
+        </div>
+        <div class="ai-stat-item">
+            <h4>Role</h4>
+            <div class="value">{{ user.role_name }}</div>
+        </div>
+        <div class="ai-stat-item">
+            <h4>Working hours</h4>
+            <div class="value">{{ (user.access_start_time|string)[:5] }} - {{ (user.access_end_time|string)[:5] }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="profile-tabs">
+    <button class="active" type="button" data-tab="personal" onclick="showTab('personal', this)"><i class="bi bi-person-fill"></i> Personal</button>
+    <button type="button" data-tab="about" onclick="showTab('about', this)"><i class="bi bi-info-circle-fill"></i> About</button>
+    <button type="button" data-tab="professional" onclick="showTab('professional', this)"><i class="bi bi-briefcase-fill"></i> Professional</button>
+    <button type="button" data-tab="security" onclick="showTab('security', this)"><i class="bi bi-shield-lock-fill"></i> Security</button>
+    <button type="button" data-tab="activity" onclick="showTab('activity', this)"><i class="bi bi-clock-history"></i> My activity</button>
+    <button type="button" data-tab="account" onclick="showTab('account', this)"><i class="bi bi-gear-fill"></i> Account</button>
+</div>
+
+<!-- ============ PERSONAL ============ -->
+<div id="personal" class="tab-content active">
+    <form method="POST" action="{{ url_for('update_profile') }}">
+        <input type="hidden" name="tab" value="personal">
+        <div class="form-section">
+            <div class="section-header"><i class="bi bi-person-vcard"></i><h5>Personal information</h5></div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Full name</label>
+                    <input name="full_name" class="form-control-pro" value="{{ user.full_name or '' }}" required maxlength="100">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Username</label>
+                    <input class="form-control-pro" value="{{ user.username }}" readonly title="Only the Admin can change the username">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Gender</label>
+                    <select name="gender" class="form-control-pro">
+                        <option value="">Select gender</option>
+                        {% for g in ['Male', 'Female', 'Other'] %}<option value="{{ g }}" {% if user.gender == g %}selected{% endif %}>{{ g }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Birthday</label>
+                    <input name="birthday" type="date" class="form-control-pro" value="{{ user.birthday.isoformat() if user.birthday else '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Email address</label>
+                    <input name="email" type="email" class="form-control-pro" value="{{ user.email or '' }}" maxlength="100">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Phone</label>
+                    <input name="phone" class="form-control-pro" value="{{ user.phone or '' }}" maxlength="20" placeholder="0300 0000000">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-pro">Language</label>
+                    <select name="language" class="form-control-pro">
+                        <option value="">Select language</option>
+                        {% for lang in ['English', 'Urdu', 'Sindhi', 'Punjabi', 'Pashto'] %}<option value="{{ lang }}" {% if user.language == lang %}selected{% endif %}>{{ lang }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="form-section">
+            <div class="section-header"><i class="bi bi-geo-alt-fill"></i><h5>Addresses</h5></div>
+            <div class="mb-3"><label class="form-label-pro">Home address</label><input name="home_address" class="form-control-pro" value="{{ user.home_address or '' }}" maxlength="255"></div>
+            <div class="mb-3"><label class="form-label-pro">Work address</label><input name="work_address" class="form-control-pro" value="{{ user.work_address or '' }}" maxlength="255"></div>
+            <div class="mb-3"><label class="form-label-pro">Other address</label><input name="other_address" class="form-control-pro" value="{{ user.other_address or '' }}" maxlength="255"></div>
+        </div>
+        <button type="submit" class="btn-save"><i class="bi bi-check2-circle"></i> Save personal information</button>
+    </form>
+</div>
+
+<!-- ============ ABOUT ============ -->
+<div id="about" class="tab-content">
+    <form method="POST" action="{{ url_for('update_profile') }}">
+        <input type="hidden" name="tab" value="about">
+        <div class="form-section">
+            <div class="section-header"><i class="bi bi-file-person-fill"></i><h5>About me</h5></div>
+            <label class="form-label-pro">Professional summary</label>
+            <textarea name="about" class="form-control-pro" rows="6" maxlength="2000" placeholder="A short introduction about yourself">{{ user.about or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn-save"><i class="bi bi-check2-circle"></i> Save about</button>
+    </form>
+</div>
+
+<!-- ============ PROFESSIONAL ============ -->
+<div id="professional" class="tab-content">
+    <form method="POST" action="{{ url_for('update_profile') }}">
+        <input type="hidden" name="tab" value="professional">
+        <div class="form-section">
+            <div class="section-header"><i class="bi bi-briefcase-fill"></i><h5>Professional details</h5></div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Position / title</label><input name="position" class="form-control-pro" value="{{ user.position or '' }}" maxlength="100" placeholder="e.g. Senior Pharmacist"></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Licence / registration no.</label><input name="license_info" class="form-control-pro" value="{{ user.license_info or '' }}" maxlength="255" placeholder="e.g. Pharmacy council registration"></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Experience</label><textarea name="experience" class="form-control-pro" rows="3" maxlength="2000" placeholder="Describe your work experience">{{ user.experience or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Projects</label><textarea name="projects" class="form-control-pro" rows="3" maxlength="2000">{{ user.projects or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Recommendations</label><textarea name="recommendations" class="form-control-pro" rows="3" maxlength="2000">{{ user.recommendations or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Volunteer work</label><textarea name="volunteer" class="form-control-pro" rows="3" maxlength="2000">{{ user.volunteer or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Honors</label><textarea name="honors" class="form-control-pro" rows="3" maxlength="2000">{{ user.honors or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Awards</label><textarea name="awards" class="form-control-pro" rows="3" maxlength="2000">{{ user.awards or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Causes</label><textarea name="causes" class="form-control-pro" rows="3" maxlength="2000">{{ user.causes or '' }}</textarea></div>
+                <div class="col-md-6 mb-3"><label class="form-label-pro">Services</label><textarea name="services" class="form-control-pro" rows="3" maxlength="2000">{{ user.services or '' }}</textarea></div>
+            </div>
+        </div>
+        <button type="submit" class="btn-save"><i class="bi bi-check2-circle"></i> Save professional details</button>
+    </form>
+</div>
+
+<!-- ============ SECURITY ============ -->
+<div id="security" class="tab-content">
+    <form method="POST" action="{{ url_for('change_password') }}" class="form-section">
+        <div class="section-header"><i class="bi bi-shield-lock-fill"></i><h5>Change password</h5></div>
+        <p class="tab-note">At least 8 characters with letters and numbers.</p>
+        <div style="max-width:520px;">
+            <label class="form-label-pro">Current password</label>
+            <div class="pw-field"><input type="password" name="old_password" id="pwOld" class="form-control-pro" required autocomplete="current-password"><button type="button" onclick="togglePw('pwOld')"><i class="bi bi-eye"></i></button></div>
+            <label class="form-label-pro">New password</label>
+            <div class="pw-field"><input type="password" name="new_password" id="pwNew" class="form-control-pro" required minlength="8" autocomplete="new-password" oninput="pwStrength(this.value)"><button type="button" onclick="togglePw('pwNew')"><i class="bi bi-eye"></i></button></div>
+            <div class="pw-meter"><div id="pwBar"></div></div>
+            <div class="pw-hint" id="pwText">Strength: enter a password</div>
+            <label class="form-label-pro">Confirm new password</label>
+            <div class="pw-field"><input type="password" name="confirm_password" id="pwConf" class="form-control-pro" required minlength="8" autocomplete="new-password"><button type="button" onclick="togglePw('pwConf')"><i class="bi bi-eye"></i></button></div>
+        </div>
+        <div style="margin-top:12px;"><button type="submit" class="btn-save"><i class="bi bi-shield-check"></i> Update password</button></div>
+    </form>
+</div>
+
+<!-- ============ ACTIVITY ============ -->
+<div id="activity" class="tab-content">
+    <div class="form-section">
+        <div class="section-header"><i class="bi bi-clock-history"></i><h5>My recent activity</h5></div>
+        <p class="tab-note">Your last 12 actions in the system. </p>
+        {% for a in activity %}
+        <div class="act-row">
+            <span class="act-dot {% if a.status == 'denied' %}bad{% elif 'delete' in a.action %}warn{% endif %}"></span>
+            <div style="flex:1;">
+                <div class="act-action">{{ a.action }}</div>
+                <div class="act-det">{{ a.details or '' }}</div>
+                <div class="act-when">{{ a.created_at }}{% if a.request_id %} &middot; {{ a.request_id }}{% endif %}</div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No activity recorded yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- ============ ACCOUNT ============ -->
+<div id="account" class="tab-content">
+    <div class="form-section">
+        <div class="section-header"><i class="bi bi-gear-fill"></i><h5>Account</h5></div>
+        <a href="#" onclick="showTab('security', document.querySelector('[data-tab=security]')); return false;" class="settings-item">
+            <div class="left"><i class="bi bi-key-fill"></i><div><strong>Change password</strong><small>Update your login password</small></div></div>
+            <div class="right"><i class="bi bi-chevron-right"></i></div>
+        </a>
+        <a href="#" onclick="showTab('activity', document.querySelector('[data-tab=activity]')); return false;" class="settings-item">
+            <div class="left"><i class="bi bi-clock-history"></i><div><strong>My activity</strong><small>See what you did recently</small></div></div>
+            <div class="right"><i class="bi bi-chevron-right"></i></div>
+        </a>
+        {% if session.role == 'Admin' %}
+        <a href="{{ url_for('settings_page', tab='about') }}" class="settings-item">
+            <div class="left"><i class="bi bi-info-circle-fill"></i><div><strong>About MediGen AI Pro</strong><small>Version {{ app_version }} &middot; system information</small></div></div>
+            <div class="right"><i class="bi bi-chevron-right"></i></div>
+        </a>
+        {% else %}
+        <div class="help-card">
+            <i class="bi bi-info-circle-fill"></i>
+            <div><strong>MediGen AI Pro {{ app_version }}</strong><span>Ask your Admin for system information or access changes.</span></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function showTab(tabName, btn) {
+    document.querySelectorAll('.tab-content').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.profile-tabs button').forEach(function (b) { b.classList.remove('active'); });
+    var pane = document.getElementById(tabName);
+    if (pane) pane.classList.add('active');
+    var button = btn || document.querySelector('.profile-tabs button[data-tab="' + tabName + '"]');
+    if (button) button.classList.add('active');
+    history.replaceState(null, '', '#' + tabName);
+}
+(function () {
+    var h = (location.hash || '').slice(1);
+    if (h && document.getElementById(h) && document.getElementById(h).classList.contains('tab-content')) { showTab(h, null); }
+})();
+function togglePw(id) { var i = document.getElementById(id); i.type = i.type === 'password' ? 'text' : 'password'; }
+function pwStrength(v) {
+    var score = 0;
+    if (v.length >= 8) score++;
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    var bar = document.getElementById('pwBar'), txt = document.getElementById('pwText');
+    var levels = [['#d6455a', 'Very weak', '20%'], ['#f97316', 'Weak', '40%'], ['#f59e0b', 'Fair', '60%'], ['#22a876', 'Good', '80%'], ['#15803d', 'Strong', '100%']];
+    if (!v.length) { bar.style.width = '0'; txt.textContent = 'Strength: enter a password'; return; }
+    var l = levels[Math.max(0, Math.min(4, score - 1))];
+    bar.style.width = l[2]; bar.style.background = l[0]; txt.textContent = 'Strength: ' + l[1];
+}
+</script>
+
+{% endblock %}

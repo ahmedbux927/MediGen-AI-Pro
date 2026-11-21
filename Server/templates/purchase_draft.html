@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Draft #{{ draft.draft_id }}{% endblock %}
+{% set state_label = {'draft': 'Open', 'sent': 'Sent to supplier', 'cancelled': 'Cancelled'} %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-cart-plus"></i> Draft #{{ draft.draft_id }}: {{ draft.supplier_name or 'No supplier yet' }}</h2>
+    <p>Status: <b>{{ state_label[draft.status] }}</b> &middot; created {{ draft.created_at }} by {{ draft.created_name or 'a user' }}{% if draft.sent_at %} &middot; sent {{ draft.sent_at }}{% endif %}</p>
+    <p><a href="{{ url_for('purchase_drafts') }}"><i class="bi bi-arrow-left"></i> All drafts</a></p>
+</div>
+
+<section class="sp-card">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span><b>Estimated total:</b> Rs. {{ '%.2f'|format(total) }}</span>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('purchase_draft_export', draft_id=draft.draft_id) }}"><i class="bi bi-filetype-csv"></i> Export CSV</a>
+        {% if editable %}
+        <form method="post" action="{{ url_for('purchase_draft_sent', draft_id=draft.draft_id) }}" onsubmit="return confirm('Mark this draft as sent to the supplier?');">
+            <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-send-check"></i> Mark as sent</button>
+        </form>
+        <form method="post" action="{{ url_for('purchase_draft_cancel', draft_id=draft.draft_id) }}" onsubmit="return confirm('Cancel this draft?');">
+            <button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-x-circle"></i> Cancel draft</button>
+        </form>
+        {% endif %}
+    </div>
+</section>
+
+<section class="sp-card">
+    {% if editable %}<form method="post" action="{{ url_for('purchase_draft_save', draft_id=draft.draft_id) }}">{% endif %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Medicine</th><th>Barcode</th><th class="text-end">Stock now</th><th style="width:140px;">Order qty</th><th class="text-end">Unit cost</th><th class="text-end">Line total</th></tr></thead>
+        <tbody>
+        {% for l in lines %}
+            <tr>
+                <td>{{ l.name }}{% if l.dosage_form %} <small class="text-muted">{{ l.dosage_form }}</small>{% endif %}</td>
+                <td><small>{{ l.barcode or '' }}</small></td>
+                <td class="text-end">{{ l.stock_quantity or 0 }}</td>
+                <td>
+                    {% if editable %}
+                    <input type="hidden" name="medicine_id" value="{{ l.medicine_id }}">
+                    <input type="number" name="quantity" min="0" max="{{ max_qty }}" step="1" inputmode="numeric" class="form-control form-control-sm" value="{{ l.quantity }}" aria-label="Order quantity for {{ l.name }}">
+                    {% else %}{{ l.quantity }}{% endif %}
+                </td>
+                <td class="text-end">{{ '%.2f'|format(l.unit_cost) }}</td>
+                <td class="text-end">{{ '%.2f'|format(l.quantity * l.unit_cost) }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6" class="text-muted">No items in this draft. Items set to 0 are removed.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% if editable %}
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save quantities</button>
+        <span class="text-muted small">Set an item to 0 to remove it. Stock does not change until the goods are received on the Purchase page.</span>
+    </form>{% endif %}
+</section>
+{% endblock %}

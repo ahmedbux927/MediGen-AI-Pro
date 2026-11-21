@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Drafts{% endblock %}
+{% set state_label = {'draft': 'Open', 'sent': 'Sent to supplier', 'cancelled': 'Cancelled'} %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-cart-plus"></i> Purchase Drafts</h2>
+    <p>Suggested orders, one draft per supplier. Review and change the quantities, then send to the supplier. Drafts do not change stock.</p>
+</div>
+
+<section class="sp-card">
+    <h3><i class="bi bi-magic"></i> Create drafts from suggestions</h3>
+    <p>{{ suggestions }} item(s) are low or running out now. Items already on an open draft are not added again.</p>
+    <form method="post" action="{{ url_for('purchase_drafts_create') }}">
+        <button type="submit" class="btn btn-primary" {% if not suggestions %}disabled{% endif %}><i class="bi bi-magic"></i> Create drafts</button>
+    </form>
+</section>
+
+<section class="sp-card">
+    <h3><i class="bi bi-list-check"></i> Drafts</h3>
+    {% if drafts %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>#</th><th>Supplier</th><th>Status</th><th class="text-end">Items</th><th class="text-end">Estimated total (Rs.)</th><th>Created</th><th>Sent</th><th></th></tr></thead>
+        <tbody>
+        {% for d in drafts %}
+            <tr>
+                <td>{{ d.draft_id }}</td>
+                <td>{{ d.supplier_name or 'No supplier yet' }}</td>
+                <td>{{ state_label[d.status] }}</td>
+                <td class="text-end">{{ d.line_count }}</td>
+                <td class="text-end">{{ '%.2f'|format(d.total) }}</td>
+                <td>{{ d.created_at }}</td>
+                <td>{{ d.sent_at or '-' }}</td>
+                <td><a href="{{ url_for('purchase_draft_detail', draft_id=d.draft_id) }}">Open</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No drafts yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

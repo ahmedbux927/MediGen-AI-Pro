@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Purchase Forecast{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-graph-up-arrow"></i> Purchase Forecast</h2>
+    <p>Suggests how much to order for the next {{ cover }} days, using last year's sales in the same season. This is a rule, not a guarantee. Nothing is ordered here: add the items to a Purchase Draft after you check them.</p>
+</div>
+<section class="sp-card">
+    {% if rows %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Medicine</th><th class="text-end">Stock now</th><th class="text-end">Last 30 days</th><th class="text-end">Same time last year</th><th class="text-end">Expected next {{ cover }} days</th><th class="text-end">Suggested qty</th><th>Why</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+            <tr>
+                <td>{{ r.name }}{% if r.seasonal %} <span class="badge bg-info text-dark">Season</span>{% endif %}</td>
+                <td class="text-end">{{ r.stock }}</td>
+                <td class="text-end">{{ r.recent }}</td>
+                <td class="text-end">{{ r.last_year }}</td>
+                <td class="text-end">{{ r.expected }}</td>
+                <td class="text-end"><b>{{ r.suggested }}</b></td>
+                <td><small>{{ r.reason }}</small></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">Nothing needs ordering right now, and no seasonal rise was found.</p>
+    {% endif %}
+</section>
+{% endblock %}

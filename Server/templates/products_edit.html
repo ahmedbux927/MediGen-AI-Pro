@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Edit product{% endblock %}
+{% block content %}
+<style>
+    .pe-card { background:var(--card,#fff); color:var(--ink,#10243c); border-radius:16px; padding:20px; border:1px solid var(--card-border,#e3e9f2); box-shadow:0 10px 28px rgba(15,31,61,.08); max-width:680px; }
+    .pe-label { font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:.6px; display:block; margin:10px 0 4px; }
+    .pe-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:9px 11px; background:#f8fafc; width:100%; }
+    .pe-btn { border:none; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border-radius:11px; padding:9px 18px; font-weight:700; text-decoration:none; display:inline-block; }
+</style>
+<div class="pe-card">
+    <h3 style="font-weight:800;margin:0 0 6px;">Edit product</h3>
+    <div class="text-muted" style="font-size:13px;margin-bottom:6px;">Stock is changed only by Purchase, Stock adjust or sales. It is not edited here.</div>
+    <form method="POST" action="{{ url_for('products_edit', mid=med.medicine_id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label class="pe-label">Name</label>
+        <input class="pe-input" name="name" value="{{ med.name }}" maxlength="100" required>
+        <label class="pe-label">Strength</label>
+        <input class="pe-input" name="strength" value="{{ med.strength or '' }}" maxlength="60" placeholder="e.g. 500 mg, 5 mg/mL, 1 g vial">
+        <label class="pe-label">Dosage form</label>
+        <select class="pe-input" name="dosage_form">
+            {% for f in forms %}<option {{ 'selected' if f == med.dosage_form }}>{{ f }}</option>{% endfor %}
+        </select>
+        <label class="pe-label">Controlled schedule (leave blank if not controlled)</label>
+        <input class="pe-input" name="schedule" value="{{ med.schedule or '' }}" maxlength="20" placeholder="e.g. H or G, as your drug authority names it">
+        <p class="pe-hint" style="font-size:12px;color:#92400e;margin:-6px 0 12px;">If a schedule is set, every sale of this medicine needs a prescription attached, and each sale is written to the Controlled Register.</p>
+        <label class="pe-label">Barcode (optional)</label>
+        <input class="pe-input" name="barcode" value="{{ med.barcode or '' }}" maxlength="64" inputmode="numeric">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><label class="pe-label">Price (Rs.)</label><input class="pe-input" name="price" type="number" min="0" step="0.01" value="{{ med.price }}"></div>
+            <div><label class="pe-label">Reorder level</label><input class="pe-input" name="reorder_level" type="number" min="0" value="{{ med.reorder_level or 0 }}"></div>
+            <div><label class="pe-label">Units per pack (optional)</label><input class="pe-input" name="units_per_pack" type="number" min="1" max="10000" value="{{ med.units_per_pack or '' }}" placeholder="e.g. 10 for a strip of 10"><div class="pe-hint">Counter par <b>2pk*</b> likhne se 2 pack (units me) add ho jayenge. Khali = sirf unit sale.</div></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="pe-btn" type="submit">Save</button>
+            <a class="pe-btn" href="{{ url_for('products_section', key=section) }}">Back</a>
+        </div>
+    </form>
+</div>
+<div class="pe-card" style="margin-top:16px;">
+    <h3 style="font-weight:800;margin:0 0 6px;">Stock batches and expiry</h3>
+    <div class="text-muted" style="font-size:13px;margin-bottom:8px;">Total in stock: <strong>{{ med.stock_quantity or 0 }}</strong> (from Purchase and sales). Batch rows below come from Purchase.</div>
+    {% if batches %}
+    <div style="overflow-x:auto;">
+    <table class="table" style="font-size:14px;">
+        <thead><tr><th>Batch</th><th>Expiry</th><th>Quantity</th></tr></thead>
+        <tbody>
+        {% for b in batches %}
+        <tr>
+            <td>{{ b.batch_number }}</td>
+            <td>{{ b.expiry_date }}</td>
+            <td>{{ b.quantity }}</td>
+        </tr>
+        {% endfor %}
+        <tr><th>Batch total</th><th></th><th>{{ batch_total }}</th></tr>
+        </tbody>
+    </table>
+    </div>
+    {% if batch_total != (med.stock_quantity or 0) %}
+    <div class="text-danger" style="font-size:13px;">Batch total and stock total do not match. Tell the admin before selling.</div>
+    {% endif %}
+    {% else %}
+    <div class="text-muted">No batch yet. Add stock by <a href="{{ url_for('new_purchase') }}">Purchase</a>, then the expiry date will show here.</div>
+    {% endif %}
+</div>
+{% endblock %}
