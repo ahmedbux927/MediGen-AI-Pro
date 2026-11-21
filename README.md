@@ -24,6 +24,7 @@
   <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/actions/workflows/tests.yml"><img alt="CI tests" src="https://img.shields.io/github/actions/workflow/status/ahmedbux927/MediGen-AI-Pro/tests.yml?branch=main&label=CI%20tests"></a>
   <a href="https://github.com/ahmedbux927/MediGen-AI-Pro/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/ahmedbux927/MediGen-AI-Pro"></a>
   <img alt="Last commit" src="https://img.shields.io/github/last-commit/ahmedbux927/MediGen-AI-Pro">
+  <img alt="Stars" src="https://img.shields.io/github/stars/ahmedbux927/MediGen-AI-Pro?style=social">
 </p>
 
 <p align="center">
@@ -40,6 +41,7 @@
     <a href="#tech-stack">Tech Stack</a> ·
     <a href="#quick-start-windows">Quick Start</a> ·
     <a href="#testing">Testing</a> ·
+    <a href="#roadmap">Roadmap</a> ·
     <a href="#author--contact">Contact</a>
   </b>
 </p>
@@ -76,6 +78,8 @@
   </tr>
 </table>
 
+---
+
 ## Download
 
 **[⬇ Latest release — v101.03](https://github.com/ahmedbux927/MediGen-AI-Pro/releases/latest)**
@@ -84,6 +88,8 @@
 - `MediGen_FULL_v101.03_READY.zip` — complete package (Server + APK + step-by-step guide)
 
 Release notes and history: [Releases](https://github.com/ahmedbux927/MediGen-AI-Pro/releases) · [CHANGELOG.md](CHANGELOG.md)
+
+---
 
 ## Screenshots
 
@@ -112,18 +118,64 @@ Release notes and history: [Releases](https://github.com/ahmedbux927/MediGen-AI-
 
 <p align="center"><i>Screenshots from the live v101.03 app, running on sample data.</i></p>
 
+---
+
 ## Features
 
-- **Point of Sale** — fast billing with barcode search, pack/unit selling (`2pk*barcode`), held bills, discounts, JazzCash / Easypaisa / card / cash, change calculation, invoice QR and WhatsApp share
-- **Inventory** — batch-wise stock with expiry tracking, FEFO selling, low-stock and expiry alerts, stock counting with approval, barcode label printing
-- **Purchases** — supplier orders, receiving, purchase drafts and returns
-- **Expiry Clearance & Refill Reminders** — near-expiry stock value at risk, and WhatsApp refill reminders for regular customers
-- **Cash drawer** — open/close sessions with expected-vs-counted reconciliation
-- **AI Assistant (Gemini)** — answers from live shop data with a propose → confirm flow for actions; daily AI summary (optional)
-- **Reports & Daily Digest** — sales, profit, customer statements, and an owner digest with dues and backup health
-- **Backup** — one-click real backup (mysqldump) plus a restore test that proves the backup works
-- **Roles & security** — Admin / Pharmacist / Cashier, bcrypt passwords, login lockout, CSRF protection, full audit log
-- **Runs anywhere in the shop** — Windows desktop app (own window), any browser on the LAN, and an Android companion app
+<table>
+  <tr>
+    <td width="50%">
+      <b>Point of Sale</b><br>
+      Fast billing with barcode search, pack/unit selling (<code>2pk*barcode</code>), held bills, discounts, JazzCash / Easypaisa / card / cash, change calculation, invoice QR and WhatsApp share.
+    </td>
+    <td width="50%">
+      <b>Inventory</b><br>
+      Batch-wise stock with expiry tracking, FEFO selling, low-stock and expiry alerts, stock counting with approval, barcode label printing.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Purchases</b><br>
+      Supplier orders, receiving, purchase drafts and returns.
+    </td>
+    <td>
+      <b>Expiry Clearance &amp; Refill Reminders</b><br>
+      Near-expiry stock value at risk, and WhatsApp refill reminders for regular customers.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Cash Drawer</b><br>
+      Open/close sessions with expected-vs-counted reconciliation.
+    </td>
+    <td>
+      <b>AI Assistant (Gemini)</b><br>
+      Answers from live shop data with a propose → confirm flow for actions; optional daily AI summary.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Reports &amp; Daily Digest</b><br>
+      Sales, profit, customer statements, and an owner digest with dues and backup health.
+    </td>
+    <td>
+      <b>Backup You Can Trust</b><br>
+      One-click real backup (mysqldump) plus a restore test that proves the backup actually works.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <b>Roles &amp; Security</b><br>
+      Admin / Pharmacist / Cashier roles, bcrypt passwords, login lockout, CSRF protection, full audit log.
+    </td>
+    <td>
+      <b>Runs Anywhere in the Shop</b><br>
+      Windows desktop app (its own window), any browser on the LAN, and an Android companion app.
+    </td>
+  </tr>
+</table>
+
+---
 
 ## Architecture
 
@@ -145,7 +197,18 @@ The server runs on one Windows PC. Every other device in the shop reaches it
 over the local network — nothing about the shop's data needs the internet.
 The Gemini API is called from the server only, with the owner's own key.
 
+---
+
 ## Tech stack
+
+<p>
+  <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white">
+  <img alt="Flask" src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
+  <img alt="MySQL" src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
+  <img alt="Bootstrap" src="https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white">
+  <img alt="Android" src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white">
+  <img alt="GitHub Actions" src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white">
+</p>
 
 | Layer | Technology |
 |---|---|
@@ -156,6 +219,9 @@ The Gemini API is called from the server only, with the owner's own key.
 | Desktop | pywebview + PyInstaller, Inno Setup installer |
 | Android | Native WebView companion (LAN only) |
 | Reports | ReportLab, openpyxl |
+| CI | GitHub Actions — full test suite on every push |
+
+---
 
 ## Quick start (Windows)
 
@@ -173,6 +239,8 @@ same network use `http://<this-pc-ip>:5000`.
 
 A full walkthrough is in [STEP_BY_STEP_GUIDE.md](STEP_BY_STEP_GUIDE.md).
 
+---
+
 ## Windows application (Setup file)
 
 ```
@@ -183,11 +251,15 @@ Builds `MediGenAIPro.exe` (PyInstaller) and then the one-file installer
 `dist\MediGen_Setup_101.03.exe` (Inno Setup 6). The target PC needs no
 Python. A portable MySQL can be bundled — see `Server/installer/README.md`.
 
+---
+
 ## Android app
 
 `MediGenAIPro.apk` (distributed with each release) connects to the shop PC
 over the local Wi-Fi and validates that the address is a private LAN
 address before connecting.
+
+---
 
 ## Project layout
 
@@ -200,6 +272,8 @@ Server/installer/  Inno Setup script + build notes
 docs/              QA matrix, changelog of the v4 programme, shop test checklist
 ```
 
+---
+
 ## Testing
 
 The automated suite (mock + unit, no database needed) currently reports
@@ -210,6 +284,8 @@ cd Server
 python tests\run_all.py
 ```
 
+---
+
 ## Security notes
 
 - Passwords are bcrypt-hashed; API and "remember me" tokens are stored SHA-256 hashed.
@@ -218,6 +294,19 @@ python tests\run_all.py
 - Prescription images are processed locally (Tesseract OCR) and are never
   sent to the AI provider.
 - Found a security issue? Please see [SECURITY.md](SECURITY.md).
+
+---
+
+## Roadmap
+
+Under evaluation for future versions:
+
+- Licensed drug-interaction database integration
+- Optional cloud hosting with HTTPS for multi-branch access
+- FBR (Pakistan tax) integration assessment
+- Scheduled WhatsApp digests to the owner
+
+---
 
 ## Author & Contact
 
@@ -233,9 +322,17 @@ python tests\run_all.py
 - **Email:** [ahmedbux927@gmail.com](mailto:ahmedbux927@gmail.com)
 - **More work:** [github.com/ahmedbux927](https://github.com/ahmedbux927)
 
+---
+
 ## License
 
 Proprietary software — © Ahmed Bux. All rights reserved.
 See [LICENSE](LICENSE) for the full text.
 
-<p align="center"><a href="#medigen-ai-pro">↑ Back to top</a></p>
+---
+
+<p align="center">
+  <b>If MediGen AI Pro impressed you, consider giving it a ⭐ — it helps the project get discovered.</b><br><br>
+  <a href="#medigen-ai-pro">↑ Back to top</a><br><br>
+  <i>© 2026 Ahmed Bux · MediGen AI Pro · Built for a real pharmacy, in production daily.</i>
+</p>
