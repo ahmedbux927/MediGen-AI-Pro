@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Edit Prescription{% endblock %}
+{% block content %}
+<style>
+    .ep-wrap { max-width:960px; margin:0 auto; }
+    .ep-card { background:#fff; border:1px solid #e3e9f2; border-radius:16px; box-shadow:0 10px 28px rgba(15,31,61,.07); overflow:hidden; }
+    .ep-top { padding:22px 26px; border-bottom:1px solid #f1f5f9; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+    .ep-top h3 { margin:0; font-size:20px; font-weight:800; color:#1b2a3b; display:flex; align-items:center; gap:10px; }
+    .ep-top h3 i { color:#1f6fb2; }
+    .ep-meta { font-size:14px; color:#64748b; }
+    .ep-body { padding:24px 26px; }
+    .ep-label { font-size:11px; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.7px; margin-bottom:6px; display:block; }
+    .ep-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 13px; font-size:14px; background:#f8fafc; width:100%; color:#1b2a3b; }
+    .ep-input:focus { outline:none; border-color:#0f9aa0; background:#fff; box-shadow:0 0 0 3px rgba(15,154,160,.12); }
+    .ep-hint { font-size:12px; color:#8593ab; margin-top:5px; }
+    .ep-notice { background:#fff7e6; border:1px solid #f3d9a4; border-left:4px solid #f59e0b; color:#8a5a00; border-radius:12px; padding:12px 16px; font-size:14px; margin-bottom:18px; }
+    .ep-notice strong { color:#6b4400; }
+    .ep-section { font-size:13px; font-weight:800; color:#1b2a3b; text-transform:uppercase; letter-spacing:.6px; margin:22px 0 10px; display:flex; align-items:center; gap:8px; }
+    .ep-table { width:100%; border-collapse:separate; border-spacing:0 8px; }
+    .ep-table th { font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:.5px; padding:0 8px; text-align:left; }
+    .ep-table td { padding:0 8px; vertical-align:middle; }
+    .ep-table .ep-input { margin:0; }
+    .ep-del { width:38px; height:38px; border-radius:10px; border:1px solid #f4c4cc; background:#fdf0f2; color:#d6455a; display:inline-flex; align-items:center; justify-content:center; font-size:16px; }
+    .ep-del:hover { background:#d6455a; color:#fff; }
+    .ep-add { border:1.5px dashed #9fd6d9; background:#f3fbfb; color:#0b7b80; border-radius:10px; padding:9px 16px; font-weight:700; font-size:14px; margin-top:6px; }
+    .ep-add:hover { background:#e4f6f6; }
+    .ep-foot { padding:18px 26px; background:#fbfdff; border-top:1px solid #f1f5f9; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+    .ep-save { border:none; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border-radius:12px; padding:11px 26px; font-weight:700; box-shadow:0 6px 14px rgba(31,111,178,.25); }
+    .ep-cancel { border:1px solid #d8e0ea; background:#fff; color:#334155; border-radius:12px; padding:11px 22px; font-weight:700; text-decoration:none; }
+    .ep-cancel:hover { background:#f4f7fb; color:#1b2a3b; }
+</style>
+
+<div class="ep-wrap">
+<div class="ep-card">
+    <div class="ep-top">
+        <h3><i class="bi bi-pencil-square"></i> Edit Prescription #{{ rx.prescription_id }}</h3>
+        <div class="ep-meta">Patient: <strong style="color:#1b2a3b;">{{ rx.customer_name }}</strong> &middot; Issued {{ rx.date_issued }}</div>
+    </div>
+
+    <form method="POST" id="rxForm">
+    <div class="ep-body">
+        {% if dispensed %}
+        <div class="ep-notice">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            This prescription was already dispensed in sale <strong>{% for s in sale_ids %}#{{ s }}{% if not loop.last %}, {% endif %}{% endfor %}</strong>.
+            Changing the medicines here <strong>does not change that sale</strong>. If the sale must change, use the Returns page for it.
+        </div>
+        {% endif %}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="ep-label">Doctor name</label>
+                <input name="doctor_name" class="ep-input" maxlength="100" required value="{{ doctor_clean }}">
+                <div class="ep-hint">"Dr." is added automatically on the receipt.</div>
+            </div>
+            <div class="col-md-6">
+                <label class="ep-label">Notes</label>
+                <input name="notes" class="ep-input" maxlength="1000" value="{{ rx.notes or '' }}" placeholder="Advice from the doctor">
+            </div>
+        </div>
+
+        <div class="ep-section"><i class="bi bi-capsule"></i> Medicines</div>
+        <table class="ep-table" id="itemsTable">
+            <thead><tr><th style="width:38%;">Medicine</th><th>Dosage</th><th style="width:110px;">Days</th><th style="width:50px;"></th></tr></thead>
+            <tbody>
+            {% for it in items %}
+            <tr>
+                <td>
+                    <select name="medicine_id[]" class="ep-input">
+                        <option value="">Select medicine</option>
+                        {% for m in medicines %}<option value="{{ m.medicine_id }}" {% if m.medicine_id == it.medicine_id %}selected{% endif %}>{{ m.name }}</option>{% endfor %}
+                    </select>
+                </td>
+                <td><input name="dosage[]" class="ep-input" maxlength="100" value="{{ it.dosage }}"></td>
+                <td><input name="duration[]" type="number" min="1" max="365" class="ep-input" value="{{ it.duration_days }}"></td>
+                <td><button type="button" class="ep-del" onclick="removeRow(this)" title="Remove"><i class="bi bi-x-lg"></i></button></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td>
+                    <select name="medicine_id[]" class="ep-input">
+                        <option value="">Select medicine</option>
+                        {% for m in medicines %}<option value="{{ m.medicine_id }}">{{ m.name }}</option>{% endfor %}
+                    </select>
+                </td>
+                <td><input name="dosage[]" class="ep-input" maxlength="100" placeholder="1 tablet daily"></td>
+                <td><input name="duration[]" type="number" min="1" max="365" class="ep-input" value="3"></td>
+                <td><button type="button" class="ep-del" onclick="removeRow(this)" title="Remove"><i class="bi bi-x-lg"></i></button></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" class="ep-add" onclick="addRow()"><i class="bi bi-plus-lg"></i> Add medicine</button>
+    </div>
+
+    <div class="ep-foot">
+        <a href="{{ url_for('prescriptions') }}" class="ep-cancel">Cancel</a>
+        <button type="submit" class="ep-save"><i class="bi bi-check2-circle"></i> Save changes</button>
+    </div>
+    </form>
+</div>
+</div>
+
+<script>
+function addRow() {
+    var tbody = document.querySelector('#itemsTable tbody');
+    var row = tbody.rows[0].cloneNode(true);
+    row.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+    row.querySelector('input[name="duration[]"]').value = 3;
+    row.querySelector('select').value = '';
+    tbody.appendChild(row);
+}
+function removeRow(btn) {
+    var tbody = document.querySelector('#itemsTable tbody');
+    if (tbody.rows.length > 1) btn.closest('tr').remove();
+}
+</script>
+{% endblock %}

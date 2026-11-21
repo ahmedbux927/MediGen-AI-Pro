@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Held Bills{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Held Bills</h4>
+        <div class="text-muted small">Rokay hue bills — resume karke sale mukammal karein. Stock hold par reserve nahi hota; sale ke waqt dobara check hota hai. Kul {{ holds|length }} open.</div>
+    </div>
+    <a class="btn btn-sm btn-outline-secondary no-print" href="{{ url_for('new_sale') }}">New sale</a>
+</div>
+{% if holds %}
+<div class="card border-0 shadow-sm p-3">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>#</th><th>Time</th><th>Customer</th><th>Items</th><th>Note</th><th>Held by</th><th class="text-end">Actions</th></tr>
+            </thead>
+            <tbody>
+            {% for h in holds %}
+                <tr>
+                    <td>{{ h.hold_id }}</td>
+                    <td>{{ h.created_at }}</td>
+                    <td>{{ h.customer_name or 'Walk-in' }}</td>
+                    <td>
+                        {% for l in h.lines %}{{ l.name }} × {{ l.qty }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </td>
+                    <td>{{ h.note }}</td>
+                    <td>{{ h.username or '' }}</td>
+                    <td class="text-end">
+                        <form method="POST" action="{{ url_for('resume_held_bill', hold_id=h.hold_id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-play-circle"></i> Resume</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('discard_held_bill', hold_id=h.hold_id) }}" class="d-inline"
+                              onsubmit="return confirm('Discard this held bill?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Discard</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card border-0 shadow-sm p-4 text-center text-muted">
+    No held bills right now. Use <b>Hold bill</b> on the sale page to park a bill here.
+</div>
+{% endif %}
+{% endblock %}

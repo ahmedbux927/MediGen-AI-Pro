@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Data Quality{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Data Quality</h4>
+        <div class="text-muted small">Report of wrong or incomplete data. Nothing is changed here; it is for viewing only. {{ shop }}</div>
+        <div class="small mt-1"><a href="{{ url_for('sync_conflicts_page') }}">Phone sync stock conflicts (check the shelf)</a></div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <div class="text-muted small">Health score</div>
+            <div class="fs-3 fw-bold">{{ score }}%</div>
+            <div class="small text-muted">{{ clean }} of {{ total }} medicines clean</div>
+        </div>
+    </div>
+</div>
+
+{% for key, title, hint, rows in checks %}
+<div class="data-card mb-3 p-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <strong>{{ title }}</strong>
+            <div class="text-muted small">{{ hint }}</div>
+            {% if key == 'category' and rows %}<a class="small" href="{{ url_for('medicines', issue='nocat') }}">Show these items in Medicines (select them and set a category)</a>{% endif %}
+        </div>
+        <span class="badge {% if rows %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ rows|length }}{% if rows|length >= 200 %}+{% endif %}</span>
+    </div>
+    {% if rows %}
+    <div class="table-responsive mt-2">
+        <table class="table table-sm mb-0">
+            <tbody>
+            {% for r in rows %}
+                {% if key == 'duplicate' %}
+                <tr><td>{{ r.names }}</td><td class="text-end">{{ r.cnt }} times</td></tr>
+                {% elif key == 'barcode' %}
+                <tr><td>{{ r.names }}</td><td class="text-end">barcode {{ r.barcode }} ({{ r.cnt }} items)</td></tr>
+                {% elif key == 'repeat_cat' %}
+                <tr><td>{{ r.names }}</td><td class="text-end">{{ r.cnt }} names</td></tr>
+                {% elif key == 'mismatch' %}
+                <tr><td>{{ r.name }}</td><td class="text-end">stock {{ r.stock_quantity }} / batches {{ r.batch_total }}</td></tr>
+                {% elif key == 'no_batch' %}
+                <tr><td>{{ r.name }}</td><td class="text-end">stock {{ r.stock_quantity }}</td></tr>
+                {% elif key == 'price' %}
+                <tr><td>{{ r.name }}</td><td class="text-end">price {{ r.price or '-' }}</td></tr>
+                {% elif key == 'strength' %}
+                <tr><td>{{ r.name }}</td><td class="text-end">strength "{{ r.strength }}"</td></tr>
+                {% else %}
+                <tr><td>{{ r.name }}</td><td></td></tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+<div class="small text-muted">To fix a medicine, use Edit or Edit selected on the Medicines page.</div>
+{% endblock %}

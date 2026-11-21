@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Import Products{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Import Products — Preview First</h4>
+        <div class="text-muted small">File pehle check hogi, preview me har row nazar ayega, phir Confirm par hi save hoga. Galat rows save nahi hoti.</div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm p-3 mb-3">
+    <form method="POST" action="{{ url_for('import_preview') }}" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-end">
+        <div class="flex-grow-1">
+            <label class="form-label small mb-1">CSV, Excel (.xlsx) or PDF file</label>
+            <input type="file" name="import_file" class="form-control" accept=".csv,.xlsx,.pdf" required>
+        </div>
+        <label class="form-check small mb-2">
+            <input type="checkbox" name="update_existing" class="form-check-input" value="1">
+            Jo items pehle se hain un ki price/tarteeb update bhi karein (stock kabhi import se nahi badalta)
+        </label>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-eye"></i> Preview</button>
+    </form>
+    <div class="small text-muted mt-2">Purana seedha import (bina preview) section pages par mojood hai. Ye wala tareeqa bari lists ke liye mehfooz hai.</div>
+</div>
+
+{% if batches %}
+<div class="card border-0 shadow-sm p-3">
+    <h6 class="mb-2">Recent imports</h6>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>#</th><th>File</th><th>Result</th><th>When</th><th>Status</th><th class="text-end">Action</th></tr></thead>
+            <tbody>
+            {% for b in batches %}
+                <tr>
+                    <td>{{ b.batch_id }}</td>
+                    <td>{{ b.filename }}</td>
+                    <td>{{ b.summary.counts if b.summary else '' }}</td>
+                    <td>{{ b.created_at }}</td>
+                    <td>{{ b.status }}</td>
+                    <td class="text-end">
+                        {% if b.status == 'applied' %}
+                        <form method="POST" action="{{ url_for('import_batch_undo', batch_id=b.batch_id) }}" class="d-inline"
+                              onsubmit="return confirm('Undo this import? New items will be removed and updates restored. This is blocked if any imported item was sold or purchased.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-arrow-counterclockwise"></i> Undo import</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

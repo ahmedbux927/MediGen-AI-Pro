@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Expenses{% endblock %}
+{% block content %}
+<div class="mb-3">
+    <h4 class="mb-0">Expenses</h4>
+    <div class="text-muted small">Electricity, salary, tea, rent and so on. An expense paid in cash is also recorded as cash out in the drawer.</div>
+</div>
+
+<div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-3"><div class="stat-card"><div class="text-muted small">Expenses this month</div><div class="fs-4 fw-bold">Rs. {{ '%.0f'|format(total) }}</div></div></div>
+    {% for c in cats[:3] %}
+    <div class="col-6 col-md-3"><div class="stat-card"><div class="text-muted small">{{ c.category }}</div><div class="fs-5 fw-bold">Rs. {{ '%.0f'|format(c.total) }}</div></div></div>
+    {% endfor %}
+</div>
+
+<div class="data-card p-3 mb-3">
+    <strong>New expense</strong>
+    <form method="post" action="{{ url_for('expense_add') }}" class="row g-2 align-items-end mt-1">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="col-6 col-md-2">
+            <label class="form-label small mb-1" for="expDate">Date</label>
+            <input id="expDate" name="expense_date" type="date" class="form-control form-control-sm" value="{{ today }}" max="{{ today }}" required>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small mb-1" for="expCat">Category</label>
+            <select id="expCat" name="category" class="form-select form-select-sm" required>
+                {% for c in categories %}<option>{{ c }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small mb-1" for="expAmt">Amount (Rs.)</label>
+            <input id="expAmt" name="amount" type="number" step="0.01" min="0.01" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-6 col-md-2">
+            <label class="form-label small mb-1" for="expVia">Paid via</label>
+            <select id="expVia" name="paid_via" class="form-select form-select-sm">
+                {% for p in paid_via %}<option{% if p == 'Cash' %} selected{% endif %}>{{ p }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="col-12 col-md-2">
+            <label class="form-label small mb-1" for="expNote">Note</label>
+            <input id="expNote" name="note" type="text" maxlength="255" class="form-control form-control-sm">
+        </div>
+        <div class="col-12 col-md-2"><button class="btn btn-primary btn-sm w-100" type="submit">Save</button></div>
+    </form>
+    {% if not drawer_open %}<div class="text-muted small mt-2">The drawer is closed, so cash expenses are not recorded in it.</div>{% endif %}
+</div>
+
+<div class="d-flex align-items-center gap-2 mb-2">
+    <form method="get" action="{{ url_for('expenses') }}" class="d-flex gap-2">
+        <input type="month" name="month" value="{{ month }}" class="form-control form-control-sm" style="max-width:180px;">
+        <button class="btn btn-outline-secondary btn-sm" type="submit">View</button>
+    </form>
+</div>
+
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+    <thead><tr><th>Date</th><th>Category</th><th class="text-end">Amount</th><th>Paid via</th><th>Note</th><th>By</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+    <tr>
+        <td>{{ r.expense_date }}</td>
+        <td>{{ r.category }}</td>
+        <td class="text-end fw-bold">{{ '%.0f'|format(r.amount) }}</td>
+        <td>{{ r.paid_via }}</td>
+        <td>{{ r.note or '' }}</td>
+        <td>{{ r.username or '' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="text-muted">No expenses recorded this month.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

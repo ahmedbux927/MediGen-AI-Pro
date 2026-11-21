@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}?v=3">
+<style>
+/* v86.76: section records dashboard. Light cards, one colour per section, animated bars. */
+.dv { --d-ink-fallback:#0f172a; --teal:#0f766e; --blue:#1d4ed8; --violet:#6d28d9; --pink:#be185d; --amber:#b45309; --red:#b91c1c; --green:#047857; --ink:#0f172a; --muted:#64748b; --line:#e2e8f0; }
+.dv * { box-sizing: border-box; }
+.dv-head { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+.dv-head h1 { font-size:26px; font-weight:800; margin:0; color:var(--ink); }
+.dv-head .dv-sub { color:var(--muted); font-size:14px; margin-top:4px; }
+.dv-chip { display:inline-flex; gap:6px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px; color:var(--ink); }
+.dv-card { background:var(--d-card,#fff); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:0 6px 18px rgba(15,23,42,.06); }
+.dv-title { font-size:16px; font-weight:800; color:var(--ink); margin:0 0 10px; display:flex; align-items:center; gap:8px; }
+.dv-muted { color:var(--muted); font-size:13px; }
+.dv-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:16px; }
+.dv-action { display:flex; align-items:center; gap:10px; background:var(--d-card,#fff); border:1px solid var(--line); border-left:4px solid var(--c,#0f766e); border-radius:12px; padding:12px 14px; color:var(--ink); text-decoration:none; font-weight:700; font-size:14px; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease; }
+.dv-action:hover { transform:translateY(-2px); box-shadow:0 10px 20px rgba(15,23,42,.10); color:var(--ink); }
+.dv-action i { font-size:18px; color:var(--c,#0f766e); }
+.dv-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:16px; }
+.dv-kpi { background:var(--d-card,#fff); border:1px solid var(--line); border-radius:14px; padding:14px; border-top:4px solid var(--c,#0f766e); animation:dvRise .5s ease both; }
+.dv-kpi .k { font-size:12px; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:.3px; }
+.dv-kpi .v { font-size:24px; font-weight:800; color:var(--ink); margin-top:4px; }
+.dv-kpi .f { font-size:12px; color:var(--muted); margin-top:2px; }
+.dv-table { width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
+.dv-table th { font-size:12px; text-transform:uppercase; color:var(--muted); font-weight:700; text-align:right; padding:10px 8px; border-bottom:1px solid var(--line); white-space:nowrap; background:var(--d-soft,#f8fafc); }
+.dv-table td { text-align:right; padding:10px 8px; border-bottom:1px solid var(--line); white-space:nowrap; color:var(--ink); }
+.dv-table th:first-child, .dv-table td:first-child { text-align:left; }
+.dv-table tr:last-child td { border-bottom:0; }
+.dv-table td a { color:var(--ink); font-weight:700; text-decoration:none; }
+.dv-table td a:hover { text-decoration:underline; }
+.dv-neg { color:var(--red); font-weight:700; }
+.dv-pos { color:var(--green); font-weight:700; }
+.dv-warn { color:var(--amber); font-weight:700; }
+.dv-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.dv-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin-bottom:16px; }
+.dv-sec { border-top:5px solid var(--c); animation:dvRise .6s ease both; animation-delay:var(--d,0s); }
+.dv-sec-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; }
+.dv-sec-head .ico { width:36px; height:36px; border-radius:10px; background:var(--soft); color:var(--c); display:grid; place-items:center; font-size:18px; }
+.dv-sec-head a { font-size:13px; font-weight:700; color:var(--c); text-decoration:none; }
+.dv-mini { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
+.dv-mini div { background:var(--d-soft,#f8fafc); border-radius:10px; padding:8px 6px; text-align:center; }
+.dv-mini b { display:block; font-size:17px; color:var(--ink); }
+.dv-mini span { font-size:11px; color:var(--muted); }
+.dv-bar-row { margin-bottom:8px; }
+.dv-bar-row .lbl { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-bottom:3px; }
+.dv-bar { height:10px; border-radius:999px; background:#eef2f7; overflow:hidden; }
+.dv-bar > i { display:block; height:100%; width:0; border-radius:999px; background:var(--c); animation:dvGrow 1s cubic-bezier(.2,.8,.2,1) forwards; animation-delay:var(--d,0s); }
+.dv-bar.buy > i { background:#94a3b8; }
+.dv-list { list-style:none; padding:0; margin:8px 0 0; font-size:13px; }
+.dv-list li { display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-bottom:1px dashed var(--line); }
+.dv-list li:last-child { border-bottom:0; }
+.dv-list li span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dv-list .tag { font-size:11px; font-weight:700; color:var(--muted); white-space:nowrap; }
+.dv-top-row { margin-bottom:8px; }
+.dv-top-row .lbl { display:flex; justify-content:space-between; gap:8px; font-size:12px; color:var(--ink); margin-bottom:3px; }
+.dv-top-row .lbl span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dv-top-row .tag { color:var(--muted); white-space:nowrap; font-weight:700; }
+.dv-h { font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.3px; margin:12px 0 2px; }
+.dv-week { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; align-items:end; height:190px; padding-top:10px; }
+.dv-day { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; gap:4px; }
+.dv-pair { display:flex; align-items:flex-end; gap:3px; height:150px; }
+.dv-pair i { width:12px; border-radius:6px 6px 2px 2px; height:0; animation:dvUp .9s cubic-bezier(.2,.8,.2,1) forwards; animation-delay:var(--d,0s); }
+.dv-pair .s { background:linear-gradient(180deg,#14b8a6,#0f766e); }
+.dv-pair .b { background:linear-gradient(180deg,#cbd5e1,#94a3b8); }
+.dv-day small { font-size:11px; color:var(--muted); white-space:nowrap; }
+.dv-legend { display:flex; gap:14px; font-size:12px; color:var(--muted); margin-top:4px; }
+.dv-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:middle; }
+.dv-two { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:14px; margin-bottom:16px; }
+@keyframes dvRise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+@keyframes dvGrow { from { width:0; } to { width:var(--w); } }
+@keyframes dvUp { from { height:0; } to { height:var(--h); } }
+/* v86.78: sections slide in from alternate sides as they come into view */
+@keyframes dvSlideIn { from { opacity:0; transform:translateX(var(--sx,-28px)); } to { opacity:1; transform:none; } }
+.dv-reveal:nth-child(even) { --sx: 28px; }
+.dv-js .dv-reveal:not(.in) { opacity:0; }
+.dv-js .dv-reveal.in { animation: dvSlideIn .8s cubic-bezier(.2,.8,.2,1) both; }
+@media (prefers-reduced-motion: reduce) { .dv *, .dv *::before, .dv *::after { animation:none !important; transition:none !important; } .dv-bar > i { width:var(--w); } .dv-pair i { height:var(--h); } }
+@media (max-width: 640px) { .dv-head h1 { font-size:22px; } .dv-mini { grid-template-columns:repeat(2,1fr); } .dv-two { grid-template-columns:1fr; } }
+</style>
+
+{% set S = rec.sections if rec else [] %}
+{% set T = rec.totals if rec else {} %}
+{% set W = rec.week if rec else {'days':[],'sales':[],'purchases':[]} %}
+{% set wmax = ((W.sales + W.purchases)|max) if (W.sales and W.purchases) else 1 %}
+{% set wmax = wmax if wmax > 0 else 1 %}
+{% set smax = (S|map(attribute='sales_month')|max) if S else 1 %}
+{% set smax = smax if smax and smax > 0 else 1 %}
+{% set colors = {'medicines':'#0f766e','syrups':'#6d28d9','creams':'#be185d','drip':'#1d4ed8','other':'#b45309'} %}
+
+<div class="dash dv">
+  <!-- Welcome: same hero as before; the greeting changes with the time of day -->
+  <section class="d-card d-welcome" aria-label="Welcome">
+    <img class="d-welcome-img" src="{{ url_for('static', filename='images/pharmacy-hero.jpg') }}" alt="" loading="eager">
+    <div class="d-welcome-text">
+      <h1 class="d-greet"><span id="dHello">{{ greet or 'Welcome back' }}</span>, <span class="d-accent">{{ session.user_name }}!</span></h1>
+      <p class="d-muted">Here is what is happening at your pharmacy today.</p>
+      <div class="d-chips">
+        <span class="d-chip"><i class="bi bi-calendar3"></i> <span id="dDate"></span></span>
+        <span class="d-chip"><i class="bi bi-clock"></i> <span id="dTime"></span></span>
+        <span class="d-chip d-dbstate"><i></i>Database connected</span>
+      </div>
+    </div>
+  </section>
+
+  <div style="display:flex;justify-content:flex-end;margin:-4px 0 12px;">
+    <button type="button" id="dAnimToggle" class="dv-chip" role="switch" aria-checked="true" aria-label="Chart animations" style="cursor:pointer;"><i class="bi bi-magic"></i> Animation</button>
+  </div>
+
+  <!-- KPI tiles: whole shop, with the section split under the first tile -->
+  <div class="d-kpis" style="margin-bottom:16px;">
+    <article class="d-card d-kpi" style="--c: var(--d-blue)">
+      <div class="d-kpi-row"><span class="d-kpi-ico"><i class="bi bi-capsule"></i></span>
+        <div class="d-kpi-body"><div class="d-label">Total items</div><div class="d-value" data-count="{{ T['items'] or 0 }}">{{ T['items'] or 0 }}</div></div></div>
+      <div class="d-caption">{% for s in S %}{{ s['label'] }}: <b>{{ s['items'] }}</b>{% if not loop.last %} &middot; {% endif %}{% endfor %}</div>
+    </article>
+    <article class="d-card d-kpi" style="--c: var(--d-teal)">
+      <div class="d-kpi-row"><span class="d-kpi-ico"><i class="bi bi-people"></i></span>
+        <div class="d-kpi-body"><div class="d-label">Total customers</div><div class="d-value" data-count="{{ total_cust|int }}">{{ total_cust }}</div></div></div>
+      <div class="d-caption">Registered. {{ T.customers_month or 0 }} bought this month</div>
+    </article>
+    <article class="d-card d-kpi" style="--c: var(--d-violet)">
+      <div class="d-kpi-row"><span class="d-kpi-ico"><i class="bi bi-cash-stack"></i></span>
+        <div class="d-kpi-body"><div class="d-label">Today's sales</div>
+        <div class="d-value"><small>Rs.</small><span data-count="{{ (T.sales_today or 0)|int }}">{{ '{:,}'.format((T.sales_today or 0)|int) }}</span></div></div></div>
+      <div class="d-caption">{{ today_sales }} invoice{{ '' if today_sales == 1 else 's' }} today</div>
+    </article>
+    <article class="d-card d-kpi" style="--c: var(--d-amber)">
+      <div class="d-kpi-row"><span class="d-kpi-ico"><i class="bi bi-file-earmark-text"></i></span>
+        <div class="d-kpi-body"><div class="d-label">Purchase orders</div><div class="d-value" data-count="{{ pending_po|int }}">{{ pending_po }}</div></div></div>
+      <div class="d-caption">Pending orders</div>
+    </article>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="dv-actions" aria-label="Quick actions">
+    <a href="{{ url_for('new_sale') }}" class="dv-action" style="--c:#0f766e"><i class="bi bi-cart-plus"></i> Create sale</a>
+    <a href="{{ url_for('medicines') }}" class="dv-action" style="--c:#1d4ed8"><i class="bi bi-capsule-pill"></i> Add new medicine</a>
+    <a href="{{ url_for('customers') }}" class="dv-action" style="--c:#6d28d9"><i class="bi bi-person-plus"></i> New customer</a>
+    <a href="{{ url_for('new_purchase') }}" class="dv-action" style="--c:#be185d"><i class="bi bi-box-seam"></i> Receive stock</a>
+    <a href="{{ url_for('expenses') }}" class="dv-action" style="--c:#b45309"><i class="bi bi-wallet2"></i> Expenses</a>
+    {% if session.role == 'Admin' %}<a href="{{ url_for('reports') }}" class="dv-action" style="--c:#334155"><i class="bi bi-graph-up"></i> Reports</a>{% endif %}
+    <button type="button" class="dv-action" style="--c:#0f172a" data-ai-open><i class="bi bi-robot"></i> AI Assistant</button>
+  </div>
+
+  {% if ai_summary %}
+  <!-- Stage 6: daily AI summary (Settings -> AI Assistant se on hota hai, default off) -->
+  <div class="dv-card" style="margin-bottom:14px;">
+    <div class="k" style="font-weight:700;"><i class="bi bi-robot"></i> Daily AI Summary</div>
+    <div style="white-space:pre-line; margin-top:6px;">{{ ai_summary }}</div>
+    <div class="f" style="margin-top:6px;">AI generated - check with pharmacist. Sirf aaj ke kul number bheje jate hain, koi customer ya mareez ki maloomat nahi.</div>
+  </div>
+  {% endif %}
+
+  <!-- Headline numbers for the whole shop -->
+  <div class="dv-kpis">
+    <div class="dv-kpi" style="--c:#0f766e"><div class="k">Sales today</div><div class="v">Rs. <span data-count="{{ (T.sales_today or 0)|int }}">{{ '{:,}'.format((T.sales_today or 0)|int) }}</span></div><div class="f">{{ T.sold_today or 0 }} units sold &middot; <a href="{{ url_for('sales') }}">View today's sales</a></div></div>
+    <div class="dv-kpi" style="--c:{{ '#047857' if (T.profit_today or 0) >= 0 else '#b91c1c' }};animation-delay:.05s"><div class="k">Profit today</div><div class="v {{ 'dv-pos' if (T.profit_today or 0) >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format((T.profit_today or 0)|int) }}</div><div class="f">Sale minus batch purchase price &middot; <a href="{{ url_for('reports') }}">Reports</a></div></div>
+    <div class="dv-kpi" style="--c:#be185d;animation-delay:.1s"><div class="k">Purchase today</div><div class="v">Rs. {{ '{:,}'.format((T.purchase_today or 0)|int) }}</div><div class="f">Stock received today</div></div>
+    <div class="dv-kpi" style="--c:#1d4ed8;animation-delay:.15s"><div class="k">Sales this month</div><div class="v">Rs. {{ '{:,}'.format((T.sales_month or 0)|int) }}</div><div class="f">Profit Rs. {{ '{:,}'.format((T.profit_month or 0)|int) }}</div></div>
+    <div class="dv-kpi" style="--c:#6d28d9;animation-delay:.2s"><div class="k">Customers this month</div><div class="v" data-count="{{ (T.customers_month or 0)|int }}">{{ T.customers_month or 0 }}</div><div class="f">{{ total_cust }} registered in total</div></div>
+    <div class="dv-kpi" style="--c:#b45309;animation-delay:.25s"><div class="k">Needs attention</div><div class="v">{{ (T.low or 0) + (T.out or 0) }} <span class="dv-muted" style="font-size:13px;">low/out</span></div><div class="f"><a href="{{ url_for('medicines', filter='low') }}">Low stock</a> &middot; <a href="{{ url_for('medicines', filter='out') }}">Out of stock</a><br>{{ T.expiring or 0 }} batches expire soon: <a href="{{ url_for('batches', filter='soon', days=30) }}">30 days</a> &middot; <a href="{{ url_for('batches', filter='soon', days=60) }}">60 days</a> &middot; <a href="{{ url_for('batches', filter='soon', days=90) }}">90 days</a>{% if T.no_price %} &middot; <a href="{{ url_for('data_quality') }}">{{ T.no_price }} item(s) with price 0</a>{% endif %}</div></div>
+    {% if money.cash_in_hand is defined %}
+    <div class="dv-kpi" style="--c:#047857;animation-delay:.3s"><div class="k">Cash in hand</div><div class="v">Rs. {{ '{:,}'.format(money.cash_in_hand|int) }}</div><div class="f">Opening Rs. {{ '{:,}'.format(money.cash_opening|int) }}{% if money.cash_since %} &middot; since {{ money.cash_since.strftime('%d %b') if money.cash_since.strftime else money.cash_since }}{% endif %}</div></div>
+    {% else %}
+    <div class="dv-kpi" style="--c:#94a3b8;animation-delay:.3s"><div class="k">Cash in hand</div><div class="v" style="font-size:16px;">Drawer closed</div><div class="f"><a href="{{ url_for('expenses') }}">Open cash drawer</a></div></div>
+    {% endif %}
+    {% if money.udhaar_total is defined %}
+    <div class="dv-kpi" style="--c:#b45309;animation-delay:.35s"><div class="k">Customer credit (udhaar)</div><div class="v">Rs. {{ '{:,}'.format(money.udhaar_total|int) }}</div><div class="f">All customers</div></div>
+    {% endif %}
+  </div>
+
+  <!-- Section records: one row per product section -->
+  <div class="dv-card dv-reveal" style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <h2 class="dv-title" style="margin:0;"><i class="bi bi-grid-1x2"></i> Section records</h2>
+      <a href="{{ url_for('products_hub') }}" class="dv-muted" style="font-weight:700;">Open all sections &rarr;</a>
+    </div>
+    {% if S %}
+    <div class="dv-scroll">
+    <table class="dv-table">
+      <thead><tr>
+        <th>Section</th><th>Items</th><th>In stock</th><th>Low</th><th>No stock</th><th>Expiring 90d</th>
+        <th>Sold today</th><th>Sales today</th><th>Profit today</th><th>Purchase today</th>
+        <th>Sales month</th><th>Profit month</th><th>Purchase month</th><th>Customers month</th>
+      </tr></thead>
+      <tbody>
+      {% for s in S %}
+        <tr>
+          <td><a href="{{ url_for('products_section', key=s['key']) }}"><i class="bi {{ s['icon'] }}" style="color:{{ colors[s['key']] }};"></i> {{ s['label'] }}</a></td>
+          <td>{{ s['items'] }}</td>
+          <td>{{ s['in_stock'] }}</td>
+          <td class="{{ 'dv-warn' if s['low'] }}">{{ s['low'] }}</td>
+          <td class="{{ 'dv-neg' if s['out'] and s['items'] }}">{{ s['out'] }}</td>
+          <td class="{{ 'dv-warn' if s['expiring'] }}">{{ s['expiring'] }}</td>
+          <td><b>{{ s['sold_today'] }}</b></td>
+          <td>Rs. {{ '{:,}'.format(s['sales_today']|int) }}</td>
+          <td class="{{ 'dv-pos' if s['profit_today'] >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format(s['profit_today']|int) }}</td>
+          <td>Rs. {{ '{:,}'.format(s['purchase_today']|int) }}</td>
+          <td>Rs. {{ '{:,}'.format(s['sales_month']|int) }}</td>
+          <td class="{{ 'dv-pos' if s['profit_month'] >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format(s['profit_month']|int) }}</td>
+          <td>Rs. {{ '{:,}'.format(s['purchase_month']|int) }}</td>
+          <td>{{ s['customers_month'] }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="dv-muted">Section records could not be loaded. The rest of the dashboard still works. Check the server log.</p>
+    {% endif %}
+  </div>
+
+  <!-- One card per section: stock, month figures, best sellers, low stock, expiring -->
+  <div class="dv-grid">
+  {% for s in S %}
+    {% set c = colors[s['key']] %}
+    <section class="dv-card dv-reveal dv-sec" style="--c:{{ c }};--soft:{{ c }}1a;--d:{{ loop.index0 * 0.08 }}s;" aria-label="{{ s['label'] }} records">
+      <div class="dv-sec-head">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="ico"><i class="bi {{ s['icon'] }}"></i></span>
+          <b style="font-size:16px;color:var(--ink);">{{ s['label'] }}</b>
+        </div>
+        <a href="{{ url_for('products_section', key=s['key']) }}">Records &rarr;</a>
+      </div>
+      <div class="dv-mini">
+        <div><b>{{ s['items'] }}</b><span>Items</span></div>
+        <div><b>{{ s['in_stock'] }}</b><span>In stock</span></div>
+        <div><b class="{{ 'dv-warn' if s['low'] }}">{{ s['low'] }}</b><span>Low</span></div>
+        <div><b class="{{ 'dv-warn' if s['expiring'] }}">{{ s['expiring'] }}</b><span>Expiring</span></div>
+      </div>
+      <div class="dv-bar-row">
+        <div class="lbl"><span>Sales this month</span><span>Rs. {{ '{:,}'.format(s['sales_month']|int) }}</span></div>
+        <div class="dv-bar"><i style="--w:{{ s['share'] }}%;--c:{{ c }};--d:{{ loop.index0 * 0.1 + 0.2 }}s;"></i></div>
+      </div>
+      <div class="dv-bar-row">
+        <div class="lbl"><span>Purchase this month</span><span>Rs. {{ '{:,}'.format(s['purchase_month']|int) }}</span></div>
+        <div class="dv-bar buy"><i style="--w:{{ s['purchase_share'] }}%;--d:{{ loop.index0 * 0.1 + 0.3 }}s;"></i></div>
+      </div>
+      <div class="dv-muted">Profit this month: <b class="{{ 'dv-pos' if s['profit_month'] >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format(s['profit_month']|int) }}</b></div>
+      <div class="dv-muted">Customers: <b>{{ s['customers_month'] }}</b> this month &middot; <b>{{ s['customers_all'] }}</b> all time{% if s['no_price'] %} &middot; <a href="{{ url_for('data_quality') }}" class="dv-warn">{{ s['no_price'] }} price 0</a>{% endif %}</div>
+
+      <div class="dv-h">Best sellers (30 days)</div>
+      {% if s['top'] %}
+      {% set tmax = (s['top'][0]['sold'] or 1) %}
+      <div class="dv-top">{% for t in s['top'] %}
+        <div class="dv-top-row">
+          <div class="lbl"><span>{{ loop.index }}. {{ t['name'] }}</span><span class="tag">{{ t['sold'] }} units &middot; Rs. {{ '{:,}'.format(t['revenue']|int) }}</span></div>
+          <div class="dv-bar"><i style="--w:{{ (t['sold'] * 100 / tmax)|round(1) }}%;--c:{{ c }};--d:{{ loop.index0 * 0.08 }}s;"></i></div>
+        </div>
+      {% endfor %}</div>
+      {% else %}<div class="dv-muted">No sale in the last 30 days.</div>{% endif %}
+
+      <div class="dv-h">Low stock</div>
+      {% if s['low_items'] %}
+      <ul class="dv-list">{% for l in s['low_items'][:4] %}<li><span>{{ l['name'] }}</span><span class="tag dv-warn">{{ l['stock'] }} / min {{ l['reorder'] }}</span></li>{% endfor %}</ul>
+      {% else %}<div class="dv-muted">Stock is fine.</div>{% endif %}
+
+      <div class="dv-h">Expiring within 90 days</div>
+      {% if s['expiring_items'] %}
+      <ul class="dv-list">{% for e in s['expiring_items'][:4] %}<li><span>{{ e['name'] }}</span><span class="tag {{ 'dv-neg' if e['days'] <= 30 else 'dv-warn' }}">{{ e['expiry'] }} &middot; {{ e['qty'] }}</span></li>{% endfor %}</ul>
+      {% else %}<div class="dv-muted">Nothing expires soon.</div>{% endif %}
+    </section>
+  {% endfor %}
+  </div>
+
+  <div class="dv-two">
+    <!-- 7-day sales against purchases for the whole shop -->
+    <section class="dv-card">
+      <h2 class="dv-title"><i class="bi bi-bar-chart"></i> Sales and purchases, last 7 days</h2>
+      {% if W.days %}
+      <div class="dv-week">
+        {% for d in W.days %}
+        {% set sv = W.sales[loop.index0] %}
+        {% set pv = W.purchases[loop.index0] %}
+        <div class="dv-day" title="{{ d }}: sales Rs. {{ '{:,}'.format(sv|int) }}, purchase Rs. {{ '{:,}'.format(pv|int) }}">
+          <div class="dv-pair">
+            <i class="s" style="--h:{{ (sv * 100 / wmax)|round(1) }}%;--d:{{ loop.index0 * 0.07 }}s;"></i>
+            <i class="b" style="--h:{{ (pv * 100 / wmax)|round(1) }}%;--d:{{ loop.index0 * 0.07 + 0.1 }}s;"></i>
+          </div>
+          <small>{{ d }}</small>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="dv-legend"><span><i style="background:#0f766e"></i>Sales</span><span><i style="background:#94a3b8"></i>Purchase</span></div>
+      {% else %}<p class="dv-muted">No data yet.</p>{% endif %}
+    </section>
+
+    <!-- Profit and loss per section, this month -->
+    <section class="dv-card">
+      <h2 class="dv-title"><i class="bi bi-cash-coin"></i> Profit and loss, this month</h2>
+      <div class="dv-muted" style="margin-bottom:8px;">Profit = sale minus batch purchase price. Loss = cost is higher than the sale.</div>
+      {% if S %}
+      <div class="dv-scroll">
+      <table class="dv-table">
+        <thead><tr><th>Section</th><th>Sales</th><th>Cost</th><th>Profit / Loss</th></tr></thead>
+        <tbody>
+        {% for s in S %}
+          <tr>
+            <td><i class="bi {{ s['icon'] }}" style="color:{{ colors[s['key']] }};"></i> {{ s['label'] }}</td>
+            <td>Rs. {{ '{:,}'.format(s['sales_month']|int) }}</td>
+            <td>Rs. {{ '{:,}'.format(s['cost_month']|int) }}</td>
+            <td class="{{ 'dv-pos' if s['profit_month'] >= 0 else 'dv-neg' }}">{{ 'Profit' if s['profit_month'] >= 0 else 'Loss' }} Rs. {{ '{:,}'.format(s['profit_month']|int) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot><tr>
+          <td><b>Total</b></td>
+          <td><b>Rs. {{ '{:,}'.format((T.sales_month or 0)|int) }}</b></td>
+          <td><b>Rs. {{ '{:,}'.format((T.cost_month or 0)|int) }}</b></td>
+          <td class="{{ 'dv-pos' if (T.profit_month or 0) >= 0 else 'dv-neg' }}"><b>Rs. {{ '{:,}'.format((T.profit_month or 0)|int) }}</b></td>
+        </tr></tfoot>
+      </table>
+      </div>
+      {% if money.net_month is defined %}
+      <div class="dv-muted" style="margin-top:10px;">Expenses today: <b>Rs. {{ '{:,}'.format(money.exp_today|int) }}</b> &middot; Expenses this month: <b>Rs. {{ '{:,}'.format(money.exp_month|int) }}</b></div>
+      <div class="dv-muted" style="margin-top:4px;">Net profit today (after expenses): <b class="{{ 'dv-pos' if money.net_today >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format(money.net_today|int) }}</b> &middot; this month: <b class="{{ 'dv-pos' if money.net_month >= 0 else 'dv-neg' }}">Rs. {{ '{:,}'.format(money.net_month|int) }}</b></div>
+      {% endif %}
+      {% else %}<p class="dv-muted">No data yet.</p>{% endif %}
+    </section>
+  </div>
+
+  {% if drip %}
+  <section class="dv-card dv-reveal" style="margin-bottom:16px;border-top:5px solid #1d4ed8;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h2 class="dv-title" style="margin:0;"><i class="bi bi-droplet-half"></i> Drip &amp; Injection records</h2>
+      <a href="{{ url_for('drip_records') }}" class="dv-muted" style="font-weight:700;">Open drip records &rarr;</a>
+    </div>
+    <div class="dv-kpis" style="margin:12px 0 0;">
+      <div class="dv-kpi" style="--c:#1d4ed8"><div class="k">In stock</div><div class="v">{{ drip.in_stock }}</div><div class="f">{{ drip['items'] }} items in list</div></div>
+      <div class="dv-kpi" style="--c:#1d4ed8"><div class="k">Given today</div><div class="v">{{ drip.today_records }}</div><div class="f">{{ drip.today_qty }} units</div></div>
+      <div class="dv-kpi" style="--c:#b45309"><div class="k">Low stock</div><div class="v">{{ drip.low_stock }}</div><div class="f">Items below minimum</div></div>
+      <div class="dv-kpi" style="--c:#b45309"><div class="k">Expiring</div><div class="v">{{ drip.expiring }}</div><div class="f">Batches in 90 days</div></div>
+      <div class="dv-kpi" style="--c:#b91c1c"><div class="k">Expired</div><div class="v">{{ drip.expired_qty }}</div><div class="f">Units expired, not sold</div></div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Sales overview chart (existing script, unchanged) -->
+  <section class="dv-card dv-reveal" style="margin-bottom:16px;">
+    <h2 id="salesChartTitle" class="dv-title"><i class="bi bi-graph-up"></i> Sales overview (last 7 days)</h2>
+    {% if chart_has_data %}
+    <div style="height:260px;position:relative;"><canvas id="salesChart" role="img" aria-labelledby="salesChartTitle"></canvas></div>
+    <table class="sr-only" aria-label="Last 7 days sales data">
+      <thead><tr><th scope="col">Day</th><th scope="col">Invoices</th><th scope="col">Net revenue</th></tr></thead>
+      <tbody>
+      {% for d, inv, rev in sales_rows %}<tr><td>{{ d }}</td><td>{{ inv }}</td><td>{{ rev }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="dv-muted">No sales in the last 7 days.</p>{% endif %}
+  </section>
+</div>
+
+<script>
+/* v86.78: reveal sections as they scroll into view (no effect if the browser lacks IntersectionObserver) */
+(function () {
+    var els = document.querySelectorAll('.dv-reveal');
+    if (!('IntersectionObserver' in window) || !els.length) { return; }
+    document.documentElement.classList.add('dv-js');
+    var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold: 0.12 });
+    Array.prototype.forEach.call(els, function (el) { io.observe(el); });
+})();
+</script>
+<script id="dash-data" type="application/json">{{ {'days': chart_days, 'revenue': chart_revenue, 'invoices': chart_invoices, 'hasData': chart_has_data}|tojson }}</script>
+<script src="{{ vendor_asset('chartjs/chart.umd.js', 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=4" defer></script>
+{% endblock %}

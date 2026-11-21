@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Inspection Report{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-file-earmark-spreadsheet"></i> Inspection Report</h2>
+    <p>One Excel file with the controlled drug register, cold chain readings and expiry write-offs for the dates you choose.
+       Maximum {{ max_days }} days. Type your password to download; nothing is changed.</p>
+</div>
+<form method="POST" action="{{ url_for('inspection_report_export') }}" class="pf-card" style="max-width:520px;">
+    <label class="pf-label">From (YYYY-MM-DD)</label>
+    <input type="date" name="start" value="{{ start }}" class="pf-input" required>
+    <label class="pf-label">To (YYYY-MM-DD)</label>
+    <input type="date" name="end" value="{{ end }}" class="pf-input" required>
+    <label class="pf-label">Your password</label>
+    <input type="password" name="password" class="pf-input" autocomplete="current-password" required>
+    <div style="margin-top:12px;">
+        <button type="submit" class="pf-btn"><i class="bi bi-download"></i> Download Excel</button>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Drug Interactions{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-exclamation-diamond"></i> Drug Interactions</h2>
+    <p>Pairs of medicines that should not be given together. When a sale contains a listed pair, a warning appears after the sale is saved. Nothing is blocked.</p>
+</div>
+
+<div class="alert alert-warning">
+    <b>Important:</b> this list only has the pairs entered here. It is not a complete drug database. Medicines that are not on this list are NOT confirmed safe together. Always check with the pharmacist.
+</div>
+
+<section class="sp-card">
+    <h3><i class="bi bi-plus-circle-fill"></i> Add a pair</h3>
+    <form method="post" action="{{ url_for('interaction_add') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div><label class="form-label small" for="ixA">First medicine</label>
+            <input id="ixA" type="text" name="first" list="ixNames" required maxlength="100" class="form-control" style="max-width:240px;"></div>
+        <div><label class="form-label small" for="ixB">Second medicine</label>
+            <input id="ixB" type="text" name="second" list="ixNames" required maxlength="100" class="form-control" style="max-width:240px;"></div>
+        <div><label class="form-label small" for="ixS">Severity</label>
+            <select id="ixS" name="severity" class="form-select" style="max-width:160px;">
+                {% for s in severities %}<option value="{{ s }}" {% if s == 'moderate' %}selected{% endif %}>{{ s|capitalize }}</option>{% endfor %}
+            </select></div>
+        <div><label class="form-label small" for="ixN">Note (what to watch for)</label>
+            <input id="ixN" type="text" name="note" maxlength="255" class="form-control" style="max-width:320px;"></div>
+        <button type="submit" class="btn btn-primary">Save pair</button>
+        <datalist id="ixNames">{% for n in names %}<option value="{{ n }}"></option>{% endfor %}</datalist>
+    </form>
+</section>
+
+<section class="sp-card">
+    <h3><i class="bi bi-list-ul"></i> Listed pairs</h3>
+    {% if rules %}
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Severity</th><th>First</th><th>Second</th><th>Note</th><th>Added</th><th></th></tr></thead>
+        <tbody>
+        {% for r in rules %}
+            <tr>
+                <td>{% if r.severity == 'major' %}<span class="badge bg-danger">Major</span>{% elif r.severity == 'moderate' %}<span class="badge bg-warning text-dark">Moderate</span>{% else %}<span class="badge bg-secondary">Minor</span>{% endif %}</td>
+                <td>{{ r.a_name }}</td>
+                <td>{{ r.b_name }}</td>
+                <td>{{ r.note or '' }}</td>
+                <td><small>{{ r.created_at }}</small></td>
+                <td>{% if is_admin %}
+                    <form method="post" action="{{ url_for('interaction_delete', interaction_id=r.interaction_id) }}" onsubmit="return confirm('Delete this pair?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                    </form>{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No pairs entered yet.</p>
+    {% endif %}
+</section>
+{% endblock %}

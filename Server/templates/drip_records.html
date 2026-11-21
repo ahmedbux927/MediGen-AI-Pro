@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Drip & Injection records{% endblock %}
+{% block content %}
+<style>
+    .dw-card { background:#fff; border-radius:16px; padding:20px; border:1px solid #e3e9f2; box-shadow:0 10px 28px rgba(15,31,61,.08); margin-bottom:20px; }
+    .dw-card h3 { font-weight:800; font-size:17px; margin-bottom:12px; }
+    .dw-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
+    .dw-stat { background:#fff; border:1px solid #e3e9f2; border-radius:14px; padding:14px 16px; }
+    .dw-stat b { display:block; font-size:24px; font-weight:800; color:#0f1f3d; }
+    .dw-stat span { font-size:12px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
+    .dw-stat.warn b { color:#b45309; } .dw-stat.danger b { color:#b91c1c; }
+    .dw-scroll { overflow-x:auto; }
+    .dw-table th { font-size:11px; text-transform:uppercase; color:#475569; letter-spacing:.5px; white-space:nowrap; }
+    .dw-filter { display:flex; gap:10px; flex-wrap:wrap; align-items:end; margin-bottom:16px; }
+    .dw-filter label { font-size:12px; font-weight:700; color:#475569; display:block; margin-bottom:4px; }
+    .dw-filter input { border:1.5px solid #e2e8f0; border-radius:10px; padding:8px 10px; background:#f8fafc; }
+    .dw-btn { border:none; background:linear-gradient(135deg,#0f9aa0,#1f6fb2); color:#fff; border-radius:12px; padding:9px 18px; font-weight:700; text-decoration:none; display:inline-block; }
+    .dw-btn.light { background:#fff; color:#1f6fb2; border:1.5px solid #cfe3fb; }
+    .dw-pill { font-size:11px; font-weight:700; border-radius:8px; padding:3px 8px; }
+    .dw-pill.exp { background:#fee2e2; color:#991b1b; } .dw-pill.soon { background:#fef3c7; color:#92400e; }
+</style>
+
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <h2 style="font-weight:800;font-size:22px;margin:0;">Drip & Injection records</h2>
+    <div style="display:flex;gap:8px;">
+        <a class="dw-btn light" href="{{ url_for('drip') }}"><i class="bi bi-arrow-left"></i> Quick sell</a>
+        <a class="dw-btn" href="{{ url_for('drip_records') }}?from={{ d_from }}&amp;to={{ d_to }}&amp;export=1"><i class="bi bi-download"></i> Download CSV</a>
+    </div>
+</div>
+
+<div class="dw-stats">
+    <div class="dw-stat"><span>Records in range</span><b>{{ totals.records }}</b></div>
+    <div class="dw-stat"><span>Units given</span><b>{{ totals.quantity }}</b></div>
+    <div class="dw-stat {{ 'warn' if expiry else '' }}"><span>Batches expiring in 90 days</span><b>{{ expiry|selectattr('days_left', 'ge', 0)|list|length }}</b></div>
+    <div class="dw-stat {{ 'danger' if expiry|selectattr('days_left', 'lt', 0)|list else '' }}"><span>Expired batches with stock</span><b>{{ expiry|selectattr('days_left', 'lt', 0)|list|length }}</b></div>
+</div>
+
+<div class="dw-card">
+    <form method="GET" class="dw-filter">
+        <div><label>From</label><input type="date" name="from" value="{{ d_from }}"></div>
+        <div><label>To</label><input type="date" name="to" value="{{ d_to }}"></div>
+        <button class="dw-btn" type="submit"><i class="bi bi-funnel"></i> Show</button>
+        <a class="dw-btn light" href="{{ url_for('drip_records') }}">Today</a>
+    </form>
+    <h3>Records ({{ rows|length }})</h3>
+    {% if rows %}
+    <div class="dw-scroll">
+    <table class="table dw-table">
+        <thead><tr><th>Date</th><th>Time</th><th>Medicine</th><th>Patient</th><th>Route</th><th>Dose</th><th>Qty</th><th>Sale</th><th>By</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+        <tr>
+            <td>{{ r.given_at.strftime('%d %b %Y') }}</td>
+            <td>{{ r.given_at.strftime('%H:%M') }}</td>
+            <td>{{ r.medicine_name }}</td>
+            <td>{{ r.patient }}</td>
+            <td>{{ r.route }}</td>
+            <td>{{ r.dose_text }}{% if r.notes %}<div style="font-size:11px;color:#64748b;">{{ r.notes }}</div>{% endif %}</td>
+            <td>{{ r.quantity }}</td>
+            <td>{% if r.sale_id %}<a href="{{ url_for('invoice', sale_id=r.sale_id) }}">#{{ r.sale_id }}</a>{% else %}-{% endif %}</td>
+            <td>{{ r.given_by_name or '' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="text-muted">No drip or injection records in this range.</p>
+    {% endif %}
+</div>
+
+<div class="dw-card">
+    <h3>Expiry: drip and injection stock</h3>
+    {% if expiry %}
+    <div class="dw-scroll">
+    <table class="table dw-table">
+        <thead><tr><th>Medicine</th><th>Batch</th><th>Expiry</th><th>Days left</th><th>Qty in stock</th></tr></thead>
+        <tbody>
+        {% for b in expiry %}
+        <tr>
+            <td>{{ b.name }}</td>
+            <td>{{ b.batch_number or '-' }}</td>
+            <td>{{ b.expiry_date }}</td>
+            <td>{% if b.days_left < 0 %}<span class="dw-pill exp">Expired {{ -b.days_left }} day(s) ago</span>{% else %}<span class="dw-pill soon">{{ b.days_left }}</span>{% endif %}</td>
+            <td>{{ b.quantity }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    <p class="text-muted" style="font-size:12px;margin:10px 0 0;">Expired stock is not sold. Return it to the supplier from Supplier Returns.</p>
+    {% else %}
+    <p class="text-muted">No drip or injection stock expires in the next 90 days.</p>
+    {% endif %}
+</div>
+{% endblock %}

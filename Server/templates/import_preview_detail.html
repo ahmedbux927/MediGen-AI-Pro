@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Import Preview{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Import Preview — {{ pv.filename }}</h4>
+        <div class="text-muted small">
+            Kul {{ summary.rows }} rows · New: {{ summary.counts.create }} · Update: {{ summary.counts.update }} ·
+            Pehle se hai (skip): {{ summary.counts.skip }} · Galat rows: {{ summary.counts.error }}
+        </div>
+    </div>
+    <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('import_preview') }}">Back</a>
+</div>
+
+{% if pv.status == 'preview' %}
+<form method="POST" action="{{ url_for('import_preview_confirm', preview_id=pv.preview_id) }}" class="mb-3">
+    <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Confirm import</button>
+    <span class="small text-muted ms-2">Sirf theek rows save hongi. Galat rows (error wali) save nahi hoti. Baad me Undo bhi ho sakta hai (jab tak koi item bika ya khareeda na gaya ho).</span>
+</form>
+{% else %}
+<div class="alert alert-info">Ye preview confirm ho chuki hai. Dobara import ke liye file phir se upload karein.</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm p-3">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead><tr><th>Line</th><th>Medicine</th><th>Barcode</th><th>Price</th><th>Stock</th><th>Batch / Expiry</th><th>Action</th><th>Notes</th></tr></thead>
+            <tbody>
+            {% for item in plan %}
+                <tr>
+                    <td>{{ item.line }}</td>
+                    <td>{{ item.name }}{% if item.row.get('strength') %} <span class="text-muted small">{{ item.row.get('strength') }}</span>{% endif %}</td>
+                    <td>{{ item.barcode or '' }}</td>
+                    <td>{{ item.row.get('selling_price') }}</td>
+                    <td>{{ item.row.get('stock_quantity') }}</td>
+                    <td>{{ item.row.get('batch_number') or '' }} {{ item.row.get('expiry_date') or '' }}</td>
+                    <td>
+                        {% if item.action == 'create' %}<span class="badge bg-success">New</span>
+                        {% elif item.action == 'update' %}<span class="badge bg-primary">Update</span>
+                        {% elif item.action == 'skip' %}<span class="badge bg-secondary">Skip</span>
+                        {% else %}<span class="badge bg-danger">Error</span>{% endif %}
+                    </td>
+                    <td class="small">
+                        {% for err in item.errors %}<div class="text-danger">{{ err }}</div>{% endfor %}
+                        {% for warn in item.warnings %}<div class="text-muted">{{ warn }}</div>{% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

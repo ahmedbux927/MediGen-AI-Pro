@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Daily Digest{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+    <div>
+        <h4 class="mb-0">Daily Digest</h4>
+        <div class="text-muted small">Roz ka khulasa — {{ shop }}. Sirf Admin ke liye.</div>
+    </div>
+    <div class="d-flex gap-2 no-print">
+        {% if owner_wa %}<a class="btn btn-sm btn-success" target="_blank" rel="noopener" href="https://wa.me/{{ owner_wa }}?text={{ wa_text }}">WhatsApp par bhejen</a>{% endif %}
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="window.print()">Print</button>
+    </div>
+</div>
+
+{% if not backup.exists or backup.stale %}
+<div class="alert alert-danger py-2"><strong>Backup warning:</strong>
+{% if backup.exists %}Aakhri backup {{ backup.age_h }} ghante purana hai ({{ backup.when }}).{% else %}Backups folder me koi backup nahi mila.{% endif %}
+ Settings &rarr; Security se abhi backup lein, aur roz ke auto-backup ke liye <span class="font-monospace">scripts\schedule_daily_backup.bat</span> ek dafa Administrator se chalayen.</div>
+{% endif %}
+
+<div class="row g-3 mb-3">
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3">
+        <div class="text-muted small">Kal ki sale</div>
+        <div class="fs-4 fw-bold">Rs. {{ "{:,.0f}".format(yday.revenue or 0) }}</div>
+        <div class="small text-muted">{{ yday.n or 0 }} bills &middot; aaj ab tak Rs. {{ "{:,.0f}".format(today.revenue or 0) }}</div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3">
+        <div class="text-muted small">Low stock items</div>
+        <div class="fs-4 fw-bold">{{ low_total }}</div>
+        <div class="small text-muted">reorder level par ya neeche</div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3">
+        <div class="text-muted small">90 din me expiry</div>
+        <div class="fs-4 fw-bold">{{ exp_total }}</div>
+        <div class="small text-muted">batches khatam honay walay</div>
+    </div></div>
+    <div class="col-6 col-md-3"><div class="card border-0 shadow-sm p-3">
+        <div class="text-muted small">Backup</div>
+        {% if backup.exists %}<div class="fs-6 fw-bold mt-1">{{ backup.when }}</div>
+        <div class="small text-muted">{{ backup.name }} &middot; {{ backup.size_kb }} KB &middot; kul {{ backup.count }} backups</div>
+        {% else %}<div class="fs-6 fw-bold mt-1 text-danger">Koi backup nahi</div>{% endif %}
+    </div></div>
+</div>
+
+{% if refills %}
+<div class="alert alert-info py-2 d-flex flex-wrap justify-content-between align-items-center">
+  <span><strong>Refill ka waqt:</strong> {{ refills|length }} customer(s) ki mahana dawai due hai — pehla: {{ refills[0].name }} ({{ refills[0].med_name }})</span>
+  <a class="btn btn-sm btn-primary" href="{{ url_for('refills') }}">Refill list dekhen</a>
+</div>
+{% endif %}
+<div class="mb-2"><a href="{{ url_for('expiry_clearance') }}" class="small">Expiry Clearance list (90 din) &rarr;</a></div>
+<div class="row g-3">
+    <div class="col-12 col-lg-4"><div class="card border-0 shadow-sm p-3 h-100">
+        <h6 class="mb-2">Low stock (top 10)</h6>
+        {% if low %}<table class="table table-sm mb-0"><tbody>
+        {% for r in low %}<tr><td>{{ r.name }}</td><td class="text-end"><span class="badge bg-danger">{{ r.stock_quantity }}</span> <span class="text-muted small">/ {{ r.reorder_level }}</span></td></tr>{% endfor %}
+        </tbody></table>{% else %}<div class="text-muted small">Koi item low stock par nahi. Sab theek hai.</div>{% endif %}
+    </div></div>
+    <div class="col-12 col-lg-4"><div class="card border-0 shadow-sm p-3 h-100">
+        <h6 class="mb-2">Expiring soon (top 10)</h6>
+        {% if exp %}<table class="table table-sm mb-0"><tbody>
+        {% for r in exp %}<tr><td>{{ r.name }}<div class="text-muted small">Batch {{ r.batch_number }} &middot; qty {{ r.quantity }}</div></td><td class="text-end small">{{ r.expiry_date }}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<div class="text-muted small">90 din ke andar koi batch expire nahi ho raha.</div>{% endif %}
+    </div></div>
+    <div class="col-12 col-lg-4"><div class="card border-0 shadow-sm p-3 h-100">
+        <h6 class="mb-2">Customer udhaar — Rs. {{ "{:,.0f}".format(dues_total) }} ({{ dues_count }})</h6>
+        {% if dues %}<table class="table table-sm mb-0"><tbody>
+        {% for r in dues %}<tr><td>{{ r.name }}</td><td class="text-end fw-semibold">Rs. {{ "{:,.0f}".format(r.due) }}</td>
+        <td class="text-end">{% if r.wa %}<a class="btn btn-sm btn-outline-success py-0" target="_blank" rel="noopener" href="https://wa.me/{{ r.wa }}?text={{ ('Adaigi ki yaad-dehani: ' ~ shop ~ ' ke zimme aapke Rs. ' ~ ("{:,.0f}".format(r.due)) ~ ' baqi hain. Mehrabani karke ada kar dein. Shukriya!') | urlencode }}">Reminder</a>{% endif %}</td></tr>{% endfor %}
+        </tbody></table>{% else %}<div class="text-muted small">Kisi customer ka udhaar baqi nahi.</div>{% endif %}
+    </div></div>
+</div>
+{% endblock %}
