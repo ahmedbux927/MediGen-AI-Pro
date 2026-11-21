@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+{% block title %}Medicines{% endblock %}
+{% block content %}
+{% if issue == 'nocat' %}
+<div class="alert alert-warning py-2 small mb-3">Showing only medicines without a category. Select them with the checkboxes and set the category under "Edit selected". <a href="{{ url_for('medicines') }}">Show all</a></div>
+{% endif %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}?v=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/medicine-look.css') }}?v=4">
+
+<!-- Page Header -->
+<div class="page-header">
+    <h2 class="page-title"><i class="bi bi-capsule"></i>Medicines Management</h2>
+    <p class="page-subtitle">Complete inventory control with real-time stock, batches and cost tracking</p>
+    <span style="font-size:11px;color:#94a3b8;">Build v{{ app_version }}</span>
+</div>
+
+<!-- Stats Row -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card" onclick="window.location='{{ url_for('medicines') }}'">
+            <i class="bi bi-capsule-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-capsule"></i> Total Medicines</div>
+            <div class="stat-value">{{ stats.total }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" onclick="window.location='{{ url_for('medicines', filter='ok') }}'">
+            <i class="bi bi-box-seam stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-box-seam"></i> In Stock</div>
+            <div class="stat-value">{{ stats.in_stock }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warn" onclick="window.location='{{ url_for('medicines', filter='low') }}'">
+            <i class="bi bi-exclamation-triangle-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-exclamation-triangle-fill"></i> Low Stock</div>
+            <div class="stat-value">{{ stats.low }}</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card alert" onclick="window.location='{{ url_for('medicines', filter='out') }}'">
+            <i class="bi bi-x-octagon-fill stat-icon-bg"></i>
+            <div class="stat-label"><i class="bi bi-x-octagon-fill"></i> Out of Stock</div>
+            <div class="stat-value">{{ stats.empty }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+    <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addModal">
+        <i class="bi bi-plus-circle-fill"></i> Add Medicine
+    </button>
+    <button class="btn-ghost" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+        <i class="bi bi-tag-fill"></i> Category
+    </button>
+    <form method="POST" action="{{ url_for('products_import', key='medicines') }}" enctype="multipart/form-data" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="catalog" id="impFile" accept=".csv,.pdf,image/*" hidden onchange="this.form.submit()">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('impFile').click()" title="Choose a CSV or PDF list; it is imported at once">
+            <i class="bi bi-upload"></i> Import list
+        </button>
+    </form>
+    <form method="POST" action="{{ url_for('products_import', key='medicines') }}" enctype="multipart/form-data" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="catalog_cam" id="impCam" accept="image/*" capture="environment" hidden onchange="this.form.submit()">
+        <button type="button" class="btn-ghost" onclick="document.getElementById('impCam').click()" title="Take a straight photo of the list with the camera">
+            <i class="bi bi-camera"></i> Camera photo
+        </button>
+    </form>
+    <a href="{{ url_for('export_medicines') }}" class="btn-ghost">
+        <i class="bi bi-download"></i> Export
+    </a>
+    <a href="{{ url_for('import_preview') }}" class="btn-ghost" title="Bari list ke liye: pehle preview, phir confirm, undo bhi mumkin">
+        <i class="bi bi-eye"></i> Import with preview
+    </a>
+    <a href="{{ url_for('product_labels') }}" class="btn-ghost" title="Shelf ke liye barcode labels print karein">
+        <i class="bi bi-upc-scan"></i> Labels
+    </a>
+    <div class="spacer"></div>
+    <form method="GET" action="{{ url_for('medicines') }}" class="search-wrapper" onsubmit="return false;">
+        <input type="text" name="q" value="{{ q }}" class="search-box has-mic" autocomplete="off" oninput="medFilter(this.value)"
+               placeholder="Search name or category..."
+               autocomplete="off" id="searchInput">
+        <button type="button" class="med-mic" data-voice-for="searchInput" aria-label="Voice search"><i class="bi bi-mic-fill"></i></button>
+        <button type="button" class="med-clear" title="Clear search" aria-label="Clear search" onclick="var b=document.getElementById('searchInput'); b.value=''; medFilter(''); b.focus();">&times;</button>
+        {% if flt != 'all' %}<input type="hidden" name="filter" value="{{ flt }}">{% endif %}
+    </form>
+    <div id="medCount" class="med-count"></div>
+<script src="{{ url_for('static', filename='js/voice-search.js') }}"></script>
+</div>
+
+<!-- Filter Tabs -->
+<div class="filter-tabs" style="margin-bottom: 16px; display: inline-flex;">
+    <a href="{{ url_for('medicines', q=q, per=per) }}" class="{% if flt == 'all' %}active{% endif %}">
+        <i class="bi bi-grid-3x3-gap"></i> All <span class="count">{{ stats.total }}</span>
+    </a>
+    <a href="{{ url_for('medicines', q=q, filter='ok', per=per) }}" class="{% if flt == 'ok' %}active{% endif %}">
+        <i class="bi bi-check-circle"></i> In Stock <span class="count">{{ stats.in_stock }}</span>
+    </a>
+    <a href="{{ url_for('medicines', q=q, filter='low', per=per) }}" class="{% if flt == 'low' %}active{% endif %}">
+        <i class="bi bi-exclamation-triangle"></i> Low <span class="count">{{ stats.low }}</span>
+    </a>
+    <a href="{{ url_for('medicines', q=q, filter='out', per=per) }}" class="{% if flt == 'out' %}active{% endif %}">
+        <i class="bi bi-x-octagon"></i> Out <span class="count">{{ stats.empty }}</span>
+    </a>
+</div>
+
+<!-- Medicines Table -->
+<div class="data-card">
+    <table class="medicines-table table data-table">
+        <thead>
+            <tr>
+                <th style="width: 40px;"><input type="checkbox" class="row-check" id="checkAll"></th>
+                <th style="width: 56px;">#</th>
+                <th>Medicine</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Reorder</th>
+                <th style="text-align:center; width: 232px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="medicinesTable">
+        {% for m in medicines %}
+        <tr data-mid="{{ m.medicine_id }}" data-q="{{ ((m.name or '') ~ ' ' ~ (m.category_name or '') ~ ' ' ~ (m.dosage_form or '') ~ ' ' ~ (m.barcode or ''))|lower|e }}">
+            <td><input type="checkbox" class="row-check row-select" value="{{ m.medicine_id }}"></td>
+            <td style="color:#64748b;font-weight:700;">{{ offset + loop.index }}</td>
+            <td>
+                <div class="med-name">
+                    <span class="pill-icon"><i class="bi bi-capsule"></i></span>
+                    <div>
+                        {{ m.name }}
+                        <div class="sub">{{ m.category_name or 'No category' }}{% if m.dosage_form %} · {{ m.dosage_form }}{% endif %}{% if m.rack_location %} · <i class="bi bi-geo-alt"></i> {{ m.rack_location }}{% endif %}</div>
+                    </div>
+                </div>
+            </td>
+            <td><span class="reorder-badge">{{ m.category_name or '—' }}</span></td>
+            <td>
+                <div class="price-text">Rs. {{ '{:,.0f}'.format(m.price|float) }}</div>
+                {% if session.role != 'Cashier' and m.cost_price and m.cost_price > 0 %}
+                <div class="cost-text">
+                    Cost: Rs. {{ '{:,.0f}'.format(m.cost_price|float) }}
+                    {% set margin = ((m.price|float) - (m.cost_price|float)) %}
+                    <span class="margin-text {% if margin >= 0 %}margin-pos{% else %}margin-neg{% endif %}">
+                        ({{ '+' if margin >= 0 else '' }}{{ '{:,.0f}'.format(margin) }})
+                    </span>
+                </div>
+                {% endif %}
+            </td>
+            <td>
+                {% if m.stock_quantity <= 0 %}
+                    <span class="stock-badge stock-low"><i class="bi bi-x-octagon-fill"></i> {{ m.stock_quantity }}</span>
+                {% elif m.stock_quantity <= m.reorder_level %}
+                    <span class="stock-badge stock-medium"><i class="bi bi-exclamation-triangle-fill"></i> {{ m.stock_quantity }}</span>
+                {% else %}
+                    <span class="stock-badge stock-high"><i class="bi bi-check-circle-fill"></i> {{ m.stock_quantity }}</span>
+                {% endif %}
+            </td>
+            <td><span class="reorder-badge">{{ m.reorder_level }}</span></td>
+            <td>
+                <div class="action-btns">
+                    <a class="btn-icon" title="Sell" href="{{ url_for('new_sale') }}?med={{ m.medicine_id }}&qty=1" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;"><i class="bi bi-cart-plus-fill"></i></a>
+                    <button class="btn-icon edit" title="Edit"
+                            onclick="openEdit({{ m.medicine_id }}, '{{ m.name|replace("'", "\\'") }}', {{ m.category_id or 0 }}, {{ m.price }}, {{ 0 if session.role == 'Cashier' else (m.cost_price or 0) }}, {{ m.reorder_level }}, '{{ m.barcode or '' }}', '{{ (m.rack_location or '')|replace("'", "\\'") }}', '{{ m.dosage_form or '' }}')">
+                        <i class="bi bi-pencil-fill"></i>
+                    </button>
+                    <button class="btn-icon adjust" title="Adjust Stock"
+                            onclick="openAdjust({{ m.medicine_id }}, '{{ m.name|replace("'", "\\'") }}', {{ m.stock_quantity }})">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                    <button class="btn-icon history" title="Stock History"
+                            onclick="openHistory({{ m.medicine_id }}, '{{ m.name|replace("'", "\\'") }}')">
+                        <i class="bi bi-clock-history"></i>
+                    </button>
+                    {% if session.role == 'Admin' %}
+                    <a class="btn-icon delete" title="Delete"
+                       href="{{ url_for('delete_medicine', mid=m.medicine_id) }}"
+                       data-method="post" onclick="return confirm('Delete {{ m.name }}?')">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7">
+                <div class="no-results">
+                    <i class="bi bi-search"></i>
+                    <p>No medicines found{% if q %} for "{{ q }}"{% endif %}</p>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if false %}{# v86.26: no pager, all items on one page #}
+    <div class="pager">
+        <div class="info">
+            {% if total %}
+                Showing {{ offset + 1 }}–{{ offset + medicines|length }} of {{ total }}
+                {% if q %} (search: "{{ q }}"){% endif %}
+            {% else %}
+                No results
+            {% endif %}
+        </div>
+        {% if pages > 1 %}
+        <ul>
+            {% if page > 1 %}
+            <li><a href="{{ url_for('medicines', q=q, filter=flt, page=page-1, per=per) }}"><i class="bi bi-chevron-left"></i></a></li>
+            {% endif %}
+            {% for n in range([page-2, 1]|max, [page+2, pages]|min + 1) %}
+            <li>{% if n == page %}<span class="cur">{{ n }}</span>{% else %}<a href="{{ url_for('medicines', q=q, filter=flt, page=n, per=per) }}">{{ n }}</a>{% endif %}</li>
+            {% endfor %}
+            {% if page < pages %}
+            <li><a href="{{ url_for('medicines', q=q, filter=flt, page=page+1, per=per) }}"><i class="bi bi-chevron-right"></i></a></li>
+            {% endif %}
+        </ul>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <label style="font-size: 13px; color: #64748b;">Per page:</label>
+            <select onchange="location.href='{{ url_for('medicines', q=q, filter=flt, page=1) }}&per='+this.value"
+                    style="padding: 6px 10px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 13px;">
+                {% for n in [15, 50, 100] %}
+                <option value="{{ n }}" {% if per == n %}selected{% endif %}>{{ n }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Bulk action bar -->
+<div class="bulk-bar" id="bulkBar">
+    <i class="bi bi-check2-square" style="font-size: 18px;"></i>
+    <span><span class="count" id="bulkCount">0</span> medicine(s) selected</span>
+    <div style="flex: 1;"></div>
+    <button class="btn-ghost" onclick="clearBulk()" title="Unselect every medicine" style="background: transparent; color: #fff; border-color: rgba(255,255,255,0.3);">
+        <i class="bi bi-x-circle"></i> Clear all
+    </button>
+    <button class="btn-ghost" onclick="sellSelected()" style="background: #fff; color: #1f6fb2; border-color: #fff;">
+        <i class="bi bi-cash-coin"></i> Sell Selected
+    </button>
+    {% if session.role != 'Cashier' %}
+    <button class="btn-ghost" onclick="openBulkEdit()" style="background: #fff; color: #1f6fb2; border-color: #fff;">
+        <i class="bi bi-pencil-square"></i> Edit selected
+    </button>
+    {% endif %}
+    {% if session.role == 'Admin' %}
+    <button class="btn-ghost" onclick="bulkDelete()" title="Delete every ticked medicine" style="background: #cf3f55; color: #fff; border-color: #cf3f55;">
+        <i class="bi bi-trash"></i> Delete selected
+    </button>
+    {% endif %}
+    <button class="btn-ghost" onclick="bulkExport()" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">
+        <i class="bi bi-download"></i> Export Selected
+    </button>
+</div>
+
+{% include '_bulk_edit.html' %}
+
+<!-- ==================== ADD MODAL ==================== -->
+<div class="modal fade" id="addModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<form id="sellSelForm" method="POST" action="{{ url_for('cart_add_selected') }}" style="display:none;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="key" value="medicines">
+</form>
+<form method="POST" action="{{ url_for('add_medicine') }}" id="addMedForm" novalidate>
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-capsule"></i>Add New Medicine</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        {% if not categories %}
+        <div class="alert alert-warning small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            No category yet. First add a category on the <a href="{{ url_for('manage_categories') }}">Categories</a> page, then save the medicine here.
+        </div>
+        {% endif %}
+        <div class="alert alert-danger small mb-3" id="addMedErr" role="alert" hidden></div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Medicine Name *</label>
+                <input name="name" class="form-control-pro" placeholder="e.g. Panadol" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Category *</label>
+                <select name="category_id" class="form-control-pro" required>
+                    <option value="">Select Category</option>
+                    {% for c in categories %}<option value="{{ c.category_id }}">{{ c.category_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Sale Price (Rs.) *</label>
+                <input name="price" type="number" step="0.01" min="0" class="form-control-pro" placeholder="0.00" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Cost Price (Rs.)</label>
+                <input name="cost_price" type="number" step="0.01" min="0" class="form-control-pro" placeholder="0.00">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Barcode (optional)</label>
+                <div class="scan-field"><input name="barcode" id="addBarcode" type="text" maxlength="64" autocomplete="off" class="form-control-pro" placeholder="Scan with scanner or camera, or type, then Enter"><button type="button" class="scan-btn" onclick="addScanCamera()" aria-label="Scan barcode with camera"><i class="bi bi-camera"></i> Camera</button></div>
+                <div class="text-muted small mt-1">Scanner: scan the code, it fills the field and moves on. Camera: point at the barcode.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Opening Stock</label>
+                <input name="stock" type="number" min="0" class="form-control-pro" placeholder="0" value="0">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Reorder Level (Alert)</label>
+                <input name="reorder" type="number" min="0" class="form-control-pro" value="20">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Dosage Form (optional)</label>
+                <select name="dosage_form" class="form-control-pro"><option value="">Not set</option>{% for f in dosage_forms %}<option>{{ f }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Shelf Location (optional)</label>
+                <input name="rack_location" type="text" maxlength="40" class="form-control-pro" placeholder="e.g. A-3">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 11px 24px; font-weight: 600;">Cancel</button>
+        <button class="btn-add" style="padding: 11px 28px;"><i class="bi bi-check2-circle"></i> Save Medicine</button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+<script>
+/* v86.35: barcode in the Add form. A USB scanner types the code and presses Enter; the camera button fills the same way.
+   Duplicate codes are refused at once; otherwise the cursor moves to the next empty field, and the form saves when all required fields are filled. */
+var barcodeMap = {{ barcode_map|tojson }};
+function barcodeEntered(auto) {
+    var input = document.getElementById('addBarcode');
+    var form = document.getElementById('addMedForm');
+    var err = document.getElementById('addMedErr');
+    var code = (input.value || '').replace(/\s+/g, '');
+    input.value = code;
+    if (!code) return;
+    if (Object.prototype.hasOwnProperty.call(barcodeMap, code)) {
+        err.textContent = 'This barcode is already used by "' + barcodeMap[code] + '". Choose another barcode or edit that medicine.';
+        err.hidden = false;
+        input.select();
+        return;
+    }
+    err.hidden = true;
+    var empty = Array.prototype.find.call(form.querySelectorAll('[required]'), function (el) { return !String(el.value).trim(); });
+    if (empty) { empty.focus(); return; }
+    if (auto) form.requestSubmit();
+}
+function addScanCamera() {
+    var input = document.getElementById('addBarcode');
+    MediScan.open({
+        onCode: function (value) {
+            input.value = value;
+            barcodeEntered(false);
+        }
+    });
+}
+document.getElementById('addBarcode').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); barcodeEntered(true); }
+});
+
+/* Add medicine: show a visible message for the missing field (the browser bubble can sit off-screen inside the modal) */
+(function () {
+    var form = document.getElementById('addMedForm');
+    if (!form) return;
+    var err = document.getElementById('addMedErr');
+    form.addEventListener('submit', function (e) {
+        var missing = [];
+        form.querySelectorAll('[required]').forEach(function (el) {
+            if (!String(el.value).trim()) {
+                var row = el.closest('.mb-3');
+                missing.push(row ? row.querySelector('label').textContent.replace('*', '').trim() : el.name);
+            }
+        });
+        if (missing.length) {
+            e.preventDefault();
+            err.textContent = 'Please fill: ' + missing.join(', ') + '.';
+            err.hidden = false;
+            var first = Array.prototype.find.call(form.querySelectorAll('[required]'), function (el) { return !String(el.value).trim(); });
+            if (first) first.focus();
+            return;
+        }
+        err.hidden = true;
+    });
+})();
+</script>
+
+<!-- ==================== EDIT MODAL ==================== -->
+<div class="modal fade" id="editModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<form method="POST" id="editForm">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-pencil-square"></i>Edit Medicine</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Medicine Name *</label>
+                <input name="name" id="eName" class="form-control-pro" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Category *</label>
+                <select name="category_id" id="eCat" class="form-control-pro" required>
+                    {% for c in categories %}<option value="{{ c.category_id }}">{{ c.category_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Sale Price (Rs.) *</label>
+                <input name="price" id="ePrice" type="number" step="0.01" min="0" class="form-control-pro" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Cost Price (Rs.)</label>
+                <input name="cost_price" id="eCost" type="number" step="0.01" min="0" class="form-control-pro">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Barcode (optional)</label>
+                <div class="scan-field"><input name="barcode" id="eBarcode" type="text" maxlength="64" class="form-control-pro" placeholder="Scan or type"><button type="button" class="scan-btn" onclick="MediScan.fillFrom(this)" aria-label="Scan barcode with camera"><i class="bi bi-upc-scan"></i> Scan</button></div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Reorder Level</label>
+                <input name="reorder" id="eReorder" type="number" min="0" class="form-control-pro">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Dosage Form</label>
+                <select name="dosage_form" id="eForm" class="form-control-pro"><option value="">Not set</option>{% for f in dosage_forms %}<option>{{ f }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label-pro">Shelf Location</label>
+                <input name="rack_location" id="eRack" type="text" maxlength="40" class="form-control-pro" placeholder="e.g. A-3">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 11px 24px; font-weight: 600;">Cancel</button>
+        <button class="btn-add" style="padding: 11px 28px;"><i class="bi bi-check2-circle"></i> Update Medicine</button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+<!-- ==================== ADJUST MODAL ==================== -->
+<div class="modal fade" id="adjustModal">
+<div class="modal-dialog">
+<div class="modal-content">
+<form method="POST" id="adjustForm">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-arrow-left-right"></i>Adjust Stock</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <p style="margin-bottom: 20px; color: #44546f;">
+            Medicine: <strong id="aName"></strong><br>
+            Current stock: <strong id="aCurrent"></strong> units
+        </p>
+        <div class="mb-3">
+            <label class="form-label-pro">Direction *</label>
+            <select name="direction" id="aDir" class="form-control-pro" required onchange="updateReasons()">
+                <option value="in">➕ Stock In (add units)</option>
+                <option value="out">➖ Stock Out (remove units)</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label-pro">Reason *</label>
+            <select name="reason" id="aReason" class="form-control-pro" required></select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label-pro">Quantity *</label>
+            <input name="quantity" type="number" min="1" class="form-control-pro" required placeholder="0">
+        </div>
+        <div class="mb-3">
+            <label class="form-label-pro">Note (optional)</label>
+            <input name="note" maxlength="255" class="form-control-pro" placeholder="Additional notes...">
+        </div>
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px; padding: 11px 24px; font-weight: 600;">Cancel</button>
+        <button class="btn-add" style="padding: 11px 28px;"><i class="bi bi-check2-circle"></i> Apply Adjustment</button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+<!-- ==================== HISTORY MODAL ==================== -->
+<div class="modal fade" id="historyModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-clock-history"></i>Stock History — <span id="hName"></span></h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 20px;" id="historyBody">
+        <div class="text-center py-4"><div class="spinner-border text-primary"></div></div>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- ==================== CATEGORY MODAL ==================== -->
+<div class="modal fade" id="addCategoryModal">
+<div class="modal-dialog">
+<div class="modal-content">
+<form method="POST" action="{{ url_for('add_category') }}">
+    <div class="modal-header-custom">
+        <h5><i class="bi bi-tag-fill"></i>Add Category</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+    </div>
+    <div class="modal-body" style="padding: 30px;">
+        <label class="form-label-pro">Category Name *</label>
+        <input name="category_name" class="form-control-pro" required placeholder="e.g. Antibiotic">
+    </div>
+    <div class="modal-footer" style="border: none; padding: 18px 30px; background: #f8fafc;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn-add"><i class="bi bi-check2-circle"></i> Save</button>
+    </div>
+</form>
+</div>
+</div>
+</div>
+
+
+<script>
+var ADJUST_REASONS = {{ adjust_reasons|tojson }};
+var CSRF = '{{ csrf_token() }}';
+
+/* ---------- Edit ---------- */
+function openEdit(mid, name, cat, price, cost, reorder, barcode, rack, dform) {
+    document.getElementById('editForm').action = '/medicines/edit/' + mid;
+    document.getElementById('eName').value = name;
+    var eCat = document.getElementById('eCat');
+    if (cat && !eCat.querySelector('option[value="' + cat + '"]') && catNames[cat]) { eCat.add(new Option(catNames[cat], cat)); }
+    eCat.value = cat;
+    document.getElementById('ePrice').value = price;
+    document.getElementById('eCost').value = cost;
+    document.getElementById('eReorder').value = reorder;
+    document.getElementById('eBarcode').value = barcode || '';
+    document.getElementById('eRack').value = rack || '';
+    document.getElementById('eForm').value = dform || '';
+    new bootstrap.Modal(document.getElementById('editModal')).show();
+}
+
+/* ---------- Adjust ---------- */
+function openAdjust(mid, name, current) {
+    document.getElementById('adjustForm').action = '/medicines/adjust/' + mid;
+    document.getElementById('aName').textContent = name;
+    document.getElementById('aCurrent').textContent = current;
+    document.getElementById('aDir').value = 'in';
+    updateReasons();
+    new bootstrap.Modal(document.getElementById('adjustModal')).show();
+}
+function updateReasons() {
+    var dir = document.getElementById('aDir').value;
+    var sel = document.getElementById('aReason');
+    sel.innerHTML = '';
+    ADJUST_REASONS[dir].forEach(function(r) {
+        var o = document.createElement('option'); o.value = r; o.textContent = r;
+        sel.appendChild(o);
+    });
+}
+
+/* ---------- History ---------- */
+function openHistory(mid, name) {
+    document.getElementById('hName').textContent = name;
+    document.getElementById('historyBody').innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+    new bootstrap.Modal(document.getElementById('historyModal')).show();
+
+    fetch('/medicines/' + mid + '/adjustments')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var html = '';
+            if (!data.length) {
+                html = '<div class="text-center py-4 text-muted"><i class="bi bi-inbox" style="font-size: 40px;"></i><p class="mt-2">No adjustments yet</p></div>';
+            } else {
+                html = '<table class="table" style="margin: 0;"><thead><tr style="background: #f4f7fb;"><th>When</th><th>Change</th><th>Old → New</th><th>Reason</th><th>By</th></tr></thead><tbody>';
+                var e = function (t) {
+                    return String(t === null || t === undefined ? '' : t)
+                        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                };
+                data.forEach(function(r) {
+                    var color = r.change > 0 ? '#17784f' : '#a8283b';
+                    var sign = r.change > 0 ? '+' : '';
+                    html += '<tr><td style="font-size: 12.5px;">' + e(r.when) + '</td>' +
+                            '<td style="color: ' + color + '; font-weight: 700;">' + sign + e(r.change) + '</td>' +
+                            '<td>' + e(r.old) + ' → ' + e(r.new) + '</td>' +
+                            '<td>' + e(r.reason) + (r.note ? '<br><small style="color:#8593ab;">' + e(r.note) + '</small>' : '') + '</td>' +
+                            '<td>' + e(r.by) + '</td></tr>';
+                });
+                html += '</tbody></table>';
+            }
+            document.getElementById('historyBody').innerHTML = html;
+        })
+        .catch(function() {
+            document.getElementById('historyBody').innerHTML = '<div class="text-center py-4 text-danger">Failed to load history</div>';
+        });
+}
+
+/* ---------- Bulk select ---------- */
+function updateBulkBar() {
+    var selected = document.querySelectorAll('.row-select:checked');
+    var bar = document.getElementById('bulkBar');
+    document.getElementById('bulkCount').textContent = selected.length;
+    if (selected.length > 0) bar.classList.add('show');
+    else bar.classList.remove('show');
+}
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-select')) updateBulkBar();
+    if (e.target.id === 'checkAll') {
+        document.querySelectorAll('.row-select').forEach(function(cb) { cb.checked = e.target.checked; });
+        updateBulkBar();
+    }
+});
+function clearBulk() {
+    document.querySelectorAll('.row-select, #checkAll').forEach(function(cb) { cb.checked = false; });
+    updateBulkBar();
+}
+function sellSelected() {
+    var ids = Array.from(document.querySelectorAll('.row-select:checked')).map(function(cb) { return cb.value; });
+    if (!ids.length) return;
+    var f = document.getElementById('sellSelForm');
+    f.querySelectorAll('input[name=mid]').forEach(function(n) { n.remove(); });
+    ids.forEach(function(id) {
+        var i = document.createElement('input');
+        i.type = 'hidden'; i.name = 'mid'; i.value = id;
+        f.appendChild(i);
+    });
+    f.submit();
+}
+function bulkDelete() {
+    var ids = Array.from(document.querySelectorAll('.row-select:checked')).map(function(cb) { return cb.value; });
+    if (!ids.length) return;
+    if (!confirm('Delete ' + ids.length + ' selected medicine(s)? Their bills and purchases stay in the records.')) return;
+    var f = document.createElement('form');
+    f.method = 'POST';
+    f.action = '{{ url_for("bulk_delete_medicines") }}';
+    var tok = document.createElement('input'); tok.type = 'hidden'; tok.name = 'csrf_token'; tok.value = '{{ csrf_token() }}';
+    f.appendChild(tok);
+    ids.forEach(function(id) {
+        var i = document.createElement('input'); i.type = 'hidden'; i.name = 'mid'; i.value = id; f.appendChild(i);
+    });
+    document.body.appendChild(f);
+    f.submit();
+}
+function bulkExport() {
+    var ids = Array.from(document.querySelectorAll('.row-select:checked')).map(function(cb) { return cb.value; });
+    if (!ids.length) return;
+    window.location = '{{ url_for('export_medicines') }}?ids=' + ids.join(',');
+}
+
+/* v86.30: the old server-side debounce (form reload while typing) was removed; live filter is medFilter() */
+
+/* ---------- Keyboard shortcuts ---------- */
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.key === '/') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+    if (e.key === 'n' || e.key === 'N') { e.preventDefault(); new bootstrap.Modal(document.getElementById('addModal')).show(); }
+});
+</script>
+
+<script>
+var catNames = {{ cat_names|tojson }};   // v86.27: names of all categories (for an item's own category)
+// v86.26: instant search. Every word typed must appear in the row (name, category, form, barcode).
+function medFilter(text) {
+    var words = (text || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var shown = 0, rows = document.querySelectorAll('tr[data-mid]');
+    rows.forEach(function (tr) {
+        var hay = tr.getAttribute('data-q') || '';
+        var ok = words.every(function (w) { return hay.indexOf(w) !== -1; });
+        tr.style.display = ok ? '' : 'none';
+        if (ok) shown++;
+    });
+    var info = document.getElementById('medCount');
+    if (info) info.textContent = words.length ? ('Found ' + shown + ' of ' + rows.length) : ('Total ' + rows.length + ' items');
+}
+document.addEventListener('DOMContentLoaded', function () {
+    var box = document.querySelector('input[name="q"]');
+    if (box) medFilter(box.value);
+});
+</script>
+{% endblock %}

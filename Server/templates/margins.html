@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Profit Margin{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-percent"></i> Profit Margin per Item</h2>
+    <p>Margin = sale price minus cost. Cost is the purchase price of the last received batch, or the item's cost price if no batch exists. Items below {{ low_pct }}% margin are flagged.</p>
+</div>
+
+<section class="sp-card">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+        <div><div class="text-muted small">Sold below cost</div><b style="color:#b91c1c;">{{ summary['loss'] }}</b></div>
+        <div><div class="text-muted small">No sale price</div><b>{{ summary['no_price'] }}</b></div>
+        <div><div class="text-muted small">No cost</div><b>{{ summary['no_cost'] }}</b></div>
+        <div><div class="text-muted small">Low margin</div><b style="color:#b45309;">{{ summary['low'] }}</b></div>
+        <div><div class="text-muted small">Healthy</div><b style="color:#15803d;">{{ summary['ok'] }}</b></div>
+    </div>
+</section>
+
+<section class="sp-card">
+    <form method="get" action="{{ url_for('margins') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+        <input type="search" name="q" value="{{ q }}" maxlength="60" class="form-control" placeholder="Search name or barcode" style="max-width:280px;">
+        <select name="f" class="form-select" style="max-width:220px;">
+            <option value="all" {% if f == 'all' %}selected{% endif %}>All items ({{ total }})</option>
+            <option value="loss" {% if f == 'loss' %}selected{% endif %}>Sold below cost</option>
+            <option value="no_price" {% if f == 'no_price' %}selected{% endif %}>No sale price</option>
+            <option value="no_cost" {% if f == 'no_cost' %}selected{% endif %}>No cost</option>
+            <option value="low" {% if f == 'low' %}selected{% endif %}>Low margin</option>
+            <option value="ok" {% if f == 'ok' %}selected{% endif %}>Healthy</option>
+        </select>
+        <button type="submit" class="btn btn-outline-primary btn-sm">Show</button>
+    </form>
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Medicine</th><th>Form</th><th class="text-end">Sale price</th><th class="text-end">Cost</th><th class="text-end">Margin</th><th class="text-end">Margin %</th><th>Cost from</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+            <tr>
+                <td>{{ r.name }}</td>
+                <td><small>{{ r.dosage_form or '' }}</small></td>
+                <td class="text-end">{{ '%.2f'|format(r.price) if r.price is not none else '-' }}</td>
+                <td class="text-end">{{ '%.2f'|format(r.cost) if r.cost is not none else '-' }}</td>
+                <td class="text-end">{{ '%.2f'|format(r.margin) if r.margin is not none else '-' }}</td>
+                <td class="text-end">{{ '%.1f'|format(r.pct) if r.pct is not none else '-' }}</td>
+                <td><small>{{ {'batch': 'last batch', 'item': 'item cost'}.get(r.cost_source, '-') }}</small></td>
+                <td>
+                    {% if r.status == 'loss' %}<span class="badge bg-danger">Below cost</span>
+                    {% elif r.status == 'no_price' %}<span class="badge bg-secondary">No sale price</span>
+                    {% elif r.status == 'no_cost' %}<span class="badge bg-secondary">No cost</span>
+                    {% elif r.status == 'low' %}<span class="badge bg-warning text-dark">Low</span>
+                    {% else %}<span class="badge bg-success">OK</span>{% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="8" class="text-muted">No items in this view.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}
