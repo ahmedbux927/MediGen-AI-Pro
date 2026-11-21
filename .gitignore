@@ -1,0 +1,13 @@
+.env
+*.env
+!.env.example
+backups/
+logs/
+__pycache__/
+*.pyc
+dist/
+mysql-data/
+mysql-server.log
+instance/
+.DS_Store
+Thumbs.db
