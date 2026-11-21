@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Branch Summary{% endblock %}
+{% block content %}
+<div class="sp-head">
+    <h2 class="page-title"><i class="bi bi-diagram-3"></i> Branch Summary</h2>
+    <p>Compare this shop with another branch. Only counts are shared: no medicine names, no patient names, no bills. The token is a secret and is shown only as "saved".</p>
+</div>
+
+<section class="sp-card">
+    <h3><i class="bi bi-gear"></i> Other branch</h3>
+    <form method="post" action="{{ url_for('branches_save') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div><label class="form-label small" for="bn">Name</label>
+            <input id="bn" name="branch_name" maxlength="60" value="{{ cfg.branch_name }}" class="form-control" style="max-width:200px;"></div>
+        <div style="flex:1;min-width:260px;"><label class="form-label small" for="bu">Address (https:// or LAN http://)</label>
+            <input id="bu" name="branch_url" value="{{ cfg.branch_url }}" maxlength="200" class="form-control" placeholder="https://branch.example.com"></div>
+        <div><label class="form-label small" for="bt">API token {% if has_token %}(saved, leave blank to keep){% endif %}</label>
+            <input id="bt" type="password" name="branch_token" maxlength="200" autocomplete="off" class="form-control" style="max-width:260px;"></div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+    <p class="text-muted small" style="margin-top:10px;">Make the token on the other branch's computer with scripts/create_api_token.py (role Admin or Pharmacist).</p>
+    {% if cfg.branch_url and has_token %}
+    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('branches', fetch=1) }}">Check now</a>
+    {% endif %}
+</section>
+
+{% if remote_error %}<div class="alert alert-danger">{{ remote_error }}</div>{% endif %}
+
+<section class="sp-card">
+    <div class="table-responsive">
+    <table class="table table-sm align-middle">
+        <thead><tr><th>Number</th><th class="text-end">This shop</th><th class="text-end">{{ cfg.branch_name or 'Other branch' }}</th></tr></thead>
+        <tbody>
+        {% set rowsdef = [('Today sales (Rs.)', 'today_revenue'), ('Today bills', 'today_invoices'), ('This month sales (Rs.)', 'month_revenue'), ('This month bills', 'month_invoices'), ('Out of stock items', 'out_of_stock_items'), ('Low stock items', 'low_stock_items'), ('Batches expiring in 90 days', 'expiring_90_batches'), ('Customers with dues', 'customers_with_dues')] %}
+        {% for label, key in rowsdef %}
+            <tr>
+                <td>{{ label }}</td>
+                <td class="text-end">{{ local[key] if local else '-' }}</td>
+                <td class="text-end">{{ remote[key] if remote else '-' }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</section>
+{% endblock %}
