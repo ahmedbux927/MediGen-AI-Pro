@@ -86,6 +86,7 @@
 
 - `MediGenAIPro.apk` — Android companion app
 - `MediGen_FULL_v101.03_READY.zip` — complete package (Server + APK + step-by-step guide)
+- `MediGen_AI_Pro_Official_Ad_v4.mp4` — **the official product film** (2:21, Full HD, with subtitles & chapters) — watch it on the release page
 
 Release notes and history: [Releases](https://github.com/ahmedbux927/MediGen-AI-Pro/releases) · [CHANGELOG.md](CHANGELOG.md)
 
