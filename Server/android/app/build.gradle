@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.medigen.aipro'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.medigen.aipro'
+        minSdk 24
+        targetSdk 34
+        // Keep these two in step with Config.APP_VERSION in Server/config.py.
+        versionCode 104
+        versionName '101.03'
+    }
+
+    // The project keeps the simple layout the manual build uses
+    // (app/AndroidManifest.xml, app/src/..., app/res/...), so point Gradle at it.
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Signing is configured locally by the owner (keystore NOT in the repo).
+            // See BUILD_APK.md, "Signed release build".
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

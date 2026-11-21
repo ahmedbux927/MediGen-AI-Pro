@@ -1,0 +1,153 @@
+/* ============ Professional light theme (v53) ============
+   Loaded after classic.css and pages.css. Tokens and a few surfaces only; layout is unchanged. */
+:root {
+    --ink: #1c2433;
+    --ink-2: #4a5568;
+    --ink-3: #7b8699;
+    --canvas: #d9dfe7;          /* silver page background (visibly silver, not white) */
+    --card: #ffffff;
+    --line: #dde2ea;
+    --teal: #0e7c86;
+    --teal-2: #14a3ad;
+    --blue: #1d5fa7;
+    --shadow-card:
+        0 1px 2px rgba(17, 24, 39, 0.05),
+        0 6px 18px rgba(17, 24, 39, 0.06);
+    --shadow-soft: 0 2px 8px rgba(17, 24, 39, 0.06);
+    --brand-grad: linear-gradient(135deg, #0e7c86 0%, #1d5fa7 100%);
+}
+
+html, body {
+    background: linear-gradient(180deg, #dce2ea 0%, #cdd5e0 100%) fixed;
+}
+
+/* Sidebar scrollbar: thin and quiet */
+.sidebar { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 6px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.36); }
+
+/* Cards: crisper edge, less glow */
+.card, .stat-card, .panel, .table-card {
+    border: 1px solid var(--line);
+}
+
+/* Tables: quieter header, clear row rhythm */
+table thead th {
+    background: #f4f6f9;
+    color: var(--ink-2);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Focus rings for keyboard users */
+:focus-visible {
+    outline: 2px solid var(--teal-2);
+    outline-offset: 2px;
+}
+
+/* ============ AI assistant panel (floating, can be closed) ============ */
+.ai-launcher {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1040;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 18px 6px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 999px;
+    background: linear-gradient(115deg, #0b2a4a 0%, #1d5fa7 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 12px 26px rgba(11, 42, 74, 0.35);
+    cursor: pointer;
+}
+.ai-launcher:hover { filter: brightness(1.08); }
+.ai-launcher[hidden] { display: none; }
+.ai-launcher-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #14a3ad, #1d5fa7);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+
+.ai-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1040;
+    width: 380px;
+    height: 600px;
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 22px 50px rgba(11, 42, 74, 0.28);
+    overflow: hidden;
+}
+.ai-panel[hidden] { display: none; }
+
+.ai-panel-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px;
+    background: linear-gradient(115deg, #0b2a4a 0%, #0f4b5c 100%);
+    color: #fff;
+}
+.ai-panel-logo {
+    width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px;
+    background: linear-gradient(135deg, #14a3ad, #1d5fa7);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.3);
+}
+.ai-panel-title { flex: 1; min-width: 0; }
+.ai-panel-title strong { display: block; font-size: 15px; font-weight: 700; }
+.ai-panel-title small { display: flex; align-items: center; gap: 6px; font-size: 12px; opacity: 0.85; }
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25); }
+.ai-close {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.ai-close:hover { background: rgba(255, 255, 255, 0.24); }
+.ai-panel iframe {
+    flex: 1 1 auto;
+    width: 100%;
+    border: 0;
+    background: #f6f8fb;
+}
+
+@media (max-width: 575px) {
+    .ai-panel {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        width: auto;
+        height: 72vh;
+    }
+    .ai-launcher { right: 16px; bottom: 16px; }
+}
+
+/* ============ Embed mode: the assistant page inside the panel shows only the chat ============ */
+.embed-mode .sidebar,
+.embed-mode .menu-toggle,
+.embed-mode .menu-backdrop,
+.embed-mode .top-bar { display: none !important; }
+.embed-mode .main-content { margin-left: 0 !important; padding: 0 !important; }
+.embed-mode .chat-shell { max-width: none; border: 0; border-radius: 0; box-shadow: none; height: 100%; }
