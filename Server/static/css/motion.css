@@ -1,0 +1,110 @@
+/* MediGen motion layer (v87.17). Loaded last.
+   Speed, strength are set per device from the "Animation & sound" panel (motion.js).
+   --mg-speed: 0.5 (slow) .. 2 (fast). --mg-strength: 0 (off) .. 2 (strong). Transform and opacity only. */
+
+:root {
+  --mg-speed: 1;
+  --mg-strength: 1;
+  --mg-ease: cubic-bezier(.2, .7, .2, 1);
+  --mg-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --mg-accent: #0f9aa0;
+  --mg-accent-soft: rgba(15, 154, 160, .14);
+  --mg-lift: calc(4px * var(--mg-strength));
+}
+
+@keyframes mg-rise {
+  from { opacity: 0; transform: translateY(var(--mg-lift)); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes mg-fade-out {
+  to { opacity: 0; transform: translateY(calc(-3px * var(--mg-strength))); }
+}
+@keyframes mg-rail {
+  from { transform: scaleY(0); opacity: 0; }
+  to   { transform: scaleY(1); opacity: 1; }
+}
+
+main.main-content > .top-bar,
+main.main-content > .sp-head,
+main.main-content > section {
+  animation: mg-rise calc(.3s / var(--mg-speed)) var(--mg-ease-out) both;
+}
+
+.sidebar-nav a {
+  position: relative;
+  transition: background-color calc(.25s / var(--mg-speed)) var(--mg-ease), color calc(.25s / var(--mg-speed)) var(--mg-ease);
+}
+.sidebar-nav a:hover { background-color: var(--mg-accent-soft); }
+.sidebar-nav a.active::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--mg-accent);
+  animation: mg-rail calc(.35s / var(--mg-speed)) var(--mg-ease-out) both;
+}
+
+.sp-card,
+.hub-card {
+  transition: box-shadow calc(.3s / var(--mg-speed)) var(--mg-ease), border-color calc(.3s / var(--mg-speed)) var(--mg-ease);
+}
+.sp-card:hover,
+.hub-card:hover {
+  box-shadow: 0 6px 18px -14px rgba(15, 60, 70, .30);
+}
+.hub-card:hover { border-color: var(--mg-accent); }
+
+.btn, button, .btn-ghost {
+  transition: transform calc(.15s / var(--mg-speed)) var(--mg-ease), background-color calc(.25s / var(--mg-speed)) var(--mg-ease);
+}
+.btn:active, button:active, .btn-ghost:active { transform: scale(calc(1 - .015 * var(--mg-strength))); }
+
+:focus-visible {
+  outline: 2px solid var(--mg-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--mg-accent-soft);
+}
+
+body.mg-leaving main.main-content { animation: mg-fade-out calc(.18s / var(--mg-speed)) var(--mg-ease) both; }
+
+.alert {
+  animation: mg-rise calc(.25s / var(--mg-speed)) var(--mg-ease-out) both;
+}
+
+/* Animation & sound panel */
+.mg-panel {
+  position: fixed;
+  top: calc(64px + env(safe-area-inset-top, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  width: min(340px, calc(100vw - 24px));
+  background: var(--card, #fff);
+  color: var(--ink, #1d2a26);
+  border: 1px solid var(--rule, #d6d2c4);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -16px rgba(15, 60, 70, .35);
+  padding: 16px 18px;
+  z-index: 1060;
+  font-size: 14px;
+  animation: mg-rise calc(.2s / var(--mg-speed)) var(--mg-ease-out) both;
+}
+.mg-panel h6 { margin: 0 0 4px; font-weight: 700; font-size: 15px; }
+.mg-panel .mg-sub { color: var(--muted, #5d6b66); font-size: 12px; margin-bottom: 12px; }
+.mg-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; margin-top: 12px; }
+.mg-row label { font-weight: 600; }
+.mg-row output { font-variant-numeric: tabular-nums; color: var(--mg-accent); font-weight: 700; min-width: 3.2em; text-align: right; }
+.mg-row input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--mg-accent); }
+.mg-check { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-weight: 600; }
+.mg-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; }
+.mg-actions button { font-size: 13px; padding: 6px 12px; }
+.mg-test { border: 1px solid var(--mg-accent); background: transparent; color: var(--mg-accent); border-radius: 8px; cursor: pointer; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

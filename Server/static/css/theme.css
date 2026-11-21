@@ -1,0 +1,248 @@
+/* =====================================================================
+   MEDIGEN - DARK / LIGHT THEME (v48)
+   Frontend only. Light is the default. Dark is used when the user picks it
+   with the theme button in the top bar (stored in this browser only).
+   Load order: classic.css -> pages.css -> theme.css (this file wins).
+   ===================================================================== */
+
+/* ---------- DARK TOKENS: same names as classic.css, so every token-based style follows ---------- */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #e7eef8;
+    --ink-2: #a9bbd0;
+    --ink-3: #7d91ab;
+    --canvas: #0a1220;
+    --card: #111c2e;
+    --card-2: #172439;
+    --line: #22334d;
+    --field: #0d1828;
+
+    --shadow-card:
+        0 1px 0 rgba(255, 255, 255, 0.03) inset,
+        0 2px 4px rgba(0, 0, 0, 0.25),
+        0 14px 34px rgba(0, 0, 0, 0.35);
+    --shadow-soft: 0 6px 16px rgba(0, 0, 0, 0.35);
+    --pressed: inset 2px 2px 6px rgba(0, 0, 0, 0.4), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] body {
+    background:
+        radial-gradient(1200px 500px at 85% -10%, rgba(31, 111, 178, 0.10), transparent 60%),
+        radial-gradient(900px 500px at 10% 110%, rgba(15, 154, 160, 0.08), transparent 60%),
+        var(--canvas);
+}
+
+/* ---------- TOP BAR ---------- */
+:root[data-theme="dark"] .top-bar {
+    background: linear-gradient(115deg, #111c2e 0%, #0f1a2b 55%, #0e2129 100%);
+    border-color: var(--line);
+}
+:root[data-theme="dark"] .top-bar .date-chip,
+:root[data-theme="dark"] .top-bar .user-badge {
+    background: var(--card-2);
+    border-color: var(--line);
+    color: var(--ink-2);
+}
+
+/* ---------- ALERTS (tinted, readable on dark) ---------- */
+:root[data-theme="dark"] .alert-success { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; }
+:root[data-theme="dark"] .alert-danger  { background: rgba(244, 63, 94, 0.12); color: #fda4af; }
+:root[data-theme="dark"] .alert-warning { background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+:root[data-theme="dark"] .alert-info    { background: rgba(6, 182, 212, 0.12); color: #67e8f9; }
+
+/* ---------- FORMS ---------- */
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .form-select {
+    background-color: var(--field);
+    border-color: var(--line);
+    color: var(--ink);
+}
+:root[data-theme="dark"] .form-control::placeholder { color: var(--ink-3); }
+:root[data-theme="dark"] .input-group-text {
+    background: var(--card-2);
+    border-color: var(--line);
+    color: var(--ink-2);
+}
+
+/* ---------- TABLES ---------- */
+:root[data-theme="dark"] .table > thead > tr > th {
+    background: var(--card-2);
+    border-bottom-color: var(--line);
+    color: var(--ink-2);
+}
+:root[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: rgba(255, 255, 255, 0.025); }
+:root[data-theme="dark"] .table-hover > tbody > tr:hover > * { --bs-table-hover-bg: rgba(20, 201, 192, 0.08); }
+:root[data-theme="dark"] .table > :not(caption) > * > * { border-color: var(--line); }
+
+/* ---------- BUTTONS / CONTROLS ---------- */
+:root[data-theme="dark"] .page-back {
+    background: var(--card-2);
+    border-color: var(--line);
+    color: var(--teal-2);
+    box-shadow: none;
+}
+:root[data-theme="dark"] .page-back:hover { background: rgba(20, 201, 192, 0.12); }
+:root[data-theme="dark"] .rv-btn,
+:root[data-theme="dark"] .scan-btn {
+    background: var(--card-2);
+    border-color: rgba(20, 201, 192, 0.45);
+    color: var(--teal-2);
+}
+:root[data-theme="dark"] .rv-btn:hover,
+:root[data-theme="dark"] .scan-btn:hover { background: rgba(20, 201, 192, 0.14); }
+:root[data-theme="dark"] .progress { background: var(--card-2); }
+
+/* ---------- MODALS ---------- */
+:root[data-theme="dark"] .modal-content,
+:root[data-theme="dark"] .modal-header,
+:root[data-theme="dark"] .modal-footer { background: var(--card); border-color: var(--line); }
+:root[data-theme="dark"] .modal-header .btn-close,
+:root[data-theme="dark"] .btn-close { filter: invert(1) grayscale(1) brightness(1.4); }
+
+/* ---------- REPORTS / SPECIAL PAGES (pages.css classes) ---------- */
+:root[data-theme="dark"] .sp-head h2 { color: var(--ink); }
+:root[data-theme="dark"] .sp-head p,
+:root[data-theme="dark"] .sp-note,
+:root[data-theme="dark"] .chart-note,
+:root[data-theme="dark"] .chart-empty,
+:root[data-theme="dark"] .sp-form label,
+:root[data-theme="dark"] .rv-readout { color: var(--ink-2); }
+:root[data-theme="dark"] .sp-card {
+    background: var(--card);
+    border-color: var(--line);
+    box-shadow: var(--shadow-card);
+}
+:root[data-theme="dark"] .sp-card h3 { color: var(--ink); }
+:root[data-theme="dark"] .sp-count { background: var(--card-2); color: var(--ink-2); }
+:root[data-theme="dark"] .sp-table { color: var(--ink-2); }
+:root[data-theme="dark"] .sp-table th { background: var(--card-2); color: var(--ink-2); border-bottom-color: var(--line); }
+:root[data-theme="dark"] .sp-table td { border-bottom-color: var(--line); }
+:root[data-theme="dark"] .sp-empty { color: #6ee7b7; }
+:root[data-theme="dark"] .sp-form input,
+:root[data-theme="dark"] .sp-form select {
+    background: var(--field);
+    border-color: var(--line);
+    color: var(--ink);
+}
+:root[data-theme="dark"] .sp-form input:focus,
+:root[data-theme="dark"] .sp-form select:focus { border-color: var(--teal-2); }
+:root[data-theme="dark"] .scan-overlay .scan-close,
+:root[data-theme="dark"] .scan-close { background: var(--card-2); color: var(--ink); }
+
+/* ---------- INLINE STYLES IN TEMPLATES (light colours written in the HTML) ----------
+   Templates set some light backgrounds and grey text with style="...". These rules
+   replace only those exact light values, so brand colours and buttons keep their look. */
+:root[data-theme="dark"] [style*="background: #f8fafc"],
+:root[data-theme="dark"] [style*="background:#f8fafc"],
+:root[data-theme="dark"] [style*="background: #f4f7fb"],
+:root[data-theme="dark"] [style*="background:#f4f7fb"],
+:root[data-theme="dark"] [style*="background: #f1f5f9"],
+:root[data-theme="dark"] [style*="background: #eff6ff"],
+:root[data-theme="dark"] [style*="background:#eff6ff"] {
+    background: var(--card-2) !important;
+}
+:root[data-theme="dark"] [style*="color: #1e40af"],
+:root[data-theme="dark"] [style*="color:#1e40af"] { color: #93c5fd !important; }
+:root[data-theme="dark"] [style*="color: #0f172a"],
+:root[data-theme="dark"] [style*="color:#1b2a3b"],
+:root[data-theme="dark"] [style*="color: #1b2a3b"] { color: var(--ink) !important; }
+:root[data-theme="dark"] [style*="color: #44546f"],
+:root[data-theme="dark"] [style*="color:#44546f"],
+:root[data-theme="dark"] [style*="color: #34475f"],
+:root[data-theme="dark"] [style*="color:#5b6c82"],
+:root[data-theme="dark"] [style*="color: #64748b"],
+:root[data-theme="dark"] [style*="color:#64748b"],
+:root[data-theme="dark"] [style*="color:#8593ab"] { color: var(--ink-2) !important; }
+:root[data-theme="dark"] [style*="color: #17784f"],
+:root[data-theme="dark"] [style*="color: #cf3f55"] { color: #6ee7b7 !important; }
+
+/* ---------- THEME BUTTON (top bar, works in both modes) ---------- */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid #dde8f4;
+    background: #ffffff;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(15, 31, 61, 0.06);
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.theme-toggle i { font-size: 15px; color: var(--teal); }
+.theme-toggle:hover { border-color: var(--teal); color: var(--ink); }
+.theme-toggle:focus-visible { outline: 3px solid rgba(20, 201, 192, 0.45); outline-offset: 2px; }
+:root[data-theme="dark"] .theme-toggle {
+    background: var(--card-2);
+    border-color: var(--line);
+    box-shadow: none;
+}
+:root[data-theme="dark"] .theme-toggle i { color: #fcd34d; }
+
+@media (max-width: 576px) {
+    .theme-toggle .theme-label { display: none; }
+    .theme-toggle { padding: 0; width: 38px; justify-content: center; }
+}
+
+/* =====================================================================
+   PAGE CARDS (the white cards written inside each template's <style> block)
+   ===================================================================== */
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .stat-card.alert,
+:root[data-theme="dark"] .data-card,
+:root[data-theme="dark"] .chart-card,
+:root[data-theme="dark"] .rstat,
+:root[data-theme="dark"] .bt-card,
+:root[data-theme="dark"] .rx-card,
+:root[data-theme="dark"] .rc-card,
+:root[data-theme="dark"] .ep-card,
+:root[data-theme="dark"] .profile-header-card,
+:root[data-theme="dark"] .welcome-banner,
+:root[data-theme="dark"] .modal-header-custom {
+    background: var(--card) !important;
+    border-color: var(--line);
+    color: var(--ink);
+}
+:root[data-theme="dark"] .modal-header-custom { background: linear-gradient(115deg, #111c2e 0%, #0f1a2b 55%, #0e2129 100%) !important; }
+:root[data-theme="dark"] .stat-card .stat-value,
+:root[data-theme="dark"] .stat-card .stat-num { color: var(--ink); }
+:root[data-theme="dark"] .data-card .data-table { color: var(--ink); }
+:root[data-theme="dark"] .data-table tbody tr { border-bottom-color: var(--line); }
+:root[data-theme="dark"] .data-table tbody tr:hover { background: rgba(20, 201, 192, 0.07); }
+:root[data-theme="dark"] .data-table thead th { background: var(--card-2); color: var(--ink-2); border-bottom-color: var(--line); }
+:root[data-theme="dark"] .msg.bot .bubble { background: var(--card-2); color: var(--ink); border-color: var(--line); }
+:root[data-theme="dark"] .chat-foot { background: var(--card); border-top-color: var(--line); }
+:root[data-theme="dark"] .pager a,
+:root[data-theme="dark"] .pager span { background: var(--card-2); border-color: var(--line); color: var(--ink-2); }
+
+/* ---------- SHARED UI PIECES WITH HARD-CODED WHITE (classic.css) ---------- */
+:root[data-theme="dark"] .top-bar .date-chip { background: var(--card-2); }
+:root[data-theme="dark"] .top-bar .user-badge { background: var(--card-2); }
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] .btn-light {
+    background: var(--card-2);
+    border-color: var(--line);
+    color: var(--ink);
+}
+:root[data-theme="dark"] .form-control:focus,
+:root[data-theme="dark"] .form-select:focus { background-color: var(--card-2); }
+:root[data-theme="dark"] .pagination .page-link { background: var(--card-2); border-color: var(--line); color: var(--ink-2); }
+:root[data-theme="dark"] .pagination .page-item.active .page-link { color: #fff; }
+
+/* ---------- PLAIN INPUTS / SELECTS / TEXTAREA (no form-control class in some pages) ---------- */
+:root[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]):not([type="hidden"]):not(.btn),
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea {
+    background-color: var(--field);
+    border-color: var(--line);
+    color: var(--ink);
+}
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder { color: var(--ink-3); }
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.85); }

@@ -1,0 +1,61 @@
+/* v89.00: premium polish layer - loaded LAST. Refines the existing design language
+   (emerald primary) with depth, rhythm and consistency. No layout or colour-scheme change. */
+:root {
+  --mg-premium-accent: #047857;
+  --mg-premium-accent-2: #0ea5e9;
+  --mg-premium-radius: 14px;
+  --mg-premium-shadow: 0 1px 2px rgba(16,24,40,.06), 0 8px 24px -12px rgba(16,24,40,.18);
+  --mg-premium-shadow-lift: 0 2px 4px rgba(16,24,40,.08), 0 16px 32px -12px rgba(4,120,87,.28);
+}
+body { letter-spacing: .002em; }
+.card, .dv-kpi, .pf-card, .st-tile, .mg-panel {
+  border-radius: var(--mg-premium-radius) !important;
+  box-shadow: var(--mg-premium-shadow);
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+.dv-kpi:hover, .card:hover { box-shadow: var(--mg-premium-shadow-lift); transform: translateY(-1px); }
+.btn-primary, .btn-save, button[type="submit"].btn {
+  background-image: linear-gradient(180deg, #059669, #047857);
+  border-color: #047857;
+  box-shadow: 0 1px 2px rgba(4,120,87,.35);
+}
+.btn-primary:hover, .btn-save:hover { background-image: linear-gradient(180deg, #10b981, #059669); }
+.table { border-collapse: separate; border-spacing: 0; }
+.table thead th {
+  text-transform: uppercase; font-size: 11px; letter-spacing: .06em; font-weight: 700;
+  border-bottom: 2px solid var(--mg-premium-accent);
+}
+.table tbody tr { transition: background-color .12s ease; }
+.table tbody tr:hover { background-color: rgba(4,120,87,.05); }
+input, select, textarea {
+  border-radius: 10px !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--mg-premium-accent) !important;
+  box-shadow: 0 0 0 3px rgba(4,120,87,.18) !important;
+  outline: none;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 8px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #047857; border: 2px solid transparent; background-clip: content-box; }
+.badge, .tag { border-radius: 999px; padding: .28em .7em; }
+.modal-content { border-radius: 16px; box-shadow: 0 24px 64px -16px rgba(16,24,40,.35); }
+.pagination .page-link { border-radius: 8px !important; margin: 0 2px; }
+/* Loading state for submit buttons (set by v89-app.js) */
+.btn.mg-loading { opacity: .75; pointer-events: none; }
+.btn.mg-loading::after {
+  content: ""; display: inline-block; width: 14px; height: 14px; margin-left: 8px;
+  border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%;
+  animation: mg-spin .7s linear infinite; vertical-align: -2px;
+}
+@keyframes mg-spin { to { transform: rotate(360deg); } }
+/* Toast (v89-app.js) */
+#mg-toast-wrap { position: fixed; right: 16px; bottom: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+.mg-toast {
+  background: #0f172a; color: #f8fafc; padding: 12px 16px; border-radius: 12px;
+  box-shadow: 0 16px 40px -12px rgba(0,0,0,.45); max-width: 360px; font-size: 14px;
+  border-left: 4px solid var(--mg-premium-accent);
+}
+.mg-toast.mg-toast-error { border-left-color: #dc2626; }
+@media print { #mg-toast-wrap { display: none; } }

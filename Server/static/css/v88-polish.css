@@ -1,0 +1,17 @@
+/* v88.00: E4/E5 professional polish - accessibility + focus + touch targets.
+   Loaded LAST in base.html so it only refines, never replaces, the design language. */
+:focus-visible { outline: 3px solid #047857; outline-offset: 2px; border-radius: 4px; }
+html[data-theme="dark"] :focus-visible, .dark :focus-visible { outline-color: #34d399; }
+button, .btn, input[type="submit"], a.dv-action { min-height: 44px; }
+input, select, textarea { min-height: 44px; }
+label { font-weight: 600; }
+/* Status is never shown by colour alone: badges keep their text label. */
+.badge, .tag { font-weight: 700; letter-spacing: .01em; }
+/* Comfortable, consistent page rhythm */
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.table td, .table th { vertical-align: middle; }
+/* Friendly error box with retry (E6) */
+.mg-error-box { border: 1px solid #b91c1c; background: #fef2f2; color: #7f1d1d; padding: 16px; border-radius: 10px; margin: 16px 0; }
+html[data-theme="dark"] .mg-error-box, .dark .mg-error-box { background: #450a0a; color: #fecaca; border-color: #ef4444; }
+.mg-error-box .btn { margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

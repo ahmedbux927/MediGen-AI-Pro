@@ -1,0 +1,379 @@
+/* ================================================================
+   MediGen — v95.00 "NEXUS" layer
+   Loads AFTER v92-theme.css. Glassy professional look, graphite sidebar.
+   ================================================================ */
+
+/* ---------- Typography: bundled premium fonts (offline) ---------- */
+body, .form-control-pro, .form-control, input, select, textarea, button {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+}
+h1, h2, h3, h4, .page-title, .brand-name, .d-value, .dv-kpi .v,
+.live-bar, .mg-pal-input, .stat-value {
+  font-family: 'Plus Jakarta Sans', 'Inter', 'Segoe UI', sans-serif !important;
+  letter-spacing: -.01em;
+}
+
+/* ---------- Aurora canvas behind the content ---------- */
+.page-content {
+  background:
+    radial-gradient(720px 300px at 88% -60px, rgba(99,102,241,.14), transparent 62%),
+    radial-gradient(640px 280px at -80px 22%, rgba(37,99,235,.10), transparent 60%),
+    var(--mg-bg);
+}
+html[data-theme="dark"] .page-content, body.dark-mode .page-content {
+  background:
+    radial-gradient(760px 320px at 88% -60px, rgba(99,102,241,.20), transparent 62%),
+    radial-gradient(680px 300px at -80px 22%, rgba(37,99,235,.14), transparent 60%),
+    var(--mg-bg);
+}
+
+/* ---------- Glass top bar ---------- */
+.top-bar {
+  background: color-mix(in srgb, var(--mg-surface) 78%, transparent) !important;
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+}
+
+/* ---------- Cards: softer, deeper, alive ---------- */
+.card, .form-card, .d-card, .dv-kpi, .glass-card, .stat-card {
+  border-radius: 18px !important;
+  box-shadow: 0 1px 2px rgba(8,15,40,.05), 0 12px 32px -14px rgba(8,15,40,.16) !important;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.d-card:hover, .dv-kpi:hover, .stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(8,15,40,.06), 0 20px 40px -14px rgba(30,64,175,.28) !important;
+}
+
+/* KPI icon tiles become gradient jewels */
+.d-kpi-ico {
+  background: linear-gradient(135deg, var(--c, #2563eb), color-mix(in srgb, var(--c, #2563eb) 55%, #7c3aed)) !important;
+  color: #fff !important; border: none !important;
+  box-shadow: 0 8px 18px -6px color-mix(in srgb, var(--c, #2563eb) 65%, transparent);
+  border-radius: 14px !important;
+}
+.d-value { font-size: 30px !important; font-weight: 800 !important; }
+.dv-kpi { border-top: none !important; position: relative; overflow: hidden; }
+.dv-kpi::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px;
+  background: linear-gradient(90deg, var(--c, #2563eb), color-mix(in srgb, var(--c, #2563eb) 45%, #7c3aed)); }
+.dv-kpi .v { font-size: 27px !important; font-weight: 800 !important; }
+
+/* Welcome banner: animated sheen sweep */
+.welcome-banner { position: relative; overflow: hidden; }
+.welcome-banner::after { content: ''; position: absolute; top: 0; bottom: 0; width: 180px;
+  left: -220px; transform: skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.13), transparent);
+  animation: mgSheen 5.5s ease-in-out infinite; }
+@keyframes mgSheen { 0%, 55% { left: -220px; } 85%, 100% { left: 110%; } }
+
+/* Page entrance: gentle staggered rise */
+.page-content .card, .page-content .form-card, .page-content .d-card, .page-content .dv-kpi {
+  animation: mgRise .45s cubic-bezier(.22,.8,.32,1) both;
+}
+.page-content .d-kpis .d-card:nth-child(2) { animation-delay: .05s; }
+.page-content .d-kpis .d-card:nth-child(3) { animation-delay: .10s; }
+.page-content .d-kpis .d-card:nth-child(4) { animation-delay: .15s; }
+.page-content .d-kpis .d-card:nth-child(5) { animation-delay: .20s; }
+.page-content .d-kpis .d-card:nth-child(6) { animation-delay: .25s; }
+@keyframes mgRise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .welcome-banner::after { animation: none; }
+  .page-content .card, .page-content .form-card, .page-content .d-card, .page-content .dv-kpi { animation: none; }
+}
+
+/* Buttons: gradient + lift */
+.btn-primary, .btn-save, .btn-add-customer {
+  box-shadow: 0 10px 22px -8px rgba(37,99,235,.55) !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.btn-primary:hover, .btn-save:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.btn-primary:active, .btn-save:active { transform: translateY(0) scale(.985); }
+
+/* Sidebar: active item glows */
+.sidebar-nav .nav-link.active {
+  box-shadow: 0 10px 24px -8px rgba(79,70,229,.65), inset 0 1px 0 rgba(255,255,255,.25) !important;
+}
+
+/* =============== POS (New Sale) signature =============== */
+/* Product cards: bigger, tactile, gradient ring on hover */
+.pick-card {
+  border-radius: 16px !important; padding: 14px 14px 12px !important;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.pick-card:hover {
+  transform: translateY(-3px);
+  border-color: #14b8a6 !important;
+  box-shadow: 0 14px 28px -12px rgba(13,148,136,.35) !important;
+}
+.pick-card:active { transform: scale(.98); }
+.pick-card .pc-name { font-size: 15px !important; font-weight: 700 !important; }
+.pick-card .pc-row b { font-size: 16px !important; color: var(--mg-blue, #2563eb); }
+.pc-badge { background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+  box-shadow: 0 6px 14px -4px rgba(13,148,136,.5); }
+
+/* Bill bar: sticky gradient total strip — hamesha nazar */
+.live-bar {
+  position: sticky; bottom: 14px; z-index: 30;
+  background: linear-gradient(92deg, #0b3b5e, #0d9488 90%) !important;
+  color: #fff !important; border: none !important; border-radius: 16px !important;
+  padding: 14px 20px !important; font-size: 16px !important;
+  box-shadow: 0 18px 36px -12px rgba(11,59,94,.45);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.live-bar b { font-size: 20px; font-weight: 800; }
+
+/* Items table: calmer rows, clearer money column */
+.items-table tbody tr { transition: background .12s ease; }
+.items-table tbody tr:hover { background: rgba(99,102,241,.06); }
+.items-table .lt, .items-table td:nth-child(4) { font-weight: 700; }
+
+/* Scan box: the hero input of the POS */
+.scan-field .form-control-pro, #scanBox {
+  border-radius: 14px !important; padding: 13px 16px !important; font-size: 15px !important;
+  box-shadow: 0 8px 22px -12px rgba(8,15,40,.25);
+}
+#scanBox:focus { border-color: #14b8a6 !important; box-shadow: 0 0 0 4px rgba(99,102,241,.20), 0 8px 22px -12px rgba(8,15,40,.25) !important; }
+
+/* =============== Ctrl+K command palette =============== */
+.mg-pal-backdrop { position: fixed; inset: 0; z-index: 2000; display: none;
+  background: rgba(5,10,30,.52); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.mg-pal-backdrop.open { display: block; animation: mgFade .15s ease both; }
+@keyframes mgFade { from { opacity: 0; } to { opacity: 1; } }
+.mg-pal { max-width: 620px; margin: 12vh auto 0; border-radius: 20px; overflow: hidden;
+  background: var(--mg-surface); color: var(--mg-text);
+  border: 1px solid var(--mg-border);
+  box-shadow: 0 40px 90px -20px rgba(2,6,25,.6);
+  animation: mgPalIn .18s cubic-bezier(.22,.8,.32,1) both; }
+@keyframes mgPalIn { from { opacity: 0; transform: translateY(-10px) scale(.985); } to { opacity: 1; transform: none; } }
+.mg-pal-input { width: 100%; border: none !important; outline: none !important; background: transparent !important;
+  color: var(--mg-text) !important; font-size: 17px !important; padding: 18px 20px !important;
+  border-bottom: 1px solid var(--mg-border) !important; border-radius: 0 !important; box-shadow: none !important; }
+.mg-pal-list { max-height: 340px; overflow-y: auto; padding: 8px; }
+.mg-pal-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  padding: 11px 12px; border: none; background: transparent; color: var(--mg-text);
+  border-radius: 12px; font-size: 14.5px; cursor: pointer; }
+.mg-pal-item i { width: 34px; height: 34px; flex: none; display: grid; place-items: center;
+  border-radius: 10px; background: rgba(99,102,241,.13); color: #6366f1; font-size: 16px; }
+.mg-pal-item small { margin-left: auto; color: var(--mg-muted); font-size: 11.5px; }
+.mg-pal-item.sel { background: linear-gradient(92deg, rgba(37,99,235,.14), rgba(124,58,237,.14)); }
+.mg-pal-item.sel i { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; }
+.mg-pal-foot { padding: 9px 16px; font-size: 11.5px; color: var(--mg-muted);
+  border-top: 1px solid var(--mg-border); display: flex; gap: 14px; }
+.mg-pal kbd { background: var(--mg-surface2); border: 1px solid var(--mg-border); border-bottom-width: 2px;
+  border-radius: 6px; padding: 1px 6px; font-size: 11px; font-family: 'Inter', sans-serif; }
+.mg-pal-empty { padding: 22px; text-align: center; color: var(--mg-muted); font-size: 14px; }
+
+/* ============ NEXUS tokens (v95): teal brand, navy rail ============ */
+:root{
+  --mg-grad: linear-gradient(135deg,#0d9488 0%,#0f766e 100%) !important;
+  --brand-grad: linear-gradient(135deg,#0d9488 0%,#0f766e 100%) !important;
+  --mg-side: linear-gradient(180deg,#0a1a2f 0%,#0d2138 100%) !important;
+}
+
+/* ============ NEXUS sidebar (v95): gehri navy rail, teal active pill ============
+   Owner ke bheje hue Nexus design ke mutabiq — dono modes me yahi rail. */
+.sidebar{
+  background: linear-gradient(180deg,#0a1a2f 0%,#0d2138 100%) !important;
+  color: #dbe4f0 !important;
+  border-right: 1px solid #12283f !important;
+  box-shadow: 8px 0 30px -12px rgba(4,20,40,.35) !important;
+}
+.sidebar .sidebar-brand{ border-bottom: 1px solid rgba(255,255,255,.08) !important; }
+.sidebar .sidebar-brand h4{ color: #ffffff !important; }
+.sidebar .sidebar-brand small{ color: #5eead4 !important; }
+.sidebar .sidebar-brand-icon{
+  background: linear-gradient(135deg,#14b8a6,#0d9488) !important; color: #fff !important;
+  box-shadow: 0 8px 18px -6px rgba(13,148,136,.55), inset 0 1px 0 rgba(255,255,255,.3) !important;
+}
+.sidebar .sidebar-user{ background: rgba(255,255,255,.05) !important; border: 1px solid rgba(255,255,255,.09) !important; box-shadow: none; }
+.sidebar .sidebar-user .avatar{ background: #ccfbf1 !important; color: #0f766e !important; }
+.sidebar .sidebar-user .info h6{ color: #ffffff !important; }
+.sidebar .sidebar-user .info small{ color: #8fa3ba !important; }
+.sidebar .nav-section{ color: #71879e !important; }
+.sidebar .sidebar-nav a{ color: #c3cedb !important; }
+.sidebar .sidebar-nav a i{ background: transparent !important; color: #7d90a8 !important; }
+.sidebar .sidebar-nav a:hover{ background: rgba(255,255,255,.06) !important; color: #ffffff !important; }
+.sidebar .sidebar-nav a.active{
+  background: rgba(20,184,166,.20) !important; color: #ffffff !important;
+  box-shadow: inset 3px 0 0 #14b8a6 !important; border: 1px solid rgba(20,184,166,.25);
+}
+.sidebar .sidebar-nav a.active i{ background: transparent !important; color: #2dd4bf !important; }
+.sidebar .sidebar-nav a.logout-link{ color: #f08a84 !important; }
+.sidebar .sidebar-nav a.logout-link i{ background: transparent !important; color: #f08a84 !important; }
+
+/* ============ Welcome banner: LIGHT mode me halki patti (owner: black na karo, jaisi pehle thi) ============ */
+html:not([data-theme="dark"]) .dash .d-welcome, body:not(.dark-mode) .dash .d-welcome{
+  background: linear-gradient(110deg,#ffffff 0%,#eef2f8 55%,#e2eaf4 100%) !important;
+  border-color: #d5deeb !important; color: #16233a !important;
+}
+html:not([data-theme="dark"]) .dash .d-welcome::after, body:not(.dark-mode) .dash .d-welcome::after{
+  background: linear-gradient(90deg, rgba(255,255,255,.97) 32%, rgba(255,255,255,.55) 68%, rgba(255,255,255,.18) 100%) !important;
+}
+html:not([data-theme="dark"]) .dash .d-welcome-img, body:not(.dark-mode) .dash .d-welcome-img{ opacity: .5 !important; }
+html:not([data-theme="dark"]) .dash .d-greet, body:not(.dark-mode) .dash .d-greet{ color: #131f33 !important; }
+html:not([data-theme="dark"]) .dash .d-accent, body:not(.dark-mode) .dash .d-accent{ color: #2f5aa8 !important; }
+html:not([data-theme="dark"]) .dash .d-muted, body:not(.dark-mode) .dash .d-muted{ color: rgba(22,35,58,.78) !important; }
+html:not([data-theme="dark"]) .dash .d-welcome .d-chip, body:not(.dark-mode) .dash .d-welcome .d-chip{
+  background: rgba(255,255,255,.8) !important; border-color: #c9d4e4 !important; color: #22314a !important;
+}
+html:not([data-theme="dark"]) .dash .d-welcome .d-chip .bi, body:not(.dark-mode) .dash .d-welcome .d-chip .bi{ color: #5b7ba5 !important; }
+html:not([data-theme="dark"]) .dash .d-welcome-brand, body:not(.dark-mode) .dash .d-welcome-brand{ color: #131f33 !important; }
+html:not([data-theme="dark"]) .dash .d-welcome-kicker, body:not(.dark-mode) .dash .d-welcome-kicker{ color: #a8742c !important; }
+html:not([data-theme="dark"]) .dash .d-welcome-name em, body:not(.dark-mode) .dash .d-welcome-name em{ color: #2f5aa8 !important; }
+
+/* Kinetic press (v94): button dabne par halki spring feel */
+.btn, .btn-primary, .btn-save, .pf-btn, .scan-btn{
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease, filter .15s ease, background .15s ease !important;
+}
+.btn:active, .btn-primary:active, .btn-save:active, .pf-btn:active, .scan-btn:active{ transform: scale(.96) !important; }
+
+/* ================= NEXUS LIGHT SYSTEM (v95) =================
+   Halki professional coloring: safed cards, halka neela-grey canvas,
+   gehray navy headings, teal action rang. */
+:root:not([data-theme="dark"]) .page-content{
+  background: #edf1f6 !important;
+}
+:root:not([data-theme="dark"]) .top-bar{
+  background: #ffffff !important; border: 1px solid #e3e9f0 !important;
+  box-shadow: 0 1px 3px rgba(16,42,67,.05) !important; backdrop-filter: none !important;
+}
+:root:not([data-theme="dark"]) .page-content .card,
+:root:not([data-theme="dark"]) .page-content .pf-card,
+:root:not([data-theme="dark"]) .page-content .d-tile{
+  background: #ffffff !important; border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(16,42,67,.05), 0 12px 26px -20px rgba(16,42,67,.25) !important;
+}
+:root:not([data-theme="dark"]) .d-tile .d-val{ color: #10243c !important; }
+:root:not([data-theme="dark"]) .d-tile .d-ic{
+  background: #e6f7f4 !important; color: #0d9488 !important;
+}
+:root:not([data-theme="dark"]) .page-content table thead th{
+  background: #f4f7fa !important; color: #8494a9 !important;
+  text-transform: uppercase; font-size: 11px; letter-spacing: .06em;
+  border-color: #e8edf3 !important;
+}
+:root:not([data-theme="dark"]) .page-content table tbody td{ border-color: #eef2f6 !important; }
+:root:not([data-theme="dark"]) .page-content .form-control,
+:root:not([data-theme="dark"]) .page-content .form-control-pro,
+:root:not([data-theme="dark"]) .page-content .pf-input{
+  border-color: #d7e0ea !important; background: #ffffff !important;
+}
+.btn-primary{ background: linear-gradient(135deg,#0d9488,#0f766e) !important; border: none !important; }
+.bill-bar{ background: linear-gradient(120deg,#0b3b5e 0%,#0d9488 90%) !important; }
+
+/* Login: Nexus andaaz (halka canvas, safed card, teal button) */
+body.soft{
+  --ink: #10243c !important; --muted: #5a6f8f !important; --line: #d7e0ea !important;
+  --field: #ffffff !important; --page: #edf1f6 !important; --card: #ffffff !important;
+  --card-border: #e2e8f0 !important; --secure-bg: #e6f7f4 !important;
+  --teal: #0d9488 !important; --cyan: #0d9488 !important;
+  background: #edf1f6 !important;
+}
+body.soft .field{ color: #10243c !important; }
+body.soft .hero-shade{ background: linear-gradient(120deg, rgba(6,32,54,.90) 20%, rgba(9,80,74,.55) 100%) !important; }
+body.soft .submit{ background: linear-gradient(135deg,#0d9488,#0f766e) !important; }
+body.soft .formside .card{ border: 1px solid #e2e8f0 !important; box-shadow: 0 18px 40px -22px rgba(16,42,67,.30) !important; }
+
+/* Profile avatar + success flash: Nexus rang */
+.pf-avatar{ background: linear-gradient(135deg,#0b3b5e,#0d9488) !important; }
+:root:not([data-theme="dark"]) .page-content .alert-success{
+  background: #eefaf3 !important; border-color: #cdeee0 !important; color: #0c6b4f !important;
+}
+
+/* Top bar chips: Nexus safed (light) / halki likhai (dark) */
+:root:not([data-theme="dark"]) .top-bar .top-meta > *{
+  background: #ffffff !important; border: 1px solid #e2e8f0 !important; color: #33475e !important;
+  box-shadow: 0 1px 2px rgba(16,42,67,.05) !important;
+}
+html[data-theme="dark"] .top-bar .top-meta > *{
+  color: #e6edf7 !important;
+}
+html[data-theme="dark"] .top-bar .welcome-line{ color: #9fb0c6 !important; }
+
+/* Dark mode: top bar ke buttons ki likhai halki (chips theek thay, buttons nahi) */
+html[data-theme="dark"] .top-bar .top-meta button,
+html[data-theme="dark"] .top-bar .top-meta button *{ color: #e6edf7 !important; }
+html[data-theme="dark"] .top-bar .top-meta button{
+  background: rgba(255,255,255,.06) !important; border: 1px solid rgba(147,197,253,.18) !important;
+}
+
+/* ============ v100 FORM & CARD SYSTEM (final authority, dono modes) ============
+   Tamam form controls ke liye ek hi qanoon. Light: safed background, gehri syahi.
+   Dark: gehri neeli background, halki syahi. Koi input kisi mode me ghayb nahi. */
+:root:not([data-theme="dark"]) .form-control, :root:not([data-theme="dark"]) .form-select,
+:root:not([data-theme="dark"]) .form-control-pro, :root:not([data-theme="dark"]) .pf-input,
+:root:not([data-theme="dark"]) .pe-input, :root:not([data-theme="dark"]) .pd-input,
+:root:not([data-theme="dark"]) .rx-input, :root:not([data-theme="dark"]) .scan-field,
+:root:not([data-theme="dark"]) .modal input, :root:not([data-theme="dark"]) .modal select,
+:root:not([data-theme="dark"]) .modal textarea,
+:root:not([data-theme="dark"]) input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]),
+:root:not([data-theme="dark"]) select, :root:not([data-theme="dark"]) textarea{
+  background-color:#ffffff !important; color:#10243c !important; border-color:#cfdae6 !important;
+}
+:root:not([data-theme="dark"]) ::placeholder{ color:#8494a9 !important; opacity:1 !important; }
+html[data-theme="dark"] .form-control, html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .form-control-pro, html[data-theme="dark"] .pf-input,
+html[data-theme="dark"] .pe-input, html[data-theme="dark"] .pd-input,
+html[data-theme="dark"] .rx-input, html[data-theme="dark"] .scan-field,
+html[data-theme="dark"] .modal input, html[data-theme="dark"] .modal select,
+html[data-theme="dark"] .modal textarea,
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]),
+html[data-theme="dark"] select, html[data-theme="dark"] textarea{
+  background-color:#0d1830 !important; color:#e8eef7 !important; border-color:rgba(148,178,214,.28) !important;
+}
+html[data-theme="dark"] ::placeholder{ color:#7d90a8 !important; opacity:1 !important; }
+select option{ background-color:#ffffff; color:#10243c; }
+html[data-theme="dark"] select option{ background-color:#0d1830; color:#e8eef7; }
+/* Modals: card aur text mode ke sath */
+:root:not([data-theme="dark"]) .modal-content{ background:#ffffff !important; color:#10243c !important; }
+html[data-theme="dark"] .modal-content{ background:#0d1830 !important; color:#e8eef7 !important; border:1px solid rgba(148,178,214,.22); }
+html[data-theme="dark"] .modal-header-custom, html[data-theme="dark"] .modal .text-muted{ color:#9db0c6 !important; }
+:root:not([data-theme="dark"]) .form-label-pro, :root:not([data-theme="dark"]) .pe-label,
+:root:not([data-theme="dark"]) .pf-label, :root:not([data-theme="dark"]) .pd-label{ color:#44546f !important; }
+html[data-theme="dark"] .form-label-pro, html[data-theme="dark"] .pe-label,
+html[data-theme="dark"] .pf-label, html[data-theme="dark"] .pd-label{ color:#b8c7da !important; }
+/* Dashboard owner cards ke links: raw blue ki jagah saaf teal links */
+.dv-kpi .f a, .dv-card a, .dv-attn a{
+  color:#2dd4bf !important; text-decoration:none !important; font-weight:600;
+  border-bottom:1px dotted rgba(45,212,191,.5);
+}
+:root:not([data-theme="dark"]) .dv-kpi .f a, :root:not([data-theme="dark"]) .dv-card a, :root:not([data-theme="dark"]) .dv-attn a{
+  color:#0f766e !important; border-bottom-color:rgba(15,118,110,.45);
+}
+.dv-kpi .f a:hover, .dv-card a:hover, .dv-attn a:hover{ text-decoration:underline !important; }
+html[data-theme="dark"] .pe-hint{ color:#fbbf24 !important; }
+.data-card > h5{ margin-left:0 !important; }
+.data-card > h5 .bi:first-child{ margin-right:8px; }
+
+/* ============ v101 DARK COMPANION: catalog pages (medicine-look) ============
+   Medicines list ke toolbar, ghost buttons, search aur filter tabs ke rang
+   pehle sirf light mode ke liye thay - dark me safed reh jate thay. */
+html[data-theme="dark"] .toolbar{
+  background:#0d1830 !important; border-color:rgba(148,178,214,.22) !important;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+}
+html[data-theme="dark"] .btn-ghost{
+  background:rgba(255,255,255,.05) !important; color:#c9d8ea !important;
+  border-color:rgba(148,178,214,.30) !important;
+}
+html[data-theme="dark"] .btn-ghost:hover{ background:rgba(255,255,255,.10) !important; color:#fff !important; }
+html[data-theme="dark"] .filter-tabs{
+  background:#0d1830 !important; border:1px solid rgba(148,178,214,.22);
+  border-radius:12px; padding:4px;
+}
+html[data-theme="dark"] .filter-tabs a{ color:#9db0c6 !important; }
+html[data-theme="dark"] .filter-tabs a.active{ color:#fff !important; }
+html[data-theme="dark"] .action-btns .btn-icon{
+  background:rgba(255,255,255,.05) !important; border-color:rgba(148,178,214,.30) !important; color:#7dd3fc !important;
+}
+html[data-theme="dark"] .med-count{ color:#9db0c6 !important; }
+html[data-theme="dark"] .med-mic{ background:rgba(255,255,255,.06) !important; color:#2dd4bf !important; }
+html[data-theme="dark"] .pd-tab{ background:#0d1830 !important; color:#c9d8ea !important; border-color:rgba(148,178,214,.25) !important; }
+html[data-theme="dark"] .pd-btn.light{ background:rgba(255,255,255,.05) !important; color:#7dd3fc !important; border-color:rgba(148,178,214,.30) !important; }
+html[data-theme="dark"] .pd-note{ background:rgba(45,90,160,.18) !important; border-color:rgba(125,178,252,.35) !important; color:#bcd7fb !important; }
+
+html[data-theme="dark"] .medicines-table td:last-child{ background:#0d1830 !important; }
+html[data-theme="dark"] .medicines-table th:last-child{ background:#10203c !important; }
+html[data-theme="dark"] .btn-icon{ background:rgba(255,255,255,.05) !important; border-color:rgba(148,178,214,.30) !important; }
+html[data-theme="dark"] .pager a, html[data-theme="dark"] .pager span{ background:rgba(255,255,255,.05) !important; color:#c9d8ea !important; border-color:rgba(148,178,214,.30) !important; }
+html[data-theme="dark"] .pager .info{ color:#9db0c6 !important; }

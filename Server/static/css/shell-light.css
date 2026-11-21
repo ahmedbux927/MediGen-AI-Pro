@@ -1,0 +1,272 @@
+/* ===== MediGen light shell (v56) =====
+   Light sidebar, light top bar and card / table / stat-card look used on every page.
+   Every rule is scoped to light mode (:root:not([data-theme="dark"])), so dark mode is untouched.
+   The extra :root selector also lets these rules beat the per-page inline styles. */
+
+:root:not([data-theme="dark"]) body {
+    background: #f3f6fb;
+}
+
+/* ---------- Sidebar ---------- */
+:root:not([data-theme="dark"]) .sidebar {
+    background: #ffffff;
+    color: #1e2b44;
+    border-right: 1px solid #e6edf5;
+    box-shadow: 10px 0 30px -22px rgba(15, 31, 61, 0.28);
+}
+:root:not([data-theme="dark"]) .sidebar-brand {
+    border-bottom: 1px solid #eef2f7;
+}
+:root:not([data-theme="dark"]) .sidebar-brand h4 { color: #0f1f3d; }
+:root:not([data-theme="dark"]) .sidebar-brand small { color: #0f9aa0; }
+:root:not([data-theme="dark"]) .sidebar-brand-icon {
+    background: linear-gradient(135deg, #0f9aa0, #1f6fb2);
+    box-shadow: 0 8px 18px -8px rgba(15, 154, 160, 0.7);
+}
+:root:not([data-theme="dark"]) .sidebar-user {
+    background: #f5f8fc;
+    border: 1px solid #e6edf5;
+    border-radius: 16px;
+}
+:root:not([data-theme="dark"]) .sidebar-user .info h6 { color: #0f1f3d; }
+:root:not([data-theme="dark"]) .sidebar-user .info small { color: #2563eb; }
+:root:not([data-theme="dark"]) .sidebar-nav .nav-section {
+    color: #8493a8;
+    letter-spacing: 0.12em;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a {
+    color: #3b4a63;
+    border-radius: 14px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a i {
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef4fb;
+    color: #2563eb;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.3s ease;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a:hover {
+    background: #f3f7fd;
+    color: #1e2b44;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a:hover i {
+    background: #dbe9fb;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a.active {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 24px -14px rgba(37, 99, 235, 0.85);
+}
+:root:not([data-theme="dark"]) .sidebar-nav a.active i {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a.active::before { display: none; }
+:root:not([data-theme="dark"]) .sidebar-nav a.logout-link {
+    color: #d7364e;
+}
+:root:not([data-theme="dark"]) .sidebar-nav a.logout-link i {
+    background: #fdecef;
+    color: #d7364e;
+}
+
+/* ---------- Top bar ---------- */
+:root:not([data-theme="dark"]) .top-bar {
+    background: #ffffff;
+    border: 1px solid #e6edf5;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(15, 31, 61, 0.04), 0 12px 28px -20px rgba(15, 31, 61, 0.25);
+}
+:root:not([data-theme="dark"]) .top-bar::before,
+:root:not([data-theme="dark"]) .top-bar::after { display: none; }
+:root:not([data-theme="dark"]) .top-bar h3 { color: #0f1f3d; }
+:root:not([data-theme="dark"]) .top-bar .welcome-line { color: #5a6b82; }
+:root:not([data-theme="dark"]) .top-bar .user-badge,
+:root:not([data-theme="dark"]) .top-bar .date-chip {
+    background: #f5f8fc;
+    border: 1px solid #e6edf5;
+    color: #1e2b44;
+    border-radius: 999px;
+}
+:root:not([data-theme="dark"]) .top-bar .theme-toggle {
+    background: #ffffff;
+    border: 1px solid #dfe7f1;
+    color: #1e2b44;
+    border-radius: 999px;
+}
+
+/* ---------- Cards ---------- */
+:root:not([data-theme="dark"]) .card,
+:root:not([data-theme="dark"]) .table-responsive,
+:root:not([data-theme="dark"]) .toolbar-card {
+    border-radius: 18px;
+    border: 1px solid #e6edf5;
+    box-shadow: 0 1px 2px rgba(15, 31, 61, 0.04), 0 14px 32px -24px rgba(15, 31, 61, 0.28);
+    background: #ffffff;
+}
+
+/* Stat cards: soft tinted background, icon chip, no side bar (matches the v0 template) */
+:root:not([data-theme="dark"]) .stat-card {
+    background: linear-gradient(160deg, #eef5ff 0%, #ffffff 80%);
+    border: 1px solid #dfeafa;
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(15, 31, 61, 0.04), 0 14px 30px -22px rgba(37, 99, 235, 0.4);
+    padding: 20px 22px;
+}
+:root:not([data-theme="dark"]) .stat-card::before { display: none; }
+:root:not([data-theme="dark"]) .stat-card.alert {
+    background: linear-gradient(160deg, #fdeef1 0%, #ffffff 80%);
+    border-color: #f6d4db;
+}
+:root:not([data-theme="dark"]) .stat-card.warn {
+    background: linear-gradient(160deg, #fff4e5 0%, #ffffff 80%);
+    border-color: #f8e0bd;
+}
+:root:not([data-theme="dark"]) .stat-label {
+    color: #2563eb;
+    font-weight: 700;
+}
+:root:not([data-theme="dark"]) .stat-card.alert .stat-label { color: #d7364e; }
+:root:not([data-theme="dark"]) .stat-card.warn .stat-label { color: #d98a1e; }
+:root:not([data-theme="dark"]) .stat-label i {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    box-shadow: 0 10px 18px -10px rgba(37, 99, 235, 0.8);
+}
+:root:not([data-theme="dark"]) .stat-card.alert .stat-label i {
+    background: linear-gradient(135deg, #e5576c, #d7364e);
+    box-shadow: 0 10px 18px -10px rgba(215, 54, 78, 0.8);
+}
+:root:not([data-theme="dark"]) .stat-card.warn .stat-label i {
+    background: linear-gradient(135deg, #f0a43a, #d98a1e);
+    box-shadow: 0 10px 18px -10px rgba(217, 138, 30, 0.8);
+}
+:root:not([data-theme="dark"]) .stat-icon-bg { display: none; }
+:root:not([data-theme="dark"]) .stat-value { color: #0f1f3d; }
+
+/* ---------- Buttons ---------- */
+:root:not([data-theme="dark"]) .btn-primary {
+    background-image: linear-gradient(135deg, #2563eb, #3b82f6);
+    border: 0;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 12px 22px -14px rgba(37, 99, 235, 0.85);
+}
+:root:not([data-theme="dark"]) .btn-outline-secondary,
+:root:not([data-theme="dark"]) .btn-light {
+    border-radius: 12px;
+    border-color: #dfe7f1;
+    color: #1e2b44;
+    background: #ffffff;
+    font-weight: 600;
+}
+
+/* ---------- Tables ---------- */
+:root:not([data-theme="dark"]) .table > thead > tr > th {
+    background: #f7f9fc;
+    color: #7d8ba3;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e6edf5;
+}
+:root:not([data-theme="dark"]) .table > tbody > tr > td {
+    color: #1e2b44;
+    border-bottom-color: #eef2f7;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+:root:not([data-theme="dark"]) .table-hover > tbody > tr:hover > * {
+    --bs-table-hover-bg: rgba(37, 99, 235, 0.05);
+}
+
+/* ---------- Badges (status pills) ---------- */
+:root:not([data-theme="dark"]) .badge {
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* ---------- Inputs ---------- */
+:root:not([data-theme="dark"]) .form-control,
+:root:not([data-theme="dark"]) .form-select {
+    border-radius: 12px;
+    border-color: #dfe7f1;
+    background-color: #ffffff;
+    color: #1e2b44;
+}
+:root:not([data-theme="dark"]) .form-control:focus,
+:root:not([data-theme="dark"]) .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ---------- Page headings ---------- */
+:root:not([data-theme="dark"]) .page-title { color: #0f1f3d; }
+:root:not([data-theme="dark"]) .page-subtitle { color: #5a6b82; }
+
+/* Page titles: same icon chip and size on every page (customers, suppliers, alerts, batches, reports...) */
+:root:not([data-theme="dark"]) .page-title {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 22px; font-weight: 800; color: #0f1f3d; margin: 0 0 4px;
+}
+:root:not([data-theme="dark"]) .page-title i {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0f9aa0, #1f6fb2); color: #fff; font-size: 18px;
+    box-shadow: 0 10px 18px -10px rgba(15, 154, 160, 0.8); flex-shrink: 0;
+}
+
+/* Dark hero banners (Settings, Profile) keep white text on their gradient */
+:root:not([data-theme="dark"]) .pf-hero h2,
+:root:not([data-theme="dark"]) .pf-hero h3 { color: #ffffff; }
+:root:not([data-theme="dark"]) .pf-hero .meta { color: #a9d6da; }
+
+@media (prefers-reduced-motion: reduce) {
+    :root:not([data-theme="dark"]) .sidebar-nav a,
+    :root:not([data-theme="dark"]) .sidebar-nav a i { transition: none !important; }
+}
+
+/* The page title lives in the page header on every screen size, so the top bar keeps only menu/back, date and user. */
+:root:not([data-theme="dark"]) .top-bar .hero-icon,
+:root:not([data-theme="dark"]) .top-bar .page-heading { display: none; }
+@media (min-width: 992px) {
+    :root:not([data-theme="dark"]) .top-bar .hero-left { flex: 1; }
+}
+
+/* Phones: wide tables scroll sideways inside their card instead of being cut off */
+@media (max-width: 991.98px) {
+    :root:not([data-theme="dark"]) .data-card,
+    :root:not([data-theme="dark"]) .rxp-card,
+    :root:not([data-theme="dark"]) .sp-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    :root:not([data-theme="dark"]) .data-card table,
+    :root:not([data-theme="dark"]) .rxp-table,
+    :root:not([data-theme="dark"]) .sp-table {
+        min-width: 680px;
+    }
+}
+
+/* Popups taller than the window: the middle part scrolls, the header and buttons stay reachable */
+.modal-dialog { max-height: calc(100vh - 1.5rem); margin: 0.75rem auto; }
+.modal-dialog .modal-content { max-height: calc(100vh - 1.5rem); }
+.modal-dialog .modal-body { overflow-y: auto; max-height: calc(100vh - 230px); min-height: 0; }
+@media (max-width: 575.98px) { .modal-dialog .modal-body { max-height: calc(100vh - 210px); } }
